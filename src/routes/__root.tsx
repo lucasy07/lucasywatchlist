@@ -29,11 +29,18 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Anime Ranker — Seu ranking pessoal de animes" },
+      {
+        name: "description",
+        content:
+          "Crie, avalie e ranqueie seus animes favoritos por temporada. Tema dark moderno com persistência local.",
+      },
+      { name: "author", content: "Anime Ranker" },
+      { property: "og:title", content: "Anime Ranker" },
+      {
+        property: "og:description",
+        content: "Ranking pessoal de animes por média das temporadas.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
