@@ -133,6 +133,8 @@ function Index() {
 
   useEffect(() => {
     setAnimes(loadAnimes());
+    const savedView = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY + ":view") : null;
+    if (savedView === "grid" || savedView === "list") setViewMode(savedView);
     setHydrated(true);
   }, []);
 
@@ -140,6 +142,11 @@ function Index() {
     if (!hydrated) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(animes));
   }, [animes, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    localStorage.setItem(STORAGE_KEY + ":view", viewMode);
+  }, [viewMode, hydrated]);
 
   const ranked = useMemo(() => {
     const filtered = animes.filter((a) =>
