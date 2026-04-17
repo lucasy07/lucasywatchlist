@@ -301,6 +301,14 @@ function Index() {
               <p className="text-xs text-muted-foreground">Animes</p>
               <p className="text-lg font-semibold">{animes.length}</p>
             </div>
+            <Link
+              to="/upcoming"
+              className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+              aria-label="Próximas temporadas"
+            >
+              <CalendarClock className="h-4 w-4 text-primary" />
+              <span className="hidden sm:inline">Em breve</span>
+            </Link>
           </div>
         </div>
         <div className="mx-auto max-w-5xl px-4 pb-4 sm:px-6">
