@@ -3,13 +3,14 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CalendarClock, Tv, Sparkles } from "lucide-react";
 import {
   type Anime,
-  loadAnimes,
+  fetchAnimes,
   daysUntil,
   formatDateBR,
   formatReleaseLabel,
 } from "@/lib/anime-storage";
+import { useAuth } from "@/auth/AuthProvider";
 
-export const Route = createFileRoute("/upcoming")({
+export const Route = createFileRoute("/_authenticated/upcoming")({
   head: () => ({
     meta: [
       { title: "Próximas Temporadas — Anime Watchlist" },
@@ -28,13 +29,28 @@ export const Route = createFileRoute("/upcoming")({
 });
 
 function UpcomingPage() {
+  const { user } = useAuth();
   const [animes, setAnimes] = useState<Anime[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setAnimes(loadAnimes());
-    setHydrated(true);
-  }, []);
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await fetchAnimes();
+        if (!cancelled) {
+          setAnimes(data);
+          setHydrated(true);
+        }
+      } catch {
+        if (!cancelled) setHydrated(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const upcoming = useMemo(() => {
     return animes

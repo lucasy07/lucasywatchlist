@@ -15,6 +15,7 @@ import {
   List as ListIcon,
   Clapperboard,
   CalendarClock,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,17 +39,23 @@ import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import {
   type Anime,
-  loadAnimes,
-  saveAnimes,
+  type Season,
+  type UpcomingSeason,
+  fetchAnimes,
+  createAnime,
+  deleteAnime as deleteAnimeRow,
+  updateSeasons,
+  updateUpcoming,
+  importLegacyIfNeeded,
   uid,
   average,
   rankColor,
-  
   formatReleaseLabel,
   formatDateBR,
 } from "@/lib/anime-storage";
+import { useAuth } from "@/auth/AuthProvider";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/")({
   component: Index,
 });
 
@@ -79,6 +86,7 @@ async function fileToBase64(file: File, maxSize = 512): Promise<string> {
 }
 
 function Index() {
+  const { user, signOut } = useAuth();
   const [animes, setAnimes] = useState<Anime[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [search, setSearch] = useState("");
@@ -107,16 +115,32 @@ function Index() {
   const [fabOpen, setFabOpen] = useState(false);
 
   useEffect(() => {
-    setAnimes(loadAnimes());
-    const savedView = typeof window !== "undefined" ? localStorage.getItem("anime-ranker:v1:view") : null;
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const imported = await importLegacyIfNeeded(user.id);
+        if (imported > 0) {
+          toast.success(`${imported} anime${imported === 1 ? "" : "s"} importado${imported === 1 ? "" : "s"} do dispositivo`);
+        }
+        const data = await fetchAnimes();
+        if (!cancelled) {
+          setAnimes(data);
+          setHydrated(true);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Falha ao carregar seus animes");
+        if (!cancelled) setHydrated(true);
+      }
+    })();
+    const savedView =
+      typeof window !== "undefined" ? localStorage.getItem("anime-ranker:v1:view") : null;
     if (savedView === "grid" || savedView === "list") setViewMode(savedView);
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    saveAnimes(animes);
-  }, [animes, hydrated]);
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -130,18 +154,23 @@ function Index() {
     return [...filtered].sort((a, b) => average(b.seasons) - average(a.seasons));
   }, [animes, search]);
 
-  function addAnime() {
+  async function addAnime() {
     const name = newAnimeName.trim();
     if (!name) {
       toast.error("Informe o nome do anime");
       return;
     }
-    const anime: Anime = { id: uid(), name, seasons: [], cover: newAnimeCover };
-    setAnimes((prev) => [...prev, anime]);
-    setNewAnimeName("");
-    setNewAnimeCover(undefined);
-    setAnimeDialogOpen(false);
-    toast.success(`"${name}" adicionado`);
+    try {
+      const created = await createAnime({ name, cover: newAnimeCover });
+      setAnimes((prev) => [...prev, created]);
+      setNewAnimeName("");
+      setNewAnimeCover(undefined);
+      setAnimeDialogOpen(false);
+      toast.success(`"${name}" adicionado`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao adicionar anime");
+    }
   }
 
   async function handleCoverPick(e: React.ChangeEvent<HTMLInputElement>) {
@@ -172,7 +201,16 @@ function Index() {
     setSeasonDialogOpen(true);
   }
 
-  function addSeason() {
+  async function persistSeasons(animeId: string, seasons: Season[]) {
+    try {
+      await updateSeasons(animeId, seasons);
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao salvar temporadas");
+    }
+  }
+
+  async function addSeason() {
     const name = seasonName.trim();
     const rating = parseFloat(seasonRating.replace(",", "."));
     if (!seasonAnimeId) {
@@ -187,30 +225,38 @@ function Index() {
       toast.error("A nota deve estar entre 0 e 10");
       return;
     }
+    const target = animes.find((a) => a.id === seasonAnimeId);
+    if (!target) return;
+    const newSeasons = [...target.seasons, { id: uid(), name, rating }];
     setAnimes((prev) =>
-      prev.map((a) =>
-        a.id === seasonAnimeId
-          ? { ...a, seasons: [...a.seasons, { id: uid(), name, rating }] }
-          : a,
-      ),
+      prev.map((a) => (a.id === seasonAnimeId ? { ...a, seasons: newSeasons } : a)),
     );
     setSeasonDialogOpen(false);
     toast.success("Temporada adicionada");
+    await persistSeasons(seasonAnimeId, newSeasons);
   }
 
-  function deleteAnime(id: string) {
-    setAnimes((prev) => prev.filter((a) => a.id !== id));
-    toast.success("Anime removido");
+  async function deleteAnime(id: string) {
+    const prev = animes;
+    setAnimes((p) => p.filter((a) => a.id !== id));
+    try {
+      await deleteAnimeRow(id);
+      toast.success("Anime removido");
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao remover");
+      setAnimes(prev);
+    }
   }
 
-  function deleteSeason(animeId: string, seasonId: string) {
+  async function deleteSeason(animeId: string, seasonId: string) {
+    const target = animes.find((a) => a.id === animeId);
+    if (!target) return;
+    const newSeasons = target.seasons.filter((s) => s.id !== seasonId);
     setAnimes((prev) =>
-      prev.map((a) =>
-        a.id === animeId
-          ? { ...a, seasons: a.seasons.filter((s) => s.id !== seasonId) }
-          : a,
-      ),
+      prev.map((a) => (a.id === animeId ? { ...a, seasons: newSeasons } : a)),
     );
+    await persistSeasons(animeId, newSeasons);
   }
 
   function toggleExpand(id: string) {
@@ -230,7 +276,7 @@ function Index() {
     setUpcomingDialogOpen(true);
   }
 
-  function saveUpcoming() {
+  async function saveUpcoming() {
     if (!upcomingAnimeId) return;
     const title = upcomingTitle.trim();
     if (!title) {
@@ -241,22 +287,31 @@ function Index() {
       toast.error("Informe a data de lançamento");
       return;
     }
+    const upcoming: UpcomingSeason = { title, releaseDate: upcomingDate };
     setAnimes((prev) =>
-      prev.map((a) =>
-        a.id === upcomingAnimeId
-          ? { ...a, upcoming: { title, releaseDate: upcomingDate } }
-          : a,
-      ),
+      prev.map((a) => (a.id === upcomingAnimeId ? { ...a, upcoming } : a)),
     );
     setUpcomingDialogOpen(false);
     toast.success("Próxima temporada salva");
+    try {
+      await updateUpcoming(upcomingAnimeId, upcoming);
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao salvar lançamento");
+    }
   }
 
-  function clearUpcoming(animeId: string) {
+  async function clearUpcoming(animeId: string) {
     setAnimes((prev) =>
       prev.map((a) => (a.id === animeId ? { ...a, upcoming: undefined } : a)),
     );
     toast.success("Lançamento removido");
+    try {
+      await updateUpcoming(animeId, null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao remover lançamento");
+    }
   }
 
   return (
@@ -309,6 +364,14 @@ function Index() {
               <CalendarClock className="h-4 w-4 text-primary" />
               <span className="hidden sm:inline">Em breve</span>
             </Link>
+            <button
+              onClick={() => signOut()}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive"
+              aria-label="Sair"
+              title={user?.email ?? "Sair"}
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </div>
         <div className="mx-auto max-w-5xl px-4 pb-4 sm:px-6">
@@ -326,7 +389,9 @@ function Index() {
 
       {/* List */}
       <main className="mx-auto max-w-5xl px-4 pb-32 pt-6 sm:px-6">
-        {ranked.length === 0 ? (
+        {!hydrated ? (
+          <p className="py-20 text-center text-sm text-muted-foreground">Carregando...</p>
+        ) : ranked.length === 0 ? (
           <EmptyState onAdd={() => setAnimeDialogOpen(true)} hasAnimes={animes.length > 0} />
         ) : viewMode === "grid" ? (
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
