@@ -14,7 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      animes: {
+        Row: {
+          cover: string | null
+          created_at: string
+          id: string
+          name: string
+          seasons: Json
+          upcoming: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cover?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          seasons?: Json
+          upcoming?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cover?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          seasons?: Json
+          upcoming?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
