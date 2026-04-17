@@ -507,7 +507,30 @@ function Index() {
                           ))}
                         </ul>
                       )}
-                      <div className="mt-3 flex gap-2">
+                      {anime.upcoming?.releaseDate && (
+                        <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                              <CalendarClock className="h-3.5 w-3.5" />
+                              {formatReleaseLabel(anime.upcoming.releaseDate)}
+                            </div>
+                            <p className="truncate text-[11px] text-muted-foreground">
+                              {anime.upcoming.title} •{" "}
+                              {formatDateBR(anime.upcoming.releaseDate)}
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => clearUpcoming(anime.id)}
+                            className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
+                            aria-label="Remover lançamento"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      )}
+                      <div className="mt-3 flex flex-wrap gap-2">
                         <Button
                           variant="secondary"
                           size="sm"
@@ -515,6 +538,15 @@ function Index() {
                           className="flex-1"
                         >
                           <Plus className="mr-1 h-4 w-4" /> Temporada
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openUpcoming(anime.id)}
+                          className="flex-1"
+                        >
+                          <CalendarClock className="mr-1 h-4 w-4" />
+                          {anime.upcoming ? "Editar" : "Em breve"}
                         </Button>
                         <Button
                           variant="ghost"
@@ -538,6 +570,15 @@ function Index() {
       <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
         {fabOpen && (
           <>
+            <button
+              onClick={() => {
+                setFabOpen(false);
+                openUpcoming();
+              }}
+              className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-medium shadow-lg transition-transform hover:scale-105"
+            >
+              <CalendarClock className="h-4 w-4 text-primary" /> Em breve
+            </button>
             <button
               onClick={() => {
                 setFabOpen(false);
