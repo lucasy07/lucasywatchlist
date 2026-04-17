@@ -114,6 +114,7 @@ function Index() {
   const [hydrated, setHydrated] = useState(false);
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
   // Add Anime dialog
   const [animeDialogOpen, setAnimeDialogOpen] = useState(false);
