@@ -29,17 +29,17 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Anime Ranker — Seu ranking pessoal de animes" },
+      { title: "Anime Watchlist — Sua lista pessoal de animes" },
       {
         name: "description",
         content:
-          "Crie, avalie e ranqueie seus animes favoritos por temporada. Tema dark moderno com persistência local.",
+          "Crie, avalie e organize sua watchlist de animes por temporada. Tema dark moderno com persistência local.",
       },
-      { name: "author", content: "Anime Ranker" },
-      { property: "og:title", content: "Anime Ranker" },
+      { name: "author", content: "Anime Watchlist" },
+      { property: "og:title", content: "Anime Watchlist" },
       {
         property: "og:description",
-        content: "Ranking pessoal de animes por média das temporadas.",
+        content: "Sua watchlist pessoal de animes por média das temporadas.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
