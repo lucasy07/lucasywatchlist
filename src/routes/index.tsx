@@ -102,19 +102,19 @@ function Index() {
 
   useEffect(() => {
     setAnimes(loadAnimes());
-    const savedView = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY + ":view") : null;
+    const savedView = typeof window !== "undefined" ? localStorage.getItem("anime-ranker:v1:view") : null;
     if (savedView === "grid" || savedView === "list") setViewMode(savedView);
     setHydrated(true);
   }, []);
 
   useEffect(() => {
     if (!hydrated) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(animes));
+    saveAnimes(animes);
   }, [animes, hydrated]);
 
   useEffect(() => {
     if (!hydrated) return;
-    localStorage.setItem(STORAGE_KEY + ":view", viewMode);
+    localStorage.setItem("anime-ranker:v1:view", viewMode);
   }, [viewMode, hydrated]);
 
   const ranked = useMemo(() => {
