@@ -429,6 +429,15 @@ function Index() {
                         {anime.seasons.length}{" "}
                         {anime.seasons.length === 1 ? "temporada" : "temporadas"}
                       </p>
+                      {anime.upcoming?.releaseDate && (
+                        <Link
+                          to="/upcoming"
+                          className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary"
+                        >
+                          <CalendarClock className="h-3 w-3" />
+                          {formatReleaseLabel(anime.upcoming.releaseDate)}
+                        </Link>
+                      )}
                     </div>
                     <div className="flex flex-col items-end">
                       <div className="flex items-center gap-1">
