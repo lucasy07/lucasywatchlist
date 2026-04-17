@@ -97,6 +97,12 @@ function Index() {
   const [seasonName, setSeasonName] = useState("");
   const [seasonRating, setSeasonRating] = useState("");
 
+  // Upcoming season dialog
+  const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
+  const [upcomingAnimeId, setUpcomingAnimeId] = useState<string>("");
+  const [upcomingTitle, setUpcomingTitle] = useState("");
+  const [upcomingDate, setUpcomingDate] = useState("");
+
   // FAB menu
   const [fabOpen, setFabOpen] = useState(false);
 
