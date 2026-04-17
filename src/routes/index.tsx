@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Plus,
@@ -14,6 +14,7 @@ import {
   LayoutGrid,
   List as ListIcon,
   Clapperboard,
+  CalendarClock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,23 +36,21 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import {
+  type Anime,
+  loadAnimes,
+  saveAnimes,
+  uid,
+  average,
+  rankColor,
+  daysUntil,
+  formatReleaseLabel,
+  formatDateBR,
+} from "@/lib/anime-storage";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
-
-type Season = {
-  id: string;
-  name: string;
-  rating: number;
-};
-
-type Anime = {
-  id: string;
-  name: string;
-  seasons: Season[];
-  cover?: string;
-};
 
 async function fileToBase64(file: File, maxSize = 512): Promise<string> {
   const dataUrl = await new Promise<string>((resolve, reject) => {
@@ -60,7 +59,6 @@ async function fileToBase64(file: File, maxSize = 512): Promise<string> {
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
-  // Resize via canvas to keep LocalStorage light
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
@@ -78,35 +76,6 @@ async function fileToBase64(file: File, maxSize = 512): Promise<string> {
     img.onerror = reject;
     img.src = dataUrl;
   });
-}
-
-const STORAGE_KEY = "anime-ranker:v1";
-
-function loadAnimes(): Anime[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as Anime[];
-  } catch {
-    return [];
-  }
-}
-
-function uid() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
-
-function average(seasons: Season[]) {
-  if (seasons.length === 0) return 0;
-  return seasons.reduce((s, x) => s + x.rating, 0) / seasons.length;
-}
-
-function rankColor(avg: number) {
-  if (avg >= 9) return "text-primary";
-  if (avg >= 7) return "text-foreground";
-  if (avg >= 5) return "text-muted-foreground";
-  return "text-destructive";
 }
 
 function Index() {
@@ -128,24 +97,30 @@ function Index() {
   const [seasonName, setSeasonName] = useState("");
   const [seasonRating, setSeasonRating] = useState("");
 
+  // Upcoming season dialog
+  const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
+  const [upcomingAnimeId, setUpcomingAnimeId] = useState<string>("");
+  const [upcomingTitle, setUpcomingTitle] = useState("");
+  const [upcomingDate, setUpcomingDate] = useState("");
+
   // FAB menu
   const [fabOpen, setFabOpen] = useState(false);
 
   useEffect(() => {
     setAnimes(loadAnimes());
-    const savedView = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY + ":view") : null;
+    const savedView = typeof window !== "undefined" ? localStorage.getItem("anime-ranker:v1:view") : null;
     if (savedView === "grid" || savedView === "list") setViewMode(savedView);
     setHydrated(true);
   }, []);
 
   useEffect(() => {
     if (!hydrated) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(animes));
+    saveAnimes(animes);
   }, [animes, hydrated]);
 
   useEffect(() => {
     if (!hydrated) return;
-    localStorage.setItem(STORAGE_KEY + ":view", viewMode);
+    localStorage.setItem("anime-ranker:v1:view", viewMode);
   }, [viewMode, hydrated]);
 
   const ranked = useMemo(() => {
@@ -242,6 +217,48 @@ function Index() {
     setExpanded((e) => ({ ...e, [id]: !e[id] }));
   }
 
+  function openUpcoming(animeId?: string) {
+    if (animes.length === 0) {
+      toast.error("Adicione um anime primeiro");
+      return;
+    }
+    const id = animeId ?? animes[0].id;
+    setUpcomingAnimeId(id);
+    const existing = animes.find((a) => a.id === id)?.upcoming;
+    setUpcomingTitle(existing?.title ?? "");
+    setUpcomingDate(existing?.releaseDate ?? "");
+    setUpcomingDialogOpen(true);
+  }
+
+  function saveUpcoming() {
+    if (!upcomingAnimeId) return;
+    const title = upcomingTitle.trim();
+    if (!title) {
+      toast.error("Informe o título da próxima temporada");
+      return;
+    }
+    if (!upcomingDate) {
+      toast.error("Informe a data de lançamento");
+      return;
+    }
+    setAnimes((prev) =>
+      prev.map((a) =>
+        a.id === upcomingAnimeId
+          ? { ...a, upcoming: { title, releaseDate: upcomingDate } }
+          : a,
+      ),
+    );
+    setUpcomingDialogOpen(false);
+    toast.success("Próxima temporada salva");
+  }
+
+  function clearUpcoming(animeId: string) {
+    setAnimes((prev) =>
+      prev.map((a) => (a.id === animeId ? { ...a, upcoming: undefined } : a)),
+    );
+    toast.success("Lançamento removido");
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Toaster theme="dark" position="top-center" />
@@ -284,6 +301,14 @@ function Index() {
               <p className="text-xs text-muted-foreground">Animes</p>
               <p className="text-lg font-semibold">{animes.length}</p>
             </div>
+            <Link
+              to="/upcoming"
+              className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+              aria-label="Próximas temporadas"
+            >
+              <CalendarClock className="h-4 w-4 text-primary" />
+              <span className="hidden sm:inline">Em breve</span>
+            </Link>
           </div>
         </div>
         <div className="mx-auto max-w-5xl px-4 pb-4 sm:px-6">
@@ -336,6 +361,15 @@ function Index() {
                         {avg.toFixed(2)}
                       </span>
                     </div>
+                    {anime.upcoming?.releaseDate && (
+                      <Link
+                        to="/upcoming"
+                        className="absolute left-2 top-11 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground shadow-lg"
+                      >
+                        <CalendarClock className="h-3 w-3" />
+                        {formatReleaseLabel(anime.upcoming.releaseDate)}
+                      </Link>
+                    )}
                     <div className="absolute inset-x-0 bottom-0 p-3">
                       <h3 className="line-clamp-2 text-sm font-semibold leading-tight">
                         {anime.name}
@@ -404,6 +438,15 @@ function Index() {
                         {anime.seasons.length}{" "}
                         {anime.seasons.length === 1 ? "temporada" : "temporadas"}
                       </p>
+                      {anime.upcoming?.releaseDate && (
+                        <Link
+                          to="/upcoming"
+                          className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary"
+                        >
+                          <CalendarClock className="h-3 w-3" />
+                          {formatReleaseLabel(anime.upcoming.releaseDate)}
+                        </Link>
+                      )}
                     </div>
                     <div className="flex flex-col items-end">
                       <div className="flex items-center gap-1">
@@ -464,7 +507,30 @@ function Index() {
                           ))}
                         </ul>
                       )}
-                      <div className="mt-3 flex gap-2">
+                      {anime.upcoming?.releaseDate && (
+                        <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                              <CalendarClock className="h-3.5 w-3.5" />
+                              {formatReleaseLabel(anime.upcoming.releaseDate)}
+                            </div>
+                            <p className="truncate text-[11px] text-muted-foreground">
+                              {anime.upcoming.title} •{" "}
+                              {formatDateBR(anime.upcoming.releaseDate)}
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => clearUpcoming(anime.id)}
+                            className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
+                            aria-label="Remover lançamento"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      )}
+                      <div className="mt-3 flex flex-wrap gap-2">
                         <Button
                           variant="secondary"
                           size="sm"
@@ -472,6 +538,15 @@ function Index() {
                           className="flex-1"
                         >
                           <Plus className="mr-1 h-4 w-4" /> Temporada
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openUpcoming(anime.id)}
+                          className="flex-1"
+                        >
+                          <CalendarClock className="mr-1 h-4 w-4" />
+                          {anime.upcoming ? "Editar" : "Em breve"}
                         </Button>
                         <Button
                           variant="ghost"
@@ -495,6 +570,15 @@ function Index() {
       <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
         {fabOpen && (
           <>
+            <button
+              onClick={() => {
+                setFabOpen(false);
+                openUpcoming();
+              }}
+              className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-medium shadow-lg transition-transform hover:scale-105"
+            >
+              <CalendarClock className="h-4 w-4 text-primary" /> Em breve
+            </button>
             <button
               onClick={() => {
                 setFabOpen(false);
@@ -637,6 +721,65 @@ function Index() {
               Cancelar
             </Button>
             <Button onClick={addSeason}>Adicionar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upcoming Season Dialog */}
+      <Dialog open={upcomingDialogOpen} onOpenChange={setUpcomingDialogOpen}>
+        <DialogContent className="border-border bg-card">
+          <DialogHeader>
+            <DialogTitle>Próxima temporada</DialogTitle>
+            <DialogDescription>
+              Marque o título e a data de lançamento para destacar este anime.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label>Anime</Label>
+              <Select value={upcomingAnimeId} onValueChange={setUpcomingAnimeId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {animes.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>
+                      {a.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="upcoming-title">Título da temporada</Label>
+              <Input
+                id="upcoming-title"
+                value={upcomingTitle}
+                onChange={(e) => setUpcomingTitle(e.target.value)}
+                placeholder="Ex: Temporada 2"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="upcoming-date">Data de lançamento</Label>
+              <Input
+                id="upcoming-date"
+                type="date"
+                value={upcomingDate}
+                onChange={(e) => setUpcomingDate(e.target.value)}
+              />
+              {upcomingDate && (
+                <p className="text-xs text-muted-foreground">
+                  {formatReleaseLabel(upcomingDate)} •{" "}
+                  {formatDateBR(upcomingDate)}
+                </p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setUpcomingDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={saveUpcoming}>Salvar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
