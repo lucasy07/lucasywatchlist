@@ -303,6 +303,72 @@ function Index() {
       <main className="mx-auto max-w-5xl px-4 pb-32 pt-6 sm:px-6">
         {ranked.length === 0 ? (
           <EmptyState onAdd={() => setAnimeDialogOpen(true)} hasAnimes={animes.length > 0} />
+        ) : viewMode === "grid" ? (
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+            {ranked.map((anime, idx) => {
+              const avg = average(anime.seasons);
+              return (
+                <li
+                  key={anime.id}
+                  className="group relative overflow-hidden rounded-2xl border border-border transition-all hover:border-primary/40"
+                  style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
+                >
+                  <div className="relative aspect-[2/3] w-full overflow-hidden bg-secondary">
+                    {anime.cover ? (
+                      <img
+                        src={anime.cover}
+                        alt={anime.name}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                        <Tv className="h-10 w-10" />
+                      </div>
+                    )}
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+                    <div className="absolute left-2 top-2 flex h-7 min-w-7 items-center justify-center rounded-full border border-border bg-background/80 px-2 text-xs font-bold backdrop-blur">
+                      #{idx + 1}
+                    </div>
+                    <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full border border-border bg-background/80 px-2 py-1 backdrop-blur">
+                      <Star className={`h-3.5 w-3.5 ${rankColor(avg)}`} fill="currentColor" />
+                      <span className={`text-xs font-bold tabular-nums ${rankColor(avg)}`}>
+                        {avg.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="absolute inset-x-0 bottom-0 p-3">
+                      <h3 className="line-clamp-2 text-sm font-semibold leading-tight">
+                        {anime.name}
+                      </h3>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">
+                        {anime.seasons.length}{" "}
+                        {anime.seasons.length === 1 ? "temporada" : "temporadas"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1 p-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => openAddSeason(anime.id)}
+                      className="h-8 flex-1 text-xs"
+                    >
+                      <Plus className="mr-1 h-3.5 w-3.5" /> Temp.
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteAnime(anime.id)}
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      aria-label="Remover anime"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         ) : (
           <ul className="grid gap-4">
             {ranked.map((anime, idx) => {
