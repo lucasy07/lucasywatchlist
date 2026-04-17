@@ -48,8 +48,8 @@ export const Route = createRootRoute({
       { name: "description", content: "Anime Watchlist lets you track and rank anime series, managing seasons, scores, and future releases." },
       { property: "og:description", content: "Anime Watchlist lets you track and rank anime series, managing seasons, scores, and future releases." },
       { name: "twitter:description", content: "Anime Watchlist lets you track and rank anime series, managing seasons, scores, and future releases." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e8c753ca-5b8c-4384-835a-17e5061c48fd/id-preview-8c515001--144867bf-5621-4a9a-9085-01bbc8f57495.lovable.app-1776439608891.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e8c753ca-5b8c-4384-835a-17e5061c48fd/id-preview-8c515001--144867bf-5621-4a9a-9085-01bbc8f57495.lovable.app-1776439608891.png" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/5a3d6cfe-942d-4fef-abb8-a88540903e3d" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/5a3d6cfe-942d-4fef-abb8-a88540903e3d" },
     ],
     links: [
       {
