@@ -10,7 +10,10 @@ import {
   Tv,
   Trophy,
   Sparkles,
+  ImagePlus,
+  X,
 } from "lucide-react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -46,7 +49,35 @@ type Anime = {
   id: string;
   name: string;
   seasons: Season[];
+  cover?: string;
 };
+
+async function fileToBase64(file: File, maxSize = 512): Promise<string> {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+  // Resize via canvas to keep LocalStorage light
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const ratio = Math.min(1, maxSize / Math.max(img.width, img.height));
+      const w = Math.round(img.width * ratio);
+      const h = Math.round(img.height * ratio);
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return resolve(dataUrl);
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL("image/jpeg", 0.85));
+    };
+    img.onerror = reject;
+    img.src = dataUrl;
+  });
+}
 
 const STORAGE_KEY = "anime-ranker:v1";
 
