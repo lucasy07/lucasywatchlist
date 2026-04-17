@@ -254,16 +254,36 @@ function Index() {
               className="flex h-10 w-10 items-center justify-center rounded-xl"
               style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
             >
-              <Trophy className="h-5 w-5 text-primary-foreground" />
+              <Clapperboard className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-lg font-bold tracking-tight sm:text-xl">Anime Ranker</h1>
-              <p className="text-xs text-muted-foreground">Seu ranking pessoal</p>
+              <h1 className="text-lg font-bold tracking-tight sm:text-xl">Anime Watchlist</h1>
+              <p className="text-xs text-muted-foreground">Sua lista pessoal</p>
             </div>
           </div>
-          <div className="hidden text-right sm:block">
-            <p className="text-xs text-muted-foreground">Animes</p>
-            <p className="text-lg font-semibold">{animes.length}</p>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center rounded-lg border border-border bg-card p-0.5">
+              <button
+                onClick={() => setViewMode("list")}
+                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${viewMode === "list" ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                aria-label="Visualização em lista"
+                aria-pressed={viewMode === "list"}
+              >
+                <ListIcon className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${viewMode === "grid" ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                aria-label="Visualização em grade"
+                aria-pressed={viewMode === "grid"}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="hidden text-right sm:block">
+              <p className="text-xs text-muted-foreground">Animes</p>
+              <p className="text-lg font-semibold">{animes.length}</p>
+            </div>
           </div>
         </div>
         <div className="mx-auto max-w-5xl px-4 pb-4 sm:px-6">
