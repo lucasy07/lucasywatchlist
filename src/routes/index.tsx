@@ -354,7 +354,7 @@ function Index() {
                               <span
                                 className={`text-sm font-semibold tabular-nums ${rankColor(s.rating)}`}
                               >
-                                {s.rating.toFixed(1)}
+                                {s.rating.toFixed(2)}
                               </span>
                               <Button
                                 variant="ghost"
