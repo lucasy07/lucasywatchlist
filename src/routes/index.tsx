@@ -285,12 +285,26 @@ function Index() {
                   className="group relative overflow-hidden rounded-2xl border border-border transition-all hover:border-primary/40"
                   style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
                 >
-                  <div className="flex items-center gap-4 p-4 sm:p-5">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary text-base font-bold text-muted-foreground sm:h-14 sm:w-14 sm:text-lg">
+                  <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5">
+                    <div className="flex h-10 w-8 shrink-0 items-center justify-center text-sm font-bold text-muted-foreground sm:h-14 sm:w-10 sm:text-lg">
                       #{idx + 1}
                     </div>
+                    <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded-lg bg-secondary sm:h-20 sm:w-14">
+                      {anime.cover ? (
+                        <img
+                          src={anime.cover}
+                          alt={anime.name}
+                          className="h-full w-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                          <Tv className="h-5 w-5" />
+                        </div>
+                      )}
+                    </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-base font-semibold sm:text-lg">{anime.name}</h3>
+                      <h3 className="truncate text-sm font-semibold sm:text-lg">{anime.name}</h3>
                       <p className="text-xs text-muted-foreground">
                         {anime.seasons.length}{" "}
                         {anime.seasons.length === 1 ? "temporada" : "temporadas"}
@@ -299,8 +313,8 @@ function Index() {
                     <div className="flex flex-col items-end">
                       <div className="flex items-center gap-1">
                         <Star className={`h-5 w-5 ${rankColor(avg)}`} fill="currentColor" />
-                        <span className={`text-2xl font-bold tabular-nums ${rankColor(avg)}`}>
-                          {avg.toFixed(1)}
+                        <span className={`text-xl font-bold tabular-nums sm:text-2xl ${rankColor(avg)}`}>
+                          {avg.toFixed(2)}
                         </span>
                       </div>
                       <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
