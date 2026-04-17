@@ -8,10 +8,12 @@ import {
   ChevronDown,
   ChevronUp,
   Tv,
-  Trophy,
   Sparkles,
   ImagePlus,
   X,
+  LayoutGrid,
+  List as ListIcon,
+  Clapperboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
