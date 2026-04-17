@@ -117,6 +117,8 @@ function Index() {
   // Add Anime dialog
   const [animeDialogOpen, setAnimeDialogOpen] = useState(false);
   const [newAnimeName, setNewAnimeName] = useState("");
+  const [newAnimeCover, setNewAnimeCover] = useState<string | undefined>(undefined);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   // Add Season dialog
   const [seasonDialogOpen, setSeasonDialogOpen] = useState(false);
@@ -150,11 +152,29 @@ function Index() {
       toast.error("Informe o nome do anime");
       return;
     }
-    const anime: Anime = { id: uid(), name, seasons: [] };
+    const anime: Anime = { id: uid(), name, seasons: [], cover: newAnimeCover };
     setAnimes((prev) => [...prev, anime]);
     setNewAnimeName("");
+    setNewAnimeCover(undefined);
     setAnimeDialogOpen(false);
     toast.success(`"${name}" adicionado`);
+  }
+
+  async function handleCoverPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Selecione uma imagem");
+      return;
+    }
+    try {
+      const b64 = await fileToBase64(file);
+      setNewAnimeCover(b64);
+    } catch {
+      toast.error("Falha ao processar imagem");
+    } finally {
+      if (coverInputRef.current) coverInputRef.current.value = "";
+    }
   }
 
   function openAddSeason(animeId?: string) {
