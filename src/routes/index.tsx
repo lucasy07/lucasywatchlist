@@ -217,6 +217,48 @@ function Index() {
     setExpanded((e) => ({ ...e, [id]: !e[id] }));
   }
 
+  function openUpcoming(animeId?: string) {
+    if (animes.length === 0) {
+      toast.error("Adicione um anime primeiro");
+      return;
+    }
+    const id = animeId ?? animes[0].id;
+    setUpcomingAnimeId(id);
+    const existing = animes.find((a) => a.id === id)?.upcoming;
+    setUpcomingTitle(existing?.title ?? "");
+    setUpcomingDate(existing?.releaseDate ?? "");
+    setUpcomingDialogOpen(true);
+  }
+
+  function saveUpcoming() {
+    if (!upcomingAnimeId) return;
+    const title = upcomingTitle.trim();
+    if (!title) {
+      toast.error("Informe o título da próxima temporada");
+      return;
+    }
+    if (!upcomingDate) {
+      toast.error("Informe a data de lançamento");
+      return;
+    }
+    setAnimes((prev) =>
+      prev.map((a) =>
+        a.id === upcomingAnimeId
+          ? { ...a, upcoming: { title, releaseDate: upcomingDate } }
+          : a,
+      ),
+    );
+    setUpcomingDialogOpen(false);
+    toast.success("Próxima temporada salva");
+  }
+
+  function clearUpcoming(animeId: string) {
+    setAnimes((prev) =>
+      prev.map((a) => (a.id === animeId ? { ...a, upcoming: undefined } : a)),
+    );
+    toast.success("Lançamento removido");
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Toaster theme="dark" position="top-center" />
