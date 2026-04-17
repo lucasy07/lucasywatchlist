@@ -52,19 +52,6 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Season = {
-  id: string;
-  name: string;
-  rating: number;
-};
-
-type Anime = {
-  id: string;
-  name: string;
-  seasons: Season[];
-  cover?: string;
-};
-
 async function fileToBase64(file: File, maxSize = 512): Promise<string> {
   const dataUrl = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -72,7 +59,6 @@ async function fileToBase64(file: File, maxSize = 512): Promise<string> {
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
-  // Resize via canvas to keep LocalStorage light
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
@@ -90,35 +76,6 @@ async function fileToBase64(file: File, maxSize = 512): Promise<string> {
     img.onerror = reject;
     img.src = dataUrl;
   });
-}
-
-const STORAGE_KEY = "anime-ranker:v1";
-
-function loadAnimes(): Anime[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as Anime[];
-  } catch {
-    return [];
-  }
-}
-
-function uid() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
-
-function average(seasons: Season[]) {
-  if (seasons.length === 0) return 0;
-  return seasons.reduce((s, x) => s + x.rating, 0) / seasons.length;
-}
-
-function rankColor(avg: number) {
-  if (avg >= 9) return "text-primary";
-  if (avg >= 7) return "text-foreground";
-  if (avg >= 5) return "text-muted-foreground";
-  return "text-destructive";
 }
 
 function Index() {
