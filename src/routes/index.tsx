@@ -361,6 +361,15 @@ function Index() {
                         {avg.toFixed(2)}
                       </span>
                     </div>
+                    {anime.upcoming?.releaseDate && (
+                      <Link
+                        to="/upcoming"
+                        className="absolute left-2 top-11 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground shadow-lg"
+                      >
+                        <CalendarClock className="h-3 w-3" />
+                        {formatReleaseLabel(anime.upcoming.releaseDate)}
+                      </Link>
+                    )}
                     <div className="absolute inset-x-0 bottom-0 p-3">
                       <h3 className="line-clamp-2 text-sm font-semibold leading-tight">
                         {anime.name}
