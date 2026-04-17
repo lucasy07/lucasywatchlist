@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Plus,
@@ -14,6 +14,7 @@ import {
   LayoutGrid,
   List as ListIcon,
   Clapperboard,
+  CalendarClock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,17 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import {
+  type Anime,
+  loadAnimes,
+  saveAnimes,
+  uid,
+  average,
+  rankColor,
+  daysUntil,
+  formatReleaseLabel,
+  formatDateBR,
+} from "@/lib/anime-storage";
 
 export const Route = createFileRoute("/")({
   component: Index,
