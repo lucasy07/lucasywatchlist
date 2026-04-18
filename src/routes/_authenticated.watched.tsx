@@ -30,7 +30,6 @@ import { Toaster } from "@/components/ui/sonner";
 import {
   type Anime,
   type Season,
-  type UpcomingSeason,
   fetchAnimes,
   setWatched,
   deleteAnime as deleteAnimeRow,
