@@ -344,7 +344,82 @@ function Index() {
     }
   }
 
-  return (
+  function openEdit(animeId: string) {
+    const a = animes.find((x) => x.id === animeId);
+    if (!a) return;
+    setEditAnimeId(a.id);
+    setEditName(a.name);
+    setEditCover(a.cover);
+    setEditSeasons(a.seasons.map((s) => ({ ...s })));
+    setEditDialogOpen(true);
+  }
+
+  async function handleEditCoverPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Selecione uma imagem");
+      return;
+    }
+    try {
+      const b64 = await fileToBase64(file);
+      setEditCover(b64);
+    } catch {
+      toast.error("Falha ao processar imagem");
+    } finally {
+      if (editCoverInputRef.current) editCoverInputRef.current.value = "";
+    }
+  }
+
+  function updateEditSeason(id: string, patch: Partial<Season>) {
+    setEditSeasons((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
+  }
+
+  function removeEditSeason(id: string) {
+    setEditSeasons((prev) => prev.filter((s) => s.id !== id));
+  }
+
+  async function saveEdit() {
+    if (!editAnimeId) return;
+    const name = editName.trim();
+    if (!name) {
+      toast.error("Informe o nome do anime");
+      return;
+    }
+    for (const s of editSeasons) {
+      if (!s.name.trim()) {
+        toast.error("Toda temporada precisa de nome");
+        return;
+      }
+      if (Number.isNaN(s.rating) || s.rating < 0 || s.rating > 10) {
+        toast.error(`Nota inválida em "${s.name}"`);
+        return;
+      }
+    }
+    const cleaned = editSeasons.map((s) => ({ ...s, name: s.name.trim() }));
+    const original = animes.find((a) => a.id === editAnimeId);
+    setAnimes((prev) =>
+      prev.map((a) =>
+        a.id === editAnimeId ? { ...a, name, cover: editCover, seasons: cleaned } : a,
+      ),
+    );
+    setEditDialogOpen(false);
+    try {
+      const tasks: Promise<void>[] = [];
+      if (!original || original.name !== name || original.cover !== editCover) {
+        tasks.push(updateAnime(editAnimeId, { name, cover: editCover ?? null }));
+      }
+      tasks.push(updateSeasons(editAnimeId, cleaned));
+      await Promise.all(tasks);
+      toast.success("Alterações salvas");
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao salvar alterações");
+      if (original) {
+        setAnimes((prev) => prev.map((a) => (a.id === editAnimeId ? original : a)));
+      }
+    }
+  }
     <div className="min-h-screen bg-background text-foreground">
       <Toaster theme="dark" position="top-center" />
 
