@@ -12,6 +12,7 @@ import {
   ImagePlus,
   X,
   Plus,
+  CalendarClock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
