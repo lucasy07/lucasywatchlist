@@ -96,6 +96,10 @@ function WatchedPage() {
   const [editSeasons, setEditSeasons] = useState<Season[]>([]);
   const editCoverInputRef = useRef<HTMLInputElement>(null);
 
+  // Upcoming dialog
+  const [upcomingOpen, setUpcomingOpen] = useState(false);
+  const [upcomingAnimeId, setUpcomingAnimeId] = useState<string>("");
+
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
