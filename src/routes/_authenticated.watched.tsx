@@ -469,6 +469,25 @@ function WatchedPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {(() => {
+        const a = animes.find((x) => x.id === upcomingAnimeId);
+        if (!a) return null;
+        return (
+          <UpcomingEditDialog
+            open={upcomingOpen}
+            onOpenChange={setUpcomingOpen}
+            animeId={a.id}
+            animeName={a.name}
+            initial={a.upcoming}
+            onSaved={(id, upcoming) =>
+              setAnimes((prev) =>
+                prev.map((x) => (x.id === id ? { ...x, upcoming: upcoming ?? undefined } : x)),
+              )
+            }
+          />
+        );
+      })()}
     </div>
   );
 }
