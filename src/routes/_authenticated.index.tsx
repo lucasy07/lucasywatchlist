@@ -485,6 +485,16 @@ function Index() {
                     <Button
                       variant="ghost"
                       size="icon"
+                      onClick={() => toggleWatched(anime.id, true)}
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                      aria-label="Marcar como assistido"
+                      title="Marcar como assistido"
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => deleteAnime(anime.id)}
                       className="h-8 w-8 text-muted-foreground hover:text-destructive"
                       aria-label="Remover anime"
