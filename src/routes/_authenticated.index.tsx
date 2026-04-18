@@ -48,6 +48,7 @@ import {
   deleteAnime as deleteAnimeRow,
   updateSeasons,
   updateUpcoming,
+  setWatched,
   importLegacyIfNeeded,
   uid,
   average,
