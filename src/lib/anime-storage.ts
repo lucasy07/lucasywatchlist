@@ -18,6 +18,7 @@ export type Anime = {
   seasons: Season[];
   cover?: string;
   upcoming?: UpcomingSeason;
+  watched: boolean;
 };
 
 /** Legacy localStorage key — used only for one-time auto-import. */
