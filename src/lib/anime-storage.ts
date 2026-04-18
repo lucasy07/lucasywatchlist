@@ -127,6 +127,17 @@ export async function deleteAnime(id: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function updateAnime(
+  id: string,
+  patch: { name?: string; cover?: string | null },
+): Promise<void> {
+  const update: { name?: string; cover?: string | null } = {};
+  if (patch.name !== undefined) update.name = patch.name;
+  if (patch.cover !== undefined) update.cover = patch.cover;
+  const { error } = await supabase.from("animes").update(update).eq("id", id);
+  if (error) throw error;
+}
+
 export async function updateSeasons(id: string, seasons: Season[]): Promise<void> {
   const { error } = await supabase
     .from("animes")

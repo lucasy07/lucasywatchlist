@@ -18,6 +18,7 @@ import {
   LogOut,
   Check,
   CheckCircle2,
+  Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +49,7 @@ import {
   deleteAnime as deleteAnimeRow,
   updateSeasons,
   updateUpcoming,
+  updateAnime,
   setWatched,
   importLegacyIfNeeded,
   uid,
@@ -116,6 +118,14 @@ function Index() {
 
   // FAB menu
   const [fabOpen, setFabOpen] = useState(false);
+
+  // Edit Anime dialog
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editAnimeId, setEditAnimeId] = useState<string>("");
+  const [editName, setEditName] = useState("");
+  const [editCover, setEditCover] = useState<string | undefined>(undefined);
+  const [editSeasons, setEditSeasons] = useState<Season[]>([]);
+  const editCoverInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -334,6 +344,83 @@ function Index() {
     }
   }
 
+  function openEdit(animeId: string) {
+    const a = animes.find((x) => x.id === animeId);
+    if (!a) return;
+    setEditAnimeId(a.id);
+    setEditName(a.name);
+    setEditCover(a.cover);
+    setEditSeasons(a.seasons.map((s) => ({ ...s })));
+    setEditDialogOpen(true);
+  }
+
+  async function handleEditCoverPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Selecione uma imagem");
+      return;
+    }
+    try {
+      const b64 = await fileToBase64(file);
+      setEditCover(b64);
+    } catch {
+      toast.error("Falha ao processar imagem");
+    } finally {
+      if (editCoverInputRef.current) editCoverInputRef.current.value = "";
+    }
+  }
+
+  function updateEditSeason(id: string, patch: Partial<Season>) {
+    setEditSeasons((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
+  }
+
+  function removeEditSeason(id: string) {
+    setEditSeasons((prev) => prev.filter((s) => s.id !== id));
+  }
+
+  async function saveEdit() {
+    if (!editAnimeId) return;
+    const name = editName.trim();
+    if (!name) {
+      toast.error("Informe o nome do anime");
+      return;
+    }
+    for (const s of editSeasons) {
+      if (!s.name.trim()) {
+        toast.error("Toda temporada precisa de nome");
+        return;
+      }
+      if (Number.isNaN(s.rating) || s.rating < 0 || s.rating > 10) {
+        toast.error(`Nota inválida em "${s.name}"`);
+        return;
+      }
+    }
+    const cleaned = editSeasons.map((s) => ({ ...s, name: s.name.trim() }));
+    const original = animes.find((a) => a.id === editAnimeId);
+    setAnimes((prev) =>
+      prev.map((a) =>
+        a.id === editAnimeId ? { ...a, name, cover: editCover, seasons: cleaned } : a,
+      ),
+    );
+    setEditDialogOpen(false);
+    try {
+      const tasks: Promise<void>[] = [];
+      if (!original || original.name !== name || original.cover !== editCover) {
+        tasks.push(updateAnime(editAnimeId, { name, cover: editCover ?? null }));
+      }
+      tasks.push(updateSeasons(editAnimeId, cleaned));
+      await Promise.all(tasks);
+      toast.success("Alterações salvas");
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao salvar alterações");
+      if (original) {
+        setAnimes((prev) => prev.map((a) => (a.id === editAnimeId ? original : a)));
+      }
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Toaster theme="dark" position="top-center" />
@@ -481,6 +568,16 @@ function Index() {
                       className="h-8 flex-1 text-xs"
                     >
                       <Plus className="mr-1 h-3.5 w-3.5" /> Temp.
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openEdit(anime.id)}
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                      aria-label="Editar"
+                      title="Editar"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       variant="ghost"
@@ -650,6 +747,14 @@ function Index() {
                         >
                           <CalendarClock className="mr-1 h-4 w-4" />
                           {anime.upcoming ? "Editar" : "Em breve"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openEdit(anime.id)}
+                          className="flex-1"
+                        >
+                          <Pencil className="mr-1 h-4 w-4" /> Editar
                         </Button>
                         <Button
                           variant="outline"
@@ -891,6 +996,129 @@ function Index() {
               Cancelar
             </Button>
             <Button onClick={saveUpcoming}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Anime Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-card">
+          <DialogHeader>
+            <DialogTitle>Editar anime</DialogTitle>
+            <DialogDescription>
+              Atualize o nome, a capa e as temporadas.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label>Capa</Label>
+              <input
+                ref={editCoverInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleEditCoverPick}
+                className="hidden"
+              />
+              <div className="flex items-start gap-3">
+                {editCover ? (
+                  <div className="relative h-32 w-24 overflow-hidden rounded-lg border border-border">
+                    <img src={editCover} alt="Capa" className="h-full w-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setEditCover(undefined)}
+                      className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-background/80 text-foreground hover:bg-destructive hover:text-destructive-foreground"
+                      aria-label="Remover capa"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => editCoverInputRef.current?.click()}
+                    className="flex h-32 w-24 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border bg-secondary/40 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+                  >
+                    <ImagePlus className="h-5 w-5" />
+                    Adicionar
+                  </button>
+                )}
+                {editCover && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => editCoverInputRef.current?.click()}
+                  >
+                    Trocar
+                  </Button>
+                )}
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-anime-name">Nome</Label>
+              <Input
+                id="edit-anime-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>Temporadas</Label>
+              {editSeasons.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
+                  Nenhuma temporada
+                </p>
+              ) : (
+                <ul className="grid gap-2">
+                  {editSeasons.map((s) => (
+                    <li key={s.id} className="flex items-center gap-2">
+                      <Input
+                        value={s.name}
+                        onChange={(e) => updateEditSeason(s.id, { name: e.target.value })}
+                        placeholder="Nome"
+                        className="flex-1"
+                      />
+                      <Input
+                        value={String(s.rating)}
+                        onChange={(e) => {
+                          const v = parseFloat(e.target.value.replace(",", "."));
+                          updateEditSeason(s.id, { rating: Number.isNaN(v) ? 0 : v });
+                        }}
+                        inputMode="decimal"
+                        placeholder="0-10"
+                        className="w-20"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeEditSeason(s.id)}
+                        className="h-9 w-9 text-muted-foreground hover:text-destructive"
+                        aria-label="Remover temporada"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setEditSeasons((prev) => [...prev, { id: uid(), name: "", rating: 0 }])
+                }
+              >
+                <Plus className="mr-1 h-4 w-4" /> Temporada
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={saveEdit}>Salvar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
