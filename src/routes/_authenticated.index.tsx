@@ -751,6 +751,14 @@ function Index() {
                         <Button
                           variant="outline"
                           size="sm"
+                          onClick={() => openEdit(anime.id)}
+                          className="flex-1"
+                        >
+                          <Pencil className="mr-1 h-4 w-4" /> Editar
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => toggleWatched(anime.id, true)}
                           className="flex-1"
                         >
