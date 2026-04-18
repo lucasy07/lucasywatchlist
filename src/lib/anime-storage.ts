@@ -31,6 +31,7 @@ type DbRow = {
   cover: string | null;
   seasons: unknown;
   upcoming: unknown;
+  watched: boolean | null;
 };
 
 function rowToAnime(row: DbRow): Anime {
@@ -42,6 +43,7 @@ function rowToAnime(row: DbRow): Anime {
     cover: row.cover ?? undefined,
     seasons,
     upcoming,
+    watched: row.watched ?? false,
   };
 }
 
