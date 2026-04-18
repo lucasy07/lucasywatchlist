@@ -16,6 +16,8 @@ import {
   Clapperboard,
   CalendarClock,
   LogOut,
+  Check,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +48,7 @@ import {
   deleteAnime as deleteAnimeRow,
   updateSeasons,
   updateUpcoming,
+  setWatched,
   importLegacyIfNeeded,
   uid,
   average,
@@ -148,11 +151,28 @@ function Index() {
   }, [viewMode, hydrated]);
 
   const ranked = useMemo(() => {
-    const filtered = animes.filter((a) =>
-      a.name.toLowerCase().includes(search.toLowerCase().trim()),
+    const filtered = animes.filter(
+      (a) =>
+        !a.watched &&
+        a.name.toLowerCase().includes(search.toLowerCase().trim()),
     );
     return [...filtered].sort((a, b) => average(b.seasons) - average(a.seasons));
   }, [animes, search]);
+
+  const watchedCount = useMemo(() => animes.filter((a) => a.watched).length, [animes]);
+
+  async function toggleWatched(id: string, next: boolean) {
+    const prev = animes;
+    setAnimes((p) => p.map((a) => (a.id === id ? { ...a, watched: next } : a)));
+    try {
+      await setWatched(id, next);
+      toast.success(next ? "Marcado como assistido" : "Movido para a lista");
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao atualizar");
+      setAnimes(prev);
+    }
+  }
 
   async function addAnime() {
     const name = newAnimeName.trim();
@@ -364,6 +384,14 @@ function Index() {
               <CalendarClock className="h-4 w-4 text-primary" />
               <span className="hidden sm:inline">Em breve</span>
             </Link>
+            <Link
+              to="/watched"
+              className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+              aria-label="Animes já assistidos"
+            >
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              <span className="hidden sm:inline">Assistidos{watchedCount > 0 ? ` (${watchedCount})` : ""}</span>
+            </Link>
             <button
               onClick={() => signOut()}
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive"
@@ -453,6 +481,16 @@ function Index() {
                       className="h-8 flex-1 text-xs"
                     >
                       <Plus className="mr-1 h-3.5 w-3.5" /> Temp.
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => toggleWatched(anime.id, true)}
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                      aria-label="Marcar como assistido"
+                      title="Marcar como assistido"
+                    >
+                      <Check className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       variant="ghost"
@@ -612,6 +650,14 @@ function Index() {
                         >
                           <CalendarClock className="mr-1 h-4 w-4" />
                           {anime.upcoming ? "Editar" : "Em breve"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toggleWatched(anime.id, true)}
+                          className="flex-1"
+                        >
+                          <Check className="mr-1 h-4 w-4" /> Assistido
                         </Button>
                         <Button
                           variant="ghost"

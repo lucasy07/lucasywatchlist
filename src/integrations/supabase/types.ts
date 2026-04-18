@@ -24,6 +24,7 @@ export type Database = {
           upcoming: Json | null
           updated_at: string
           user_id: string
+          watched: boolean
         }
         Insert: {
           cover?: string | null
@@ -34,6 +35,7 @@ export type Database = {
           upcoming?: Json | null
           updated_at?: string
           user_id: string
+          watched?: boolean
         }
         Update: {
           cover?: string | null
@@ -44,6 +46,7 @@ export type Database = {
           upcoming?: Json | null
           updated_at?: string
           user_id?: string
+          watched?: boolean
         }
         Relationships: []
       }

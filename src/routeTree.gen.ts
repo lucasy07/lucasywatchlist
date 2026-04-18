@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated.index'
+import { Route as AuthenticatedWatchedRouteImport } from './routes/_authenticated.watched'
 import { Route as AuthenticatedUpcomingRouteImport } from './routes/_authenticated.upcoming'
 
 const AuthRoute = AuthRouteImport.update({
@@ -28,6 +29,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedWatchedRoute = AuthenticatedWatchedRouteImport.update({
+  id: '/watched',
+  path: '/watched',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedUpcomingRoute = AuthenticatedUpcomingRouteImport.update({
   id: '/upcoming',
   path: '/upcoming',
@@ -38,10 +44,12 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/upcoming': typeof AuthenticatedUpcomingRoute
+  '/watched': typeof AuthenticatedWatchedRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/upcoming': typeof AuthenticatedUpcomingRoute
+  '/watched': typeof AuthenticatedWatchedRoute
   '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesById {
@@ -49,18 +57,20 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/upcoming': typeof AuthenticatedUpcomingRoute
+  '/_authenticated/watched': typeof AuthenticatedWatchedRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/upcoming'
+  fullPaths: '/' | '/auth' | '/upcoming' | '/watched'
   fileRoutesByTo: FileRoutesByTo
-  to: '/auth' | '/upcoming' | '/'
+  to: '/auth' | '/upcoming' | '/watched' | '/'
   id:
     | '__root__'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/upcoming'
+    | '/_authenticated/watched'
     | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/watched': {
+      id: '/_authenticated/watched'
+      path: '/watched'
+      fullPath: '/watched'
+      preLoaderRoute: typeof AuthenticatedWatchedRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/upcoming': {
       id: '/_authenticated/upcoming'
       path: '/upcoming'
@@ -104,11 +121,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedUpcomingRoute: typeof AuthenticatedUpcomingRoute
+  AuthenticatedWatchedRoute: typeof AuthenticatedWatchedRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedUpcomingRoute: AuthenticatedUpcomingRoute,
+  AuthenticatedWatchedRoute: AuthenticatedWatchedRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 

@@ -18,6 +18,7 @@ export type Anime = {
   seasons: Season[];
   cover?: string;
   upcoming?: UpcomingSeason;
+  watched: boolean;
 };
 
 /** Legacy localStorage key — used only for one-time auto-import. */
@@ -30,6 +31,7 @@ type DbRow = {
   cover: string | null;
   seasons: unknown;
   upcoming: unknown;
+  watched: boolean | null;
 };
 
 function rowToAnime(row: DbRow): Anime {
@@ -41,6 +43,7 @@ function rowToAnime(row: DbRow): Anime {
     cover: row.cover ?? undefined,
     seasons,
     upcoming,
+    watched: row.watched ?? false,
   };
 }
 
@@ -60,7 +63,7 @@ function readLegacyLocal(): Anime[] {
 export async function fetchAnimes(): Promise<Anime[]> {
   const { data, error } = await supabase
     .from("animes")
-    .select("id, name, cover, seasons, upcoming")
+    .select("id, name, cover, seasons, upcoming, watched")
     .order("created_at", { ascending: true });
   if (error) throw error;
   return (data as DbRow[]).map(rowToAnime);
@@ -105,10 +108,18 @@ export async function createAnime(input: {
       seasons: [],
       upcoming: null,
     })
-    .select("id, name, cover, seasons, upcoming")
+    .select("id, name, cover, seasons, upcoming, watched")
     .single();
   if (error) throw error;
   return rowToAnime(data as DbRow);
+}
+
+export async function setWatched(id: string, watched: boolean): Promise<void> {
+  const { error } = await supabase
+    .from("animes")
+    .update({ watched })
+    .eq("id", id);
+  if (error) throw error;
 }
 
 export async function deleteAnime(id: string): Promise<void> {
