@@ -61,6 +61,7 @@ import {
 import { useAuth } from "@/auth/AuthProvider";
 
 export const Route = createFileRoute("/_authenticated/")({
+  codeSplitGroupings: [["component"]],
   component: Index,
 });
 
