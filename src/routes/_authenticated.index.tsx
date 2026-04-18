@@ -652,6 +652,14 @@ function Index() {
                           {anime.upcoming ? "Editar" : "Em breve"}
                         </Button>
                         <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toggleWatched(anime.id, true)}
+                          className="flex-1"
+                        >
+                          <Check className="mr-1 h-4 w-4" /> Assistido
+                        </Button>
+                        <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => deleteAnime(anime.id)}
