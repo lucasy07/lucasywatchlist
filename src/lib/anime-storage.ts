@@ -131,7 +131,7 @@ export async function updateAnime(
   id: string,
   patch: { name?: string; cover?: string | null },
 ): Promise<void> {
-  const update: Record<string, unknown> = {};
+  const update: { name?: string; cover?: string | null } = {};
   if (patch.name !== undefined) update.name = patch.name;
   if (patch.cover !== undefined) update.cover = patch.cover;
   const { error } = await supabase.from("animes").update(update).eq("id", id);
