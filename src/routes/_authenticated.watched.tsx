@@ -321,6 +321,18 @@ function WatchedPage() {
                     <Button
                       variant="outline"
                       size="sm"
+                      onClick={() => {
+                        setUpcomingAnimeId(anime.id);
+                        setUpcomingOpen(true);
+                      }}
+                      className="h-8 text-xs"
+                    >
+                      <CalendarClock className="mr-1 h-3.5 w-3.5" />
+                      {anime.upcoming ? "Lançamento" : "+ Lançamento"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => unmark(anime.id)}
                       className="h-8 text-xs"
                     >
