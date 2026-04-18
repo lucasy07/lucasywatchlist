@@ -119,6 +119,14 @@ function Index() {
   // FAB menu
   const [fabOpen, setFabOpen] = useState(false);
 
+  // Edit Anime dialog
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editAnimeId, setEditAnimeId] = useState<string>("");
+  const [editName, setEditName] = useState("");
+  const [editCover, setEditCover] = useState<string | undefined>(undefined);
+  const [editSeasons, setEditSeasons] = useState<Season[]>([]);
+  const editCoverInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
