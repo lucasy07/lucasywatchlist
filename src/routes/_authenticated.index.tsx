@@ -999,6 +999,129 @@ function Index() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Anime Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-card">
+          <DialogHeader>
+            <DialogTitle>Editar anime</DialogTitle>
+            <DialogDescription>
+              Atualize o nome, a capa e as temporadas.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label>Capa</Label>
+              <input
+                ref={editCoverInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleEditCoverPick}
+                className="hidden"
+              />
+              <div className="flex items-start gap-3">
+                {editCover ? (
+                  <div className="relative h-32 w-24 overflow-hidden rounded-lg border border-border">
+                    <img src={editCover} alt="Capa" className="h-full w-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setEditCover(undefined)}
+                      className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-background/80 text-foreground hover:bg-destructive hover:text-destructive-foreground"
+                      aria-label="Remover capa"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => editCoverInputRef.current?.click()}
+                    className="flex h-32 w-24 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border bg-secondary/40 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+                  >
+                    <ImagePlus className="h-5 w-5" />
+                    Adicionar
+                  </button>
+                )}
+                {editCover && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => editCoverInputRef.current?.click()}
+                  >
+                    Trocar
+                  </Button>
+                )}
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-anime-name">Nome</Label>
+              <Input
+                id="edit-anime-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>Temporadas</Label>
+              {editSeasons.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
+                  Nenhuma temporada
+                </p>
+              ) : (
+                <ul className="grid gap-2">
+                  {editSeasons.map((s) => (
+                    <li key={s.id} className="flex items-center gap-2">
+                      <Input
+                        value={s.name}
+                        onChange={(e) => updateEditSeason(s.id, { name: e.target.value })}
+                        placeholder="Nome"
+                        className="flex-1"
+                      />
+                      <Input
+                        value={String(s.rating)}
+                        onChange={(e) => {
+                          const v = parseFloat(e.target.value.replace(",", "."));
+                          updateEditSeason(s.id, { rating: Number.isNaN(v) ? 0 : v });
+                        }}
+                        inputMode="decimal"
+                        placeholder="0-10"
+                        className="w-20"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeEditSeason(s.id)}
+                        className="h-9 w-9 text-muted-foreground hover:text-destructive"
+                        aria-label="Remover temporada"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setEditSeasons((prev) => [...prev, { id: uid(), name: "", rating: 0 }])
+                }
+              >
+                <Plus className="mr-1 h-4 w-4" /> Temporada
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={saveEdit}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
