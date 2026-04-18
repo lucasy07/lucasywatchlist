@@ -151,11 +151,28 @@ function Index() {
   }, [viewMode, hydrated]);
 
   const ranked = useMemo(() => {
-    const filtered = animes.filter((a) =>
-      a.name.toLowerCase().includes(search.toLowerCase().trim()),
+    const filtered = animes.filter(
+      (a) =>
+        !a.watched &&
+        a.name.toLowerCase().includes(search.toLowerCase().trim()),
     );
     return [...filtered].sort((a, b) => average(b.seasons) - average(a.seasons));
   }, [animes, search]);
+
+  const watchedCount = useMemo(() => animes.filter((a) => a.watched).length, [animes]);
+
+  async function toggleWatched(id: string, next: boolean) {
+    const prev = animes;
+    setAnimes((p) => p.map((a) => (a.id === id ? { ...a, watched: next } : a)));
+    try {
+      await setWatched(id, next);
+      toast.success(next ? "Marcado como assistido" : "Movido para a lista");
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao atualizar");
+      setAnimes(prev);
+    }
+  }
 
   async function addAnime() {
     const name = newAnimeName.trim();
