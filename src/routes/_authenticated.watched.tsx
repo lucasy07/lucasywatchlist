@@ -29,6 +29,7 @@ import { Toaster } from "@/components/ui/sonner";
 import {
   type Anime,
   type Season,
+  type UpcomingSeason,
   fetchAnimes,
   setWatched,
   deleteAnime as deleteAnimeRow,
@@ -39,6 +40,7 @@ import {
   uid,
 } from "@/lib/anime-storage";
 import { useAuth } from "@/auth/AuthProvider";
+import { UpcomingEditDialog } from "@/components/UpcomingEditDialog";
 
 export const Route = createFileRoute("/_authenticated/watched")({
   codeSplitGroupings: [["component"]],
