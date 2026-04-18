@@ -1,14 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, CalendarClock, Tv, Sparkles } from "lucide-react";
+import { ArrowLeft, CalendarClock, Tv, Sparkles, Pencil, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/sonner";
 import {
   type Anime,
+  type UpcomingSeason,
   fetchAnimes,
   daysUntil,
   formatDateBR,
   formatReleaseLabel,
 } from "@/lib/anime-storage";
 import { useAuth } from "@/auth/AuthProvider";
+import { UpcomingEditDialog } from "@/components/UpcomingEditDialog";
 
 export const Route = createFileRoute("/_authenticated/upcoming")({
   head: () => ({
@@ -32,6 +36,9 @@ function UpcomingPage() {
   const { user } = useAuth();
   const [animes, setAnimes] = useState<Anime[]>([]);
   const [hydrated, setHydrated] = useState(false);
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [editAnimeId, setEditAnimeId] = useState<string>("");
 
   useEffect(() => {
     if (!user) return;
@@ -62,8 +69,27 @@ function UpcomingPage() {
   const future = upcoming.filter((u) => u.days >= 0);
   const past = upcoming.filter((u) => u.days < 0);
 
+  const animesWithoutUpcoming = useMemo(
+    () => animes.filter((a) => !a.upcoming),
+    [animes],
+  );
+
+  function openEdit(animeId: string) {
+    setEditAnimeId(animeId);
+    setEditOpen(true);
+  }
+
+  function handleSaved(animeId: string, upcoming: UpcomingSeason | null) {
+    setAnimes((prev) =>
+      prev.map((a) => (a.id === animeId ? { ...a, upcoming: upcoming ?? undefined } : a)),
+    );
+  }
+
+  const editingAnime = animes.find((a) => a.id === editAnimeId);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Toaster theme="dark" position="top-center" />
       <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <Link
@@ -96,12 +122,18 @@ function UpcomingPage() {
               Adicione uma data de lançamento em algum anime para ver o cronograma
               aqui.
             </p>
-            <Link
-              to="/"
-              className="mt-6 inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-            >
-              Ir para a lista
-            </Link>
+            {animesWithoutUpcoming.length > 0 ? (
+              <Button className="mt-6" onClick={() => openEdit(animesWithoutUpcoming[0].id)}>
+                <Plus className="mr-1 h-4 w-4" /> Adicionar lançamento
+              </Button>
+            ) : (
+              <Link
+                to="/"
+                className="mt-6 inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                Ir para a lista
+              </Link>
+            )}
           </div>
         ) : (
           <div className="grid gap-6">
@@ -112,7 +144,12 @@ function UpcomingPage() {
                 </h2>
                 <ul className="grid gap-3">
                   {future.map(({ anime, days }) => (
-                    <UpcomingRow key={anime.id} anime={anime} days={days} />
+                    <UpcomingRow
+                      key={anime.id}
+                      anime={anime}
+                      days={days}
+                      onEdit={() => openEdit(anime.id)}
+                    />
                   ))}
                 </ul>
               </section>
@@ -124,7 +161,12 @@ function UpcomingPage() {
                 </h2>
                 <ul className="grid gap-3 opacity-70">
                   {past.map(({ anime, days }) => (
-                    <UpcomingRow key={anime.id} anime={anime} days={days} />
+                    <UpcomingRow
+                      key={anime.id}
+                      anime={anime}
+                      days={days}
+                      onEdit={() => openEdit(anime.id)}
+                    />
                   ))}
                 </ul>
               </section>
@@ -132,11 +174,30 @@ function UpcomingPage() {
           </div>
         )}
       </main>
+
+      {editingAnime && (
+        <UpcomingEditDialog
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          animeId={editingAnime.id}
+          animeName={editingAnime.name}
+          initial={editingAnime.upcoming}
+          onSaved={handleSaved}
+        />
+      )}
     </div>
   );
 }
 
-function UpcomingRow({ anime, days }: { anime: Anime; days: number }) {
+function UpcomingRow({
+  anime,
+  days,
+  onEdit,
+}: {
+  anime: Anime;
+  days: number;
+  onEdit: () => void;
+}) {
   const isSoon = days >= 0 && days <= 30;
   return (
     <li
@@ -180,6 +241,9 @@ function UpcomingRow({ anime, days }: { anime: Anime; days: number }) {
           </span>
         </div>
       </div>
+      <Button variant="outline" size="sm" onClick={onEdit} className="h-8 text-xs">
+        <Pencil className="mr-1 h-3.5 w-3.5" /> Editar
+      </Button>
     </li>
   );
 }

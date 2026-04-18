@@ -12,6 +12,7 @@ import {
   ImagePlus,
   X,
   Plus,
+  CalendarClock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,7 @@ import {
   uid,
 } from "@/lib/anime-storage";
 import { useAuth } from "@/auth/AuthProvider";
+import { UpcomingEditDialog } from "@/components/UpcomingEditDialog";
 
 export const Route = createFileRoute("/_authenticated/watched")({
   codeSplitGroupings: [["component"]],
@@ -92,6 +94,10 @@ function WatchedPage() {
   const [editCover, setEditCover] = useState<string | undefined>(undefined);
   const [editSeasons, setEditSeasons] = useState<Season[]>([]);
   const editCoverInputRef = useRef<HTMLInputElement>(null);
+
+  // Upcoming dialog
+  const [upcomingOpen, setUpcomingOpen] = useState(false);
+  const [upcomingAnimeId, setUpcomingAnimeId] = useState<string>("");
 
   useEffect(() => {
     if (!user) return;
@@ -314,6 +320,18 @@ function WatchedPage() {
                     <Button
                       variant="outline"
                       size="sm"
+                      onClick={() => {
+                        setUpcomingAnimeId(anime.id);
+                        setUpcomingOpen(true);
+                      }}
+                      className="h-8 text-xs"
+                    >
+                      <CalendarClock className="mr-1 h-3.5 w-3.5" />
+                      {anime.upcoming ? "Lançamento" : "+ Lançamento"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => unmark(anime.id)}
                       className="h-8 text-xs"
                     >
@@ -450,6 +468,25 @@ function WatchedPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {(() => {
+        const a = animes.find((x) => x.id === upcomingAnimeId);
+        if (!a) return null;
+        return (
+          <UpcomingEditDialog
+            open={upcomingOpen}
+            onOpenChange={setUpcomingOpen}
+            animeId={a.id}
+            animeName={a.name}
+            initial={a.upcoming}
+            onSaved={(id, upcoming) =>
+              setAnimes((prev) =>
+                prev.map((x) => (x.id === id ? { ...x, upcoming: upcoming ?? undefined } : x)),
+              )
+            }
+          />
+        );
+      })()}
     </div>
   );
 }
