@@ -108,10 +108,18 @@ export async function createAnime(input: {
       seasons: [],
       upcoming: null,
     })
-    .select("id, name, cover, seasons, upcoming")
+    .select("id, name, cover, seasons, upcoming, watched")
     .single();
   if (error) throw error;
   return rowToAnime(data as DbRow);
+}
+
+export async function setWatched(id: string, watched: boolean): Promise<void> {
+  const { error } = await supabase
+    .from("animes")
+    .update({ watched })
+    .eq("id", id);
+  if (error) throw error;
 }
 
 export async function deleteAnime(id: string): Promise<void> {
