@@ -36,6 +36,9 @@ type DbRow = {
   seasons: unknown;
   upcoming: unknown;
   watched: boolean | null;
+  mal_id: number | null;
+  image_url: string | null;
+  mal_score: number | null;
 };
 
 function rowToAnime(row: DbRow): Anime {
@@ -48,8 +51,12 @@ function rowToAnime(row: DbRow): Anime {
     seasons,
     upcoming,
     watched: row.watched ?? false,
+    malId: row.mal_id ?? null,
+    imageUrl: row.image_url ?? null,
+    malScore: row.mal_score ?? null,
   };
 }
+
 
 function readLegacyLocal(): Anime[] {
   if (typeof window === "undefined") return [];
