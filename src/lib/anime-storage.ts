@@ -19,10 +19,14 @@ export type Anime = {
   cover?: string;
   upcoming?: UpcomingSeason;
   watched: boolean;
+  malId?: number | null;
+  imageUrl?: string | null;
+  malScore?: number | null;
 };
 
 /** Legacy localStorage key — used only for one-time auto-import. */
 export const LEGACY_STORAGE_KEY = "anime-ranker:v1";
+
 const IMPORT_FLAG_PREFIX = "anime-watchlist:imported:";
 
 type DbRow = {
