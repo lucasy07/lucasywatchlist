@@ -883,15 +883,20 @@ function Index() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="anime-name">Nome</Label>
-              <Input
+              <JikanSearch
                 id="anime-name"
                 autoFocus
                 value={newAnimeName}
-                onChange={(e) => setNewAnimeName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addAnime()}
+                onChange={(v) => {
+                  setNewAnimeName(v);
+                  if (newAnimeMal && newAnimeMal.title !== v) setNewAnimeMal(null);
+                }}
+                onPick={(pick) => setNewAnimeMal(pick)}
+                onEnter={addAnime}
                 placeholder="Ex: Frieren"
               />
             </div>
+
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setAnimeDialogOpen(false)}>
