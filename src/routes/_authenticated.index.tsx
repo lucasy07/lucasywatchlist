@@ -59,6 +59,8 @@ import {
   formatDateBR,
 } from "@/lib/anime-storage";
 import { useAuth } from "@/auth/AuthProvider";
+import { JikanSearch, type JikanPick } from "@/components/JikanSearch";
+
 
 export const Route = createFileRoute("/_authenticated/")({
   codeSplitGroupings: [["component"]],
@@ -103,7 +105,9 @@ function Index() {
   const [animeDialogOpen, setAnimeDialogOpen] = useState(false);
   const [newAnimeName, setNewAnimeName] = useState("");
   const [newAnimeCover, setNewAnimeCover] = useState<string | undefined>(undefined);
+  const [newAnimeMal, setNewAnimeMal] = useState<JikanPick | null>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
+
 
   // Add Season dialog
   const [seasonDialogOpen, setSeasonDialogOpen] = useState(false);
@@ -192,10 +196,18 @@ function Index() {
       return;
     }
     try {
-      const created = await createAnime({ name, cover: newAnimeCover });
+      const pick = newAnimeMal && newAnimeMal.title === name ? newAnimeMal : null;
+      const created = await createAnime({
+        name,
+        cover: newAnimeCover ?? pick?.imageUrl ?? undefined,
+        malId: pick?.malId ?? null,
+        imageUrl: pick?.imageUrl ?? null,
+        malScore: pick?.score ?? null,
+      });
       setAnimes((prev) => [...prev, created]);
       setNewAnimeName("");
       setNewAnimeCover(undefined);
+      setNewAnimeMal(null);
       setAnimeDialogOpen(false);
       toast.success(`"${name}" adicionado`);
     } catch (err) {
@@ -203,6 +215,7 @@ function Index() {
       toast.error("Falha ao adicionar anime");
     }
   }
+
 
   async function handleCoverPick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -870,15 +883,20 @@ function Index() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="anime-name">Nome</Label>
-              <Input
+              <JikanSearch
                 id="anime-name"
                 autoFocus
                 value={newAnimeName}
-                onChange={(e) => setNewAnimeName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addAnime()}
+                onChange={(v) => {
+                  setNewAnimeName(v);
+                  if (newAnimeMal && newAnimeMal.title !== v) setNewAnimeMal(null);
+                }}
+                onPick={(pick) => setNewAnimeMal(pick)}
+                onEnter={addAnime}
                 placeholder="Ex: Frieren"
               />
             </div>
+
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setAnimeDialogOpen(false)}>
