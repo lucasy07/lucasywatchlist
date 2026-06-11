@@ -74,7 +74,7 @@ function readLegacyLocal(): Anime[] {
 export async function fetchAnimes(): Promise<Anime[]> {
   const { data, error } = await supabase
     .from("animes")
-    .select("id, name, cover, seasons, upcoming, watched")
+    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score")
     .order("created_at", { ascending: true });
   if (error) throw error;
   return (data as DbRow[]).map(rowToAnime);
@@ -106,6 +106,9 @@ export async function importLegacyIfNeeded(userId: string): Promise<number> {
 export async function createAnime(input: {
   name: string;
   cover?: string;
+  malId?: number | null;
+  imageUrl?: string | null;
+  malScore?: number | null;
 }): Promise<Anime> {
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user?.id;
@@ -118,12 +121,16 @@ export async function createAnime(input: {
       cover: input.cover ?? null,
       seasons: [],
       upcoming: null,
+      mal_id: input.malId ?? null,
+      image_url: input.imageUrl ?? null,
+      mal_score: input.malScore ?? null,
     })
-    .select("id, name, cover, seasons, upcoming, watched")
+    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score")
     .single();
   if (error) throw error;
   return rowToAnime(data as DbRow);
 }
+
 
 export async function setWatched(id: string, watched: boolean): Promise<void> {
   const { error } = await supabase
