@@ -105,7 +105,9 @@ function Index() {
   const [animeDialogOpen, setAnimeDialogOpen] = useState(false);
   const [newAnimeName, setNewAnimeName] = useState("");
   const [newAnimeCover, setNewAnimeCover] = useState<string | undefined>(undefined);
+  const [newAnimeMal, setNewAnimeMal] = useState<JikanPick | null>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
+
 
   // Add Season dialog
   const [seasonDialogOpen, setSeasonDialogOpen] = useState(false);
