@@ -19,6 +19,9 @@ export type Database = {
           cover: string | null
           created_at: string
           id: string
+          image_url: string | null
+          mal_id: number | null
+          mal_score: number | null
           name: string
           seasons: Json
           upcoming: Json | null
@@ -30,6 +33,9 @@ export type Database = {
           cover?: string | null
           created_at?: string
           id?: string
+          image_url?: string | null
+          mal_id?: number | null
+          mal_score?: number | null
           name: string
           seasons?: Json
           upcoming?: Json | null
@@ -41,6 +47,9 @@ export type Database = {
           cover?: string | null
           created_at?: string
           id?: string
+          image_url?: string | null
+          mal_id?: number | null
+          mal_score?: number | null
           name?: string
           seasons?: Json
           upcoming?: Json | null
