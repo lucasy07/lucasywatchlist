@@ -59,6 +59,8 @@ import {
   formatDateBR,
 } from "@/lib/anime-storage";
 import { useAuth } from "@/auth/AuthProvider";
+import { JikanSearch, type JikanPick } from "@/components/JikanSearch";
+
 
 export const Route = createFileRoute("/_authenticated/")({
   codeSplitGroupings: [["component"]],
