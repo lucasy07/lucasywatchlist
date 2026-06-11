@@ -196,10 +196,18 @@ function Index() {
       return;
     }
     try {
-      const created = await createAnime({ name, cover: newAnimeCover });
+      const pick = newAnimeMal && newAnimeMal.title === name ? newAnimeMal : null;
+      const created = await createAnime({
+        name,
+        cover: newAnimeCover ?? pick?.imageUrl ?? undefined,
+        malId: pick?.malId ?? null,
+        imageUrl: pick?.imageUrl ?? null,
+        malScore: pick?.score ?? null,
+      });
       setAnimes((prev) => [...prev, created]);
       setNewAnimeName("");
       setNewAnimeCover(undefined);
+      setNewAnimeMal(null);
       setAnimeDialogOpen(false);
       toast.success(`"${name}" adicionado`);
     } catch (err) {
@@ -207,6 +215,7 @@ function Index() {
       toast.error("Falha ao adicionar anime");
     }
   }
+
 
   async function handleCoverPick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
