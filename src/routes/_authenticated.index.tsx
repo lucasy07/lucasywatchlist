@@ -634,9 +634,9 @@ function Index() {
                       #{idx + 1}
                     </div>
                     <div className="relative self-stretch min-h-[120px] w-20 shrink-0 overflow-hidden rounded-lg bg-muted sm:min-h-[168px] sm:w-28">
-                      {anime.imageUrl ? (
+                      {anime.imageUrl || anime.cover ? (
                         <img
-                          src={anime.imageUrl}
+                          src={anime.imageUrl ?? anime.cover}
                           alt={anime.name}
                           className="h-full w-full object-cover"
                           loading="lazy"
