@@ -534,9 +534,9 @@ function Index() {
                   style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
                 >
                   <div className="relative aspect-[2/3] w-full overflow-hidden bg-secondary">
-                    {anime.cover ? (
+                    {anime.imageUrl || anime.cover ? (
                       <img
-                        src={anime.cover}
+                        src={anime.imageUrl ?? anime.cover}
                         alt={anime.name}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         loading="lazy"
