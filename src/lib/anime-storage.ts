@@ -166,6 +166,8 @@ export async function updateAnimeMeta(
   if (meta.malScore !== undefined) update.mal_score = meta.malScore;
   const { error } = await supabase.from("animes").update(update).eq("id", id);
   if (error) throw error;
+}
+
 
 export async function updateSeasons(id: string, seasons: Season[]): Promise<void> {
   const { error } = await supabase
