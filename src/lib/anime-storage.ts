@@ -156,6 +156,17 @@ export async function updateAnime(
   if (error) throw error;
 }
 
+export async function updateAnimeMeta(
+  id: string,
+  meta: { malId?: number | null; imageUrl?: string | null; malScore?: number | null },
+): Promise<void> {
+  const update: { mal_id?: number | null; image_url?: string | null; mal_score?: number | null } = {};
+  if (meta.malId !== undefined) update.mal_id = meta.malId;
+  if (meta.imageUrl !== undefined) update.image_url = meta.imageUrl;
+  if (meta.malScore !== undefined) update.mal_score = meta.malScore;
+  const { error } = await supabase.from("animes").update(update).eq("id", id);
+  if (error) throw error;
+
 export async function updateSeasons(id: string, seasons: Season[]): Promise<void> {
   const { error } = await supabase
     .from("animes")
