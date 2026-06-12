@@ -167,6 +167,47 @@ function Index() {
     localStorage.setItem("anime-ranker:v1:view", viewMode);
   }, [viewMode, hydrated]);
 
+  // Auto-backfill missing imageUrl from Jikan for older entries
+  useEffect(() => {
+    if (!hydrated) return;
+    const missing = animes.filter((a) => !a.imageUrl);
+    if (missing.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      for (const anime of missing) {
+        if (cancelled) return;
+        try {
+          const res = await fetch(
+            `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(anime.name)}&limit=1&sfw=true`,
+          );
+          if (!res.ok) continue;
+          const json = await res.json();
+          const top = json?.data?.[0];
+          const imageUrl: string | undefined =
+            top?.images?.jpg?.large_image_url ?? top?.images?.jpg?.image_url;
+          if (!imageUrl) continue;
+          const malId: number | null = top?.mal_id ?? null;
+          const malScore: number | null = top?.score ?? null;
+          await updateAnimeMeta(anime.id, { malId, imageUrl, malScore });
+          if (cancelled) return;
+          setAnimes((prev) =>
+            prev.map((a) =>
+              a.id === anime.id ? { ...a, malId, imageUrl, malScore } : a,
+            ),
+          );
+        } catch {
+          // ignore
+        }
+        // Jikan rate limit: ~3 req/sec
+        await new Promise((r) => setTimeout(r, 400));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
+
   const ranked = useMemo(() => {
     const filtered = animes.filter(
       (a) =>
