@@ -51,6 +51,7 @@ import {
   updateSeasons,
   updateUpcoming,
   updateAnime,
+  updateAnimeMeta,
   setWatched,
   importLegacyIfNeeded,
   uid,
