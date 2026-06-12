@@ -19,6 +19,7 @@ import {
   Check,
   CheckCircle2,
   Pencil,
+  Image as ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -533,9 +534,9 @@ function Index() {
                   style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
                 >
                   <div className="relative aspect-[2/3] w-full overflow-hidden bg-secondary">
-                    {anime.cover ? (
+                    {anime.imageUrl || anime.cover ? (
                       <img
-                        src={anime.cover}
+                        src={anime.imageUrl ?? anime.cover}
                         alt={anime.name}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         loading="lazy"
@@ -632,17 +633,17 @@ function Index() {
                     <div className="flex h-10 w-8 shrink-0 items-center justify-center text-sm font-bold text-muted-foreground sm:h-14 sm:w-10 sm:text-lg">
                       #{idx + 1}
                     </div>
-                    <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded-lg bg-secondary sm:h-20 sm:w-14">
-                      {anime.cover ? (
+                    <div className="relative self-stretch min-h-[120px] w-20 shrink-0 overflow-hidden rounded-lg bg-muted sm:min-h-[168px] sm:w-28">
+                      {anime.imageUrl ? (
                         <img
-                          src={anime.cover}
+                          src={anime.imageUrl}
                           alt={anime.name}
                           className="h-full w-full object-cover"
                           loading="lazy"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                          <Tv className="h-5 w-5" />
+                        <div className="flex h-full w-full items-center justify-center">
+                          <ImageIcon className="h-6 w-6 text-muted-foreground" />
                         </div>
                       )}
                     </div>
