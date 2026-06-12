@@ -643,7 +643,7 @@ function Index() {
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center">
-                          <Image className="h-6 w-6 text-muted-foreground" />
+                          <ImageIcon className="h-6 w-6 text-muted-foreground" />
                         </div>
                       )}
                     </div>
