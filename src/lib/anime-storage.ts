@@ -197,8 +197,9 @@ export function uid() {
 }
 
 export function average(seasons: Season[]) {
-  if (seasons.length === 0) return 0;
-  return seasons.reduce((s, x) => s + x.rating, 0) / seasons.length;
+  const rated = seasons.filter((s): s is Season & { rating: number } => typeof s.rating === "number");
+  if (rated.length === 0) return 0;
+  return rated.reduce((s, x) => s + x.rating, 0) / rated.length;
 }
 
 export function rankColor(avg: number) {
