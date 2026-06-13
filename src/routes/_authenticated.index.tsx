@@ -747,9 +747,9 @@ function Index() {
                               <Tv className="h-4 w-4 text-muted-foreground" />
                               <span className="flex-1 truncate text-sm">{s.name}</span>
                               <span
-                                className={`text-sm font-semibold tabular-nums ${rankColor(s.rating)}`}
+                                className={`text-sm font-semibold tabular-nums ${rankColor(s.rating ?? 0)}`}
                               >
-                                {s.rating.toFixed(2)}
+                                {s.rating != null ? s.rating.toFixed(2) : "—"}
                               </span>
                               <Button
                                 variant="ghost"
