@@ -3,7 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 export type Season = {
   id: string;
   name: string;
-  rating: number;
+  /** User score 0-10. null until the user rates it. */
+  rating: number | null;
+  malId?: number | null;
+  year?: number | null;
+  malScore?: number | null;
 };
 
 export type UpcomingSeason = {
@@ -109,6 +113,7 @@ export async function createAnime(input: {
   malId?: number | null;
   imageUrl?: string | null;
   malScore?: number | null;
+  seasons?: Season[];
 }): Promise<Anime> {
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user?.id;
@@ -119,7 +124,7 @@ export async function createAnime(input: {
       user_id: userId,
       name: input.name,
       cover: input.cover ?? null,
-      seasons: [],
+      seasons: input.seasons ?? [],
       upcoming: null,
       mal_id: input.malId ?? null,
       image_url: input.imageUrl ?? null,
@@ -193,8 +198,9 @@ export function uid() {
 }
 
 export function average(seasons: Season[]) {
-  if (seasons.length === 0) return 0;
-  return seasons.reduce((s, x) => s + x.rating, 0) / seasons.length;
+  const rated = seasons.filter((s): s is Season & { rating: number } => typeof s.rating === "number");
+  if (rated.length === 0) return 0;
+  return rated.reduce((s, x) => s + x.rating, 0) / rated.length;
 }
 
 export function rankColor(avg: number) {
