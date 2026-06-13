@@ -436,12 +436,13 @@ function WatchedPage() {
                         min={0}
                         max={10}
                         step={0.1}
-                        value={Number.isFinite(s.rating) ? s.rating : 0}
-                        onChange={(e) =>
-                          updateEditSeason(s.id, {
-                            rating: parseFloat(e.target.value.replace(",", ".")) || 0,
-                          })
-                        }
+                        value={s.rating == null ? "" : s.rating}
+                        onChange={(e) => {
+                          const raw = e.target.value.trim();
+                          if (raw === "") return updateEditSeason(s.id, { rating: null });
+                          const v = parseFloat(raw.replace(",", "."));
+                          updateEditSeason(s.id, { rating: Number.isNaN(v) ? null : v });
+                        }}
                         className="w-20"
                       />
                       <Button
