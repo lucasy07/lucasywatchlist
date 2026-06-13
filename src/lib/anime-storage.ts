@@ -3,7 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 export type Season = {
   id: string;
   name: string;
-  rating: number;
+  /** User score 0-10. null until the user rates it. */
+  rating: number | null;
+  malId?: number | null;
+  year?: number | null;
+  malScore?: number | null;
 };
 
 export type UpcomingSeason = {
