@@ -237,14 +237,102 @@ function Index() {
     }
   }
 
+  function resetAddAnime() {
+    chainAbortRef.current?.abort();
+    chainAbortRef.current = null;
+    setNewAnimeName("");
+    setNewAnimeCover(undefined);
+    setNewAnimeMal(null);
+    setChainSeasons(null);
+    setChainLoading(false);
+    setChainProgress(null);
+  }
+
+  async function startChainFetch(pick: JikanPick) {
+    chainAbortRef.current?.abort();
+    const ctrl = new AbortController();
+    chainAbortRef.current = ctrl;
+    setChainLoading(true);
+    setChainSeasons(null);
+    setChainProgress({ current: 0, total: 0 });
+    try {
+      const seasons = await buildChain(
+        pick.malId,
+        (p) => setChainProgress(p),
+        ctrl.signal,
+      );
+      if (ctrl.signal.aborted) return;
+      // Ensure the picked anime itself is included (in case it was filtered or
+      // the API returned nothing): fall back to the pick details.
+      const finalSeasons =
+        seasons.length > 0
+          ? seasons
+          : [
+              {
+                malId: pick.malId,
+                title: pick.title,
+                year: null,
+                malScore: pick.score,
+                imageUrl: pick.imageUrl,
+              },
+            ];
+      setChainSeasons(finalSeasons);
+    } catch (err) {
+      if ((err as { name?: string })?.name === "AbortError") return;
+      console.error(err);
+      toast.error("Falha ao buscar temporadas no MAL");
+      setChainSeasons(null);
+    } finally {
+      if (!ctrl.signal.aborted) setChainLoading(false);
+    }
+  }
+
   async function addAnime() {
     const name = newAnimeName.trim();
     if (!name) {
       toast.error("Informe o nome do anime");
       return;
     }
+    if (chainLoading) return;
+    const pick = newAnimeMal && newAnimeMal.title === name ? newAnimeMal : null;
     try {
-      const pick = newAnimeMal && newAnimeMal.title === name ? newAnimeMal : null;
+      // MAL pick → save as one anime with full season chain
+      if (pick && chainSeasons && chainSeasons.length > 0) {
+        const existingIds = new Set<number>();
+        for (const a of animes) {
+          if (a.malId) existingIds.add(a.malId);
+          for (const s of a.seasons) if (s.malId) existingIds.add(s.malId);
+        }
+        if (chainSeasons.some((s) => existingIds.has(s.malId))) {
+          toast.error("Esse anime já está na sua lista");
+          return;
+        }
+        const first = chainSeasons[0];
+        const seasons: Season[] = chainSeasons.map((s) => ({
+          id: uid(),
+          name: s.title,
+          rating: null,
+          malId: s.malId,
+          year: s.year,
+          malScore: s.malScore,
+        }));
+        const created = await createAnime({
+          name: first.title,
+          cover: first.imageUrl ?? undefined,
+          malId: first.malId,
+          imageUrl: first.imageUrl,
+          malScore: first.malScore,
+          seasons,
+        });
+        setAnimes((prev) => [...prev, created]);
+        resetAddAnime();
+        setAnimeDialogOpen(false);
+        toast.success(
+          `"${first.title}" adicionado com ${seasons.length} temporada${seasons.length === 1 ? "" : "s"}`,
+        );
+        return;
+      }
+      // Manual creation (no MAL chain)
       const created = await createAnime({
         name,
         cover: newAnimeCover ?? pick?.imageUrl ?? undefined,
@@ -253,9 +341,7 @@ function Index() {
         malScore: pick?.score ?? null,
       });
       setAnimes((prev) => [...prev, created]);
-      setNewAnimeName("");
-      setNewAnimeCover(undefined);
-      setNewAnimeMal(null);
+      resetAddAnime();
       setAnimeDialogOpen(false);
       toast.success(`"${name}" adicionado`);
     } catch (err) {
