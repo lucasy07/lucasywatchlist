@@ -62,6 +62,7 @@ import {
 } from "@/lib/anime-storage";
 import { useAuth } from "@/auth/AuthProvider";
 import { JikanSearch, type JikanPick } from "@/components/JikanSearch";
+import { buildChain, type ChainSeason } from "@/lib/jikan-chain";
 
 
 export const Route = createFileRoute("/_authenticated/")({
