@@ -113,6 +113,7 @@ export async function createAnime(input: {
   malId?: number | null;
   imageUrl?: string | null;
   malScore?: number | null;
+  seasons?: Season[];
 }): Promise<Anime> {
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user?.id;
@@ -123,7 +124,7 @@ export async function createAnime(input: {
       user_id: userId,
       name: input.name,
       cover: input.cover ?? null,
-      seasons: [],
+      seasons: input.seasons ?? [],
       upcoming: null,
       mal_id: input.malId ?? null,
       image_url: input.imageUrl ?? null,
