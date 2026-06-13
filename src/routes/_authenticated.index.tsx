@@ -1141,10 +1141,12 @@ function Index() {
                         className="flex-1"
                       />
                       <Input
-                        value={String(s.rating)}
+                        value={s.rating == null ? "" : String(s.rating)}
                         onChange={(e) => {
-                          const v = parseFloat(e.target.value.replace(",", "."));
-                          updateEditSeason(s.id, { rating: Number.isNaN(v) ? 0 : v });
+                          const raw = e.target.value.trim();
+                          if (raw === "") return updateEditSeason(s.id, { rating: null });
+                          const v = parseFloat(raw.replace(",", "."));
+                          updateEditSeason(s.id, { rating: Number.isNaN(v) ? null : v });
                         }}
                         inputMode="decimal"
                         placeholder="0-10"
