@@ -976,7 +976,13 @@ function Index() {
       </div>
 
       {/* Add Anime Dialog */}
-      <Dialog open={animeDialogOpen} onOpenChange={setAnimeDialogOpen}>
+      <Dialog
+        open={animeDialogOpen}
+        onOpenChange={(open) => {
+          setAnimeDialogOpen(open);
+          if (!open) resetAddAnime();
+        }}
+      >
         <DialogContent className="border-border bg-card">
           <DialogHeader>
             <DialogTitle>Novo Anime</DialogTitle>
@@ -1023,21 +1029,52 @@ function Index() {
                 value={newAnimeName}
                 onChange={(v) => {
                   setNewAnimeName(v);
-                  if (newAnimeMal && newAnimeMal.title !== v) setNewAnimeMal(null);
+                  if (newAnimeMal && newAnimeMal.title !== v) {
+                    setNewAnimeMal(null);
+                    setChainSeasons(null);
+                    setChainProgress(null);
+                    chainAbortRef.current?.abort();
+                    setChainLoading(false);
+                  }
                 }}
-                onPick={(pick) => setNewAnimeMal(pick)}
+                onPick={(pick) => {
+                  setNewAnimeMal(pick);
+                  startChainFetch(pick);
+                }}
                 onEnter={addAnime}
                 placeholder="Ex: Frieren"
               />
             </div>
 
+            {chainLoading && (
+              <p className="text-xs text-muted-foreground">
+                Buscando temporadas...
+                {chainProgress && chainProgress.total > 0
+                  ? ` ${chainProgress.current} de ${chainProgress.total}`
+                  : ""}
+              </p>
+            )}
+            {!chainLoading && chainSeasons && chainSeasons.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {chainSeasons.length} temporada{chainSeasons.length === 1 ? "" : "s"} encontrada{chainSeasons.length === 1 ? "" : "s"} no MAL.
+              </p>
+            )}
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setAnimeDialogOpen(false)}>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setAnimeDialogOpen(false);
+                resetAddAnime();
+              }}
+            >
               Cancelar
             </Button>
-            <Button onClick={addAnime}>Adicionar</Button>
+            <Button onClick={addAnime} disabled={chainLoading}>
+              Adicionar
+            </Button>
           </DialogFooter>
+
         </DialogContent>
       </Dialog>
 
