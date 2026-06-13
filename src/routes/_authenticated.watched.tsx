@@ -199,7 +199,7 @@ function WatchedPage() {
         toast.error("Toda temporada precisa de nome");
         return;
       }
-      if (Number.isNaN(s.rating) || s.rating < 0 || s.rating > 10) {
+      if (s.rating !== null && (Number.isNaN(s.rating) || s.rating < 0 || s.rating > 10)) {
         toast.error(`Nota inválida em "${s.name}"`);
         return;
       }
