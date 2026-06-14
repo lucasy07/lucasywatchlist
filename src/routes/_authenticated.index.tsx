@@ -231,8 +231,23 @@ function Index() {
         !a.watched &&
         a.name.toLowerCase().includes(search.toLowerCase().trim()),
     );
-    return [...filtered].sort((a, b) => average(b.seasons) - average(a.seasons));
-  }, [animes, search]);
+    return [...filtered].sort((a, b) => {
+      if (sortMode === "mal") {
+        const ma = mediaMAL(a.seasons);
+        const mb = mediaMAL(b.seasons);
+        if (ma === null && mb === null) return 0;
+        if (ma === null) return 1;
+        if (mb === null) return -1;
+        return mb - ma;
+      }
+      const pa = mediaPessoal(a.seasons);
+      const pb = mediaPessoal(b.seasons);
+      if (pa === null && pb === null) return 0;
+      if (pa === null) return 1;
+      if (pb === null) return -1;
+      return pb - pa;
+    });
+  }, [animes, search, sortMode]);
 
   const watchedCount = useMemo(() => animes.filter((a) => a.watched).length, [animes]);
 
