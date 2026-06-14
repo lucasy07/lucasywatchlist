@@ -674,6 +674,7 @@ function Index() {
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
             {ranked.map((anime, idx) => {
               const avg = average(anime.seasons);
+              const malAvg = mediaMAL(anime.seasons);
               return (
                 <li
                   key={anime.id}
@@ -697,11 +698,22 @@ function Index() {
                     <div className="absolute left-2 top-2 flex h-7 min-w-7 items-center justify-center rounded-full border border-border bg-background/80 px-2 text-xs font-bold backdrop-blur">
                       #{idx + 1}
                     </div>
-                    <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full border border-border bg-background/80 px-2 py-1 backdrop-blur">
-                      <Star className={`h-3.5 w-3.5 ${rankColor(avg)}`} fill="currentColor" />
-                      <span className={`text-xs font-bold tabular-nums ${rankColor(avg)}`}>
-                        {avg.toFixed(2)}
-                      </span>
+                    <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
+                      <div className="flex items-center gap-1 rounded-full border border-border bg-background/80 px-2 py-1 backdrop-blur">
+                        <Star className={`h-3.5 w-3.5 ${rankColor(avg)}`} fill="currentColor" />
+                        <span className={`text-xs font-bold tabular-nums ${rankColor(avg)}`}>
+                          {avg.toFixed(2)}
+                        </span>
+                      </div>
+                      {malAvg != null && (
+                        <Badge
+                          variant="outline"
+                          className="gap-1 border-border bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
+                        >
+                          <Star className="h-2.5 w-2.5" />
+                          MAL {malAvg.toFixed(1)}
+                        </Badge>
+                      )}
                     </div>
                     {anime.upcoming?.releaseDate && (
                       <Link
