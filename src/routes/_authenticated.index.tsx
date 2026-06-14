@@ -839,8 +839,13 @@ function Index() {
         ) : (
           <ul className="grid gap-4">
             {ranked.map((anime, idx) => {
-              const avg = average(anime.seasons);
+              const personalAvg = mediaPessoal(anime.seasons);
               const malAvg = mediaMAL(anime.seasons);
+              const primary = sortMode === "mal" ? malAvg : personalAvg;
+              const secondary = sortMode === "mal" ? personalAvg : malAvg;
+              const primaryLabel = sortMode === "mal" ? "MAL" : "Minha";
+              const primaryValue = primary != null ? primary.toFixed(sortMode === "mal" ? 1 : 2) : "—";
+              const primaryColor = rankColor(primary ?? 0);
               const isOpen = expanded[anime.id] ?? false;
               return (
                 <li
@@ -884,18 +889,18 @@ function Index() {
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       <div className="flex items-center gap-1">
-                        <Star className={`h-5 w-5 ${rankColor(avg)}`} fill="currentColor" />
-                        <span className={`text-xl font-bold tabular-nums sm:text-2xl ${rankColor(avg)}`}>
-                          {avg.toFixed(2)}
+                        <Star className={`h-5 w-5 ${primaryColor}`} fill="currentColor" />
+                        <span className={`text-xl font-bold tabular-nums sm:text-2xl ${primaryColor}`}>
+                          {primaryValue}
                         </span>
                       </div>
                       <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                        Média
+                        {primaryLabel}
                       </span>
-                      {malAvg != null && (
+                      {secondary != null && (
                         <Badge variant="outline" className="gap-1 px-1.5 py-0 text-[10px]">
                           <Star className="h-2.5 w-2.5" />
-                          MAL {malAvg.toFixed(1)}
+                          {sortMode === "mal" ? "Minha" : "MAL"} {secondary.toFixed(sortMode === "mal" ? 2 : 1)}
                         </Badge>
                       )}
                     </div>
