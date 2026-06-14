@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { Badge } from "@/components/ui/badge";
 import {
   type Anime,
   type Season,
@@ -56,6 +57,7 @@ import {
   importLegacyIfNeeded,
   uid,
   average,
+  mediaMAL,
   rankColor,
   formatReleaseLabel,
   formatDateBR,
@@ -437,6 +439,18 @@ function Index() {
     await persistSeasons(animeId, newSeasons);
   }
 
+  async function updateSeasonRating(animeId: string, seasonId: string, rating: number | null) {
+    const target = animes.find((a) => a.id === animeId);
+    if (!target) return;
+    const newSeasons = target.seasons.map((s) =>
+      s.id === seasonId ? { ...s, rating } : s,
+    );
+    setAnimes((prev) =>
+      prev.map((a) => (a.id === animeId ? { ...a, seasons: newSeasons } : a)),
+    );
+    await persistSeasons(animeId, newSeasons);
+  }
+
   function toggleExpand(id: string) {
     setExpanded((e) => ({ ...e, [id]: !e[id] }));
   }
@@ -660,6 +674,7 @@ function Index() {
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
             {ranked.map((anime, idx) => {
               const avg = average(anime.seasons);
+              const malAvg = mediaMAL(anime.seasons);
               return (
                 <li
                   key={anime.id}
@@ -683,11 +698,22 @@ function Index() {
                     <div className="absolute left-2 top-2 flex h-7 min-w-7 items-center justify-center rounded-full border border-border bg-background/80 px-2 text-xs font-bold backdrop-blur">
                       #{idx + 1}
                     </div>
-                    <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full border border-border bg-background/80 px-2 py-1 backdrop-blur">
-                      <Star className={`h-3.5 w-3.5 ${rankColor(avg)}`} fill="currentColor" />
-                      <span className={`text-xs font-bold tabular-nums ${rankColor(avg)}`}>
-                        {avg.toFixed(2)}
-                      </span>
+                    <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
+                      <div className="flex items-center gap-1 rounded-full border border-border bg-background/80 px-2 py-1 backdrop-blur">
+                        <Star className={`h-3.5 w-3.5 ${rankColor(avg)}`} fill="currentColor" />
+                        <span className={`text-xs font-bold tabular-nums ${rankColor(avg)}`}>
+                          {avg.toFixed(2)}
+                        </span>
+                      </div>
+                      {malAvg != null && (
+                        <Badge
+                          variant="outline"
+                          className="gap-1 border-border bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
+                        >
+                          <Star className="h-2.5 w-2.5" />
+                          MAL {malAvg.toFixed(1)}
+                        </Badge>
+                      )}
                     </div>
                     {anime.upcoming?.releaseDate && (
                       <Link
@@ -755,6 +781,7 @@ function Index() {
           <ul className="grid gap-4">
             {ranked.map((anime, idx) => {
               const avg = average(anime.seasons);
+              const malAvg = mediaMAL(anime.seasons);
               const isOpen = expanded[anime.id] ?? false;
               return (
                 <li
@@ -796,7 +823,7 @@ function Index() {
                         </Link>
                       )}
                     </div>
-                    <div className="flex flex-col items-end">
+                    <div className="flex flex-col items-end gap-1">
                       <div className="flex items-center gap-1">
                         <Star className={`h-5 w-5 ${rankColor(avg)}`} fill="currentColor" />
                         <span className={`text-xl font-bold tabular-nums sm:text-2xl ${rankColor(avg)}`}>
@@ -806,6 +833,12 @@ function Index() {
                       <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
                         Média
                       </span>
+                      {malAvg != null && (
+                        <Badge variant="outline" className="gap-1 px-1.5 py-0 text-[10px]">
+                          <Star className="h-2.5 w-2.5" />
+                          MAL {malAvg.toFixed(1)}
+                        </Badge>
+                      )}
                     </div>
                     <Button
                       variant="ghost"
@@ -835,13 +868,47 @@ function Index() {
                               key={s.id}
                               className="flex items-center gap-3 rounded-lg bg-secondary/60 px-3 py-2 transition-colors hover:bg-secondary"
                             >
-                              <Tv className="h-4 w-4 text-muted-foreground" />
-                              <span className="flex-1 truncate text-sm">{s.name}</span>
-                              <span
-                                className={`text-sm font-semibold tabular-nums ${rankColor(s.rating ?? 0)}`}
-                              >
-                                {s.rating != null ? s.rating.toFixed(2) : "—"}
-                              </span>
+                              <Tv className="h-4 w-4 shrink-0 text-muted-foreground" />
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm">{s.name}</p>
+                                <p className="text-[11px] text-muted-foreground">
+                                  {s.year ?? "Ano —"}
+                                  {typeof s.malScore === "number" && (
+                                    <>
+                                      {" · "}
+                                      <span className="inline-flex items-center gap-0.5">
+                                        <Star className="h-2.5 w-2.5" />
+                                        MAL {s.malScore.toFixed(1)}
+                                      </span>
+                                    </>
+                                  )}
+                                </p>
+                              </div>
+                              <Input
+                                type="number"
+                                inputMode="decimal"
+                                step="0.1"
+                                min={0}
+                                max={10}
+                                placeholder="—"
+                                defaultValue={s.rating != null ? String(s.rating) : ""}
+                                onBlur={(e) => {
+                                  const raw = e.currentTarget.value.trim().replace(",", ".");
+                                  if (raw === "") {
+                                    if (s.rating !== null) updateSeasonRating(anime.id, s.id, null);
+                                    return;
+                                  }
+                                  const v = parseFloat(raw);
+                                  if (Number.isNaN(v) || v < 0 || v > 10) {
+                                    toast.error("A nota deve estar entre 0 e 10");
+                                    e.currentTarget.value = s.rating != null ? String(s.rating) : "";
+                                    return;
+                                  }
+                                  if (v !== s.rating) updateSeasonRating(anime.id, s.id, v);
+                                }}
+                                className="h-8 w-20 text-center text-sm tabular-nums"
+                                aria-label={`Minha nota para ${s.name}`}
+                              />
                               <Button
                                 variant="ghost"
                                 size="icon"
