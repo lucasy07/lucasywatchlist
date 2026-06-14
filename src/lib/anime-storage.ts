@@ -203,6 +203,22 @@ export function average(seasons: Season[]) {
   return rated.reduce((s, x) => s + x.rating, 0) / rated.length;
 }
 
+/** Arithmetic mean of user scores across rated seasons. null if none rated. */
+export function mediaPessoal(seasons: Season[]): number | null {
+  const rated = seasons.filter((s): s is Season & { rating: number } => typeof s.rating === "number");
+  if (rated.length === 0) return null;
+  return rated.reduce((s, x) => s + x.rating, 0) / rated.length;
+}
+
+/** Arithmetic mean of MAL scores across seasons. null if none. */
+export function mediaMAL(seasons: Season[]): number | null {
+  const scored = seasons.filter(
+    (s): s is Season & { malScore: number } => typeof s.malScore === "number",
+  );
+  if (scored.length === 0) return null;
+  return scored.reduce((s, x) => s + x.malScore, 0) / scored.length;
+}
+
 export function rankColor(avg: number) {
   if (avg >= 9) return "text-primary";
   if (avg >= 7) return "text-foreground";
