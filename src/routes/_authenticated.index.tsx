@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { Badge } from "@/components/ui/badge";
 import {
   type Anime,
   type Season,
@@ -56,6 +57,7 @@ import {
   importLegacyIfNeeded,
   uid,
   average,
+  mediaMAL,
   rankColor,
   formatReleaseLabel,
   formatDateBR,
