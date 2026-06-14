@@ -42,6 +42,7 @@ import {
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Badge } from "@/components/ui/badge";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   type Anime,
   type Season,
@@ -58,6 +59,7 @@ import {
   uid,
   average,
   mediaMAL,
+  mediaPessoal,
   rankColor,
   formatReleaseLabel,
   formatDateBR,
@@ -105,6 +107,7 @@ function Index() {
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [sortMode, setSortMode] = useState<"mal" | "personal">("mal");
 
   // Add Anime dialog
   const [animeDialogOpen, setAnimeDialogOpen] = useState(false);
@@ -164,6 +167,9 @@ function Index() {
     const savedView =
       typeof window !== "undefined" ? localStorage.getItem("anime-ranker:v1:view") : null;
     if (savedView === "grid" || savedView === "list") setViewMode(savedView);
+    const savedSort =
+      typeof window !== "undefined" ? localStorage.getItem("anime-ranker:v1:sort") : null;
+    if (savedSort === "mal" || savedSort === "personal") setSortMode(savedSort);
     return () => {
       cancelled = true;
     };
@@ -173,6 +179,11 @@ function Index() {
     if (!hydrated) return;
     localStorage.setItem("anime-ranker:v1:view", viewMode);
   }, [viewMode, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    localStorage.setItem("anime-ranker:v1:sort", sortMode);
+  }, [sortMode, hydrated]);
 
   // Auto-backfill missing imageUrl from Jikan for older entries
   useEffect(() => {
@@ -221,8 +232,23 @@ function Index() {
         !a.watched &&
         a.name.toLowerCase().includes(search.toLowerCase().trim()),
     );
-    return [...filtered].sort((a, b) => average(b.seasons) - average(a.seasons));
-  }, [animes, search]);
+    return [...filtered].sort((a, b) => {
+      if (sortMode === "mal") {
+        const ma = mediaMAL(a.seasons);
+        const mb = mediaMAL(b.seasons);
+        if (ma === null && mb === null) return 0;
+        if (ma === null) return 1;
+        if (mb === null) return -1;
+        return mb - ma;
+      }
+      const pa = mediaPessoal(a.seasons);
+      const pb = mediaPessoal(b.seasons);
+      if (pa === null && pb === null) return 0;
+      if (pa === null) return 1;
+      if (pb === null) return -1;
+      return pb - pa;
+    });
+  }, [animes, search, sortMode]);
 
   const watchedCount = useMemo(() => animes.filter((a) => a.watched).length, [animes]);
 
@@ -666,6 +692,34 @@ function Index() {
 
       {/* List */}
       <main className="mx-auto max-w-5xl px-4 pb-32 pt-6 sm:px-6">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <ToggleGroup
+            type="single"
+            value={sortMode}
+            onValueChange={(v) => {
+              if (v === "mal" || v === "personal") setSortMode(v);
+            }}
+            className="bg-card border border-border rounded-lg p-0.5"
+          >
+            <ToggleGroupItem
+              value="mal"
+              aria-label="Ordenar por nota MAL"
+              className="h-8 px-3 text-xs font-medium data-[state=on]:bg-secondary data-[state=on]:text-foreground text-muted-foreground"
+            >
+              MAL
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="personal"
+              aria-label="Ordenar por minhas notas"
+              className="h-8 px-3 text-xs font-medium data-[state=on]:bg-secondary data-[state=on]:text-foreground text-muted-foreground"
+            >
+              Minhas notas
+            </ToggleGroupItem>
+          </ToggleGroup>
+          <p className="text-xs text-muted-foreground">
+            {ranked.length} anime{ranked.length === 1 ? "" : "s"}
+          </p>
+        </div>
         {!hydrated ? (
           <p className="py-20 text-center text-sm text-muted-foreground">Carregando...</p>
         ) : ranked.length === 0 ? (
@@ -673,8 +727,13 @@ function Index() {
         ) : viewMode === "grid" ? (
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
             {ranked.map((anime, idx) => {
-              const avg = average(anime.seasons);
+              const personalAvg = mediaPessoal(anime.seasons);
               const malAvg = mediaMAL(anime.seasons);
+              const primary = sortMode === "mal" ? malAvg : personalAvg;
+              const secondary = sortMode === "mal" ? personalAvg : malAvg;
+              const primaryLabel = sortMode === "mal" ? "MAL" : "Minha";
+              const primaryValue = primary != null ? primary.toFixed(sortMode === "mal" ? 1 : 2) : "—";
+              const primaryColor = sortMode === "mal" ? rankColor(primary ?? 0) : rankColor(primary ?? 0);
               return (
                 <li
                   key={anime.id}
@@ -700,18 +759,18 @@ function Index() {
                     </div>
                     <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
                       <div className="flex items-center gap-1 rounded-full border border-border bg-background/80 px-2 py-1 backdrop-blur">
-                        <Star className={`h-3.5 w-3.5 ${rankColor(avg)}`} fill="currentColor" />
-                        <span className={`text-xs font-bold tabular-nums ${rankColor(avg)}`}>
-                          {avg.toFixed(2)}
+                        <Star className={`h-3.5 w-3.5 ${primaryColor}`} fill="currentColor" />
+                        <span className={`text-xs font-bold tabular-nums ${primaryColor}`}>
+                          {primaryValue}
                         </span>
                       </div>
-                      {malAvg != null && (
+                      {secondary != null && (
                         <Badge
                           variant="outline"
                           className="gap-1 border-border bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
                         >
                           <Star className="h-2.5 w-2.5" />
-                          MAL {malAvg.toFixed(1)}
+                          {sortMode === "mal" ? "Minha" : "MAL"} {secondary.toFixed(sortMode === "mal" ? 2 : 1)}
                         </Badge>
                       )}
                     </div>
@@ -780,8 +839,13 @@ function Index() {
         ) : (
           <ul className="grid gap-4">
             {ranked.map((anime, idx) => {
-              const avg = average(anime.seasons);
+              const personalAvg = mediaPessoal(anime.seasons);
               const malAvg = mediaMAL(anime.seasons);
+              const primary = sortMode === "mal" ? malAvg : personalAvg;
+              const secondary = sortMode === "mal" ? personalAvg : malAvg;
+              const primaryLabel = sortMode === "mal" ? "MAL" : "Minha";
+              const primaryValue = primary != null ? primary.toFixed(sortMode === "mal" ? 1 : 2) : "—";
+              const primaryColor = rankColor(primary ?? 0);
               const isOpen = expanded[anime.id] ?? false;
               return (
                 <li
@@ -825,18 +889,18 @@ function Index() {
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       <div className="flex items-center gap-1">
-                        <Star className={`h-5 w-5 ${rankColor(avg)}`} fill="currentColor" />
-                        <span className={`text-xl font-bold tabular-nums sm:text-2xl ${rankColor(avg)}`}>
-                          {avg.toFixed(2)}
+                        <Star className={`h-5 w-5 ${primaryColor}`} fill="currentColor" />
+                        <span className={`text-xl font-bold tabular-nums sm:text-2xl ${primaryColor}`}>
+                          {primaryValue}
                         </span>
                       </div>
                       <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                        Média
+                        {primaryLabel}
                       </span>
-                      {malAvg != null && (
+                      {secondary != null && (
                         <Badge variant="outline" className="gap-1 px-1.5 py-0 text-[10px]">
                           <Star className="h-2.5 w-2.5" />
-                          MAL {malAvg.toFixed(1)}
+                          {sortMode === "mal" ? "Minha" : "MAL"} {secondary.toFixed(sortMode === "mal" ? 2 : 1)}
                         </Badge>
                       )}
                     </div>
