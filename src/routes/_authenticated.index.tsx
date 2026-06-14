@@ -59,6 +59,7 @@ import {
   uid,
   average,
   mediaMAL,
+  mediaPessoal,
   rankColor,
   formatReleaseLabel,
   formatDateBR,
