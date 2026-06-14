@@ -439,6 +439,18 @@ function Index() {
     await persistSeasons(animeId, newSeasons);
   }
 
+  async function updateSeasonRating(animeId: string, seasonId: string, rating: number | null) {
+    const target = animes.find((a) => a.id === animeId);
+    if (!target) return;
+    const newSeasons = target.seasons.map((s) =>
+      s.id === seasonId ? { ...s, rating } : s,
+    );
+    setAnimes((prev) =>
+      prev.map((a) => (a.id === animeId ? { ...a, seasons: newSeasons } : a)),
+    );
+    await persistSeasons(animeId, newSeasons);
+  }
+
   function toggleExpand(id: string) {
     setExpanded((e) => ({ ...e, [id]: !e[id] }));
   }
