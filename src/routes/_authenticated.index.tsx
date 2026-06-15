@@ -732,7 +732,7 @@ function Index() {
               const primary = sortMode === "mal" ? malAvg : personalAvg;
               const secondary = sortMode === "mal" ? personalAvg : malAvg;
               const primaryLabel = sortMode === "mal" ? "MAL" : "Minha";
-              const primaryValue = primary != null ? primary.toFixed(sortMode === "mal" ? 1 : 2) : "—";
+              const primaryValue = primary != null ? primary.toFixed(2) : "—";
               const primaryColor = sortMode === "mal" ? rankColor(primary ?? 0) : rankColor(primary ?? 0);
               return (
                 <li
@@ -770,7 +770,7 @@ function Index() {
                           className="gap-1 border-border bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
                         >
                           <Star className="h-2.5 w-2.5" />
-                          {sortMode === "mal" ? "Minha" : "MAL"} {secondary.toFixed(sortMode === "mal" ? 2 : 1)}
+                          {sortMode === "mal" ? "Minha" : "MAL"} {secondary.toFixed(2)}
                         </Badge>
                       )}
                     </div>
@@ -844,7 +844,7 @@ function Index() {
               const primary = sortMode === "mal" ? malAvg : personalAvg;
               const secondary = sortMode === "mal" ? personalAvg : malAvg;
               const primaryLabel = sortMode === "mal" ? "MAL" : "Minha";
-              const primaryValue = primary != null ? primary.toFixed(sortMode === "mal" ? 1 : 2) : "—";
+              const primaryValue = primary != null ? primary.toFixed(2) : "—";
               const primaryColor = rankColor(primary ?? 0);
               const isOpen = expanded[anime.id] ?? false;
               return (
@@ -900,7 +900,7 @@ function Index() {
                       {secondary != null && (
                         <Badge variant="outline" className="gap-1 px-1.5 py-0 text-[10px]">
                           <Star className="h-2.5 w-2.5" />
-                          {sortMode === "mal" ? "Minha" : "MAL"} {secondary.toFixed(sortMode === "mal" ? 2 : 1)}
+                          {sortMode === "mal" ? "Minha" : "MAL"} {secondary.toFixed(2)}
                         </Badge>
                       )}
                     </div>
@@ -942,7 +942,7 @@ function Index() {
                                       {" · "}
                                       <span className="inline-flex items-center gap-0.5">
                                         <Star className="h-2.5 w-2.5" />
-                                        MAL {s.malScore.toFixed(1)}
+                                        MAL {s.malScore.toFixed(2)}
                                       </span>
                                     </>
                                   )}
