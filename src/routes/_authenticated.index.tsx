@@ -741,39 +741,45 @@ function Index() {
               return (
                 <li
                   key={anime.id}
-                  className="group relative overflow-hidden rounded-2xl border border-border transition-all hover:border-primary/40"
+                  className="group relative overflow-hidden rounded-2xl border border-border/60 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)]"
                   style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
                 >
-                  <div className="relative aspect-[2/3] w-full overflow-hidden bg-secondary">
+                  <div className="relative aspect-[2/3] w-full overflow-hidden bg-card-elevated">
                     {anime.imageUrl || anime.cover ? (
                       <img
                         src={anime.imageUrl ?? anime.cover}
                         alt={anime.name}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                        <Tv className="h-10 w-10" />
+                      <div className="flex h-full w-full items-center justify-center text-primary/40">
+                        <ImageIcon className="h-10 w-10" />
                       </div>
                     )}
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
-                    <div className="absolute left-2 top-2 flex h-7 min-w-7 items-center justify-center rounded-full border border-border bg-background/80 px-2 text-xs font-bold backdrop-blur">
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                    <div
+                      className={`font-display absolute left-2 top-2 flex h-7 min-w-7 items-center justify-center rounded-full border px-2 text-xs font-bold backdrop-blur ${
+                        idx === 0
+                          ? "border-primary/60 bg-primary/20 text-primary"
+                          : "border-border/60 bg-background/70 text-foreground/80"
+                      }`}
+                    >
                       #{idx + 1}
                     </div>
                     <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
-                      <div className="flex items-center gap-1 rounded-full border border-border bg-background/80 px-2 py-1 backdrop-blur">
-                        <Star className={`h-3.5 w-3.5 ${primaryColor}`} fill="currentColor" />
-                        <span className={`text-xs font-bold tabular-nums ${primaryColor}`}>
+                      <div className="flex items-baseline gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
+                        <span className="font-display text-sm font-bold tabular-nums text-gold-gradient">
                           {primaryValue}
                         </span>
+                        <span className="text-[9px] text-muted-foreground">/10</span>
                       </div>
                       {secondary != null && (
                         <Badge
                           variant="outline"
-                          className="gap-1 border-border bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
+                          className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
                         >
-                          <Star className="h-2.5 w-2.5" />
+                          <Star className="h-2.5 w-2.5 text-primary" fill="currentColor" />
                           {sortMode === "mal" ? "Minha" : "MAL"} {secondary.toFixed(2)}
                         </Badge>
                       )}
@@ -788,15 +794,16 @@ function Index() {
                       </Link>
                     )}
                     <div className="absolute inset-x-0 bottom-0 p-3">
-                      <h3 className="line-clamp-2 text-sm font-semibold leading-tight">
+                      <h3 className="font-display line-clamp-2 text-sm font-semibold leading-tight tracking-tight">
                         {anime.name}
                       </h3>
-                      <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
                         {anime.seasons.length}{" "}
                         {anime.seasons.length === 1 ? "temporada" : "temporadas"}
                       </p>
                     </div>
                   </div>
+
                   <div className="flex gap-1 p-2">
                     <Button
                       variant="secondary"
