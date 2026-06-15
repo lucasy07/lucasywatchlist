@@ -854,37 +854,49 @@ function Index() {
               return (
                 <li
                   key={anime.id}
-                  className="group relative overflow-hidden rounded-2xl border border-border transition-all hover:border-primary/40"
+                  className="group relative overflow-hidden rounded-2xl border border-border/60 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)]"
                   style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
                 >
                   <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5">
-                    <div className="flex h-10 w-8 shrink-0 items-center justify-center text-sm font-bold text-muted-foreground sm:h-14 sm:w-10 sm:text-lg">
+                    <div
+                      className={`font-display flex h-10 w-8 shrink-0 items-center justify-center text-sm font-bold sm:h-14 sm:w-10 sm:text-xl ${
+                        idx === 0
+                          ? "text-primary"
+                          : idx === 1
+                            ? "text-foreground/80"
+                            : idx === 2
+                              ? "text-primary/60"
+                              : "text-muted-foreground/70"
+                      }`}
+                    >
                       #{idx + 1}
                     </div>
-                    <div className="relative self-stretch min-h-[120px] w-20 shrink-0 overflow-hidden rounded-lg bg-muted sm:min-h-[168px] sm:w-28">
+                    <div className="relative self-stretch min-h-[120px] w-20 shrink-0 overflow-hidden rounded-lg bg-card-elevated ring-1 ring-border/40 sm:min-h-[168px] sm:w-28">
                       {anime.imageUrl || anime.cover ? (
                         <img
                           src={anime.imageUrl ?? anime.cover}
                           alt={anime.name}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                           loading="lazy"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center">
-                          <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                          <ImageIcon className="h-7 w-7 text-primary/40" />
                         </div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-sm font-semibold sm:text-lg">{anime.name}</h3>
-                      <p className="text-xs text-muted-foreground">
+                      <h3 className="font-display truncate text-base font-semibold tracking-tight sm:text-lg">
+                        {anime.name}
+                      </h3>
+                      <p className="mt-0.5 text-[11px] uppercase tracking-wider text-muted-foreground">
                         {anime.seasons.length}{" "}
                         {anime.seasons.length === 1 ? "temporada" : "temporadas"}
                       </p>
                       {anime.upcoming?.releaseDate && (
                         <Link
                           to="/upcoming"
-                          className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary"
+                          className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary"
                         >
                           <CalendarClock className="h-3 w-3" />
                           {formatReleaseLabel(anime.upcoming.releaseDate)}
@@ -892,18 +904,18 @@ function Index() {
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-1">
-                      <div className="flex items-center gap-1">
-                        <Star className={`h-5 w-5 ${primaryColor}`} fill="currentColor" />
-                        <span className={`text-xl font-bold tabular-nums sm:text-2xl ${primaryColor}`}>
+                      <div className="flex items-baseline gap-1">
+                        <span className="font-display text-2xl font-bold tabular-nums text-gold-gradient sm:text-3xl">
                           {primaryValue}
                         </span>
+                        <span className="text-[10px] text-muted-foreground">/10</span>
                       </div>
-                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                         {primaryLabel}
                       </span>
                       {secondary != null && (
-                        <Badge variant="outline" className="gap-1 px-1.5 py-0 text-[10px]">
-                          <Star className="h-2.5 w-2.5" />
+                        <Badge variant="outline" className="gap-1 border-primary/30 px-1.5 py-0 text-[10px] text-foreground/80">
+                          <Star className="h-2.5 w-2.5 text-primary" fill="currentColor" />
                           {sortMode === "mal" ? "Minha" : "MAL"} {secondary.toFixed(2)}
                         </Badge>
                       )}
@@ -912,7 +924,7 @@ function Index() {
                       variant="ghost"
                       size="icon"
                       onClick={() => toggleExpand(anime.id)}
-                      className="shrink-0 rounded-full text-muted-foreground hover:text-foreground"
+                      className="shrink-0 rounded-full text-muted-foreground hover:text-primary"
                       aria-label={isOpen ? "Recolher" : "Expandir"}
                     >
                       {isOpen ? (
@@ -922,6 +934,7 @@ function Index() {
                       )}
                     </Button>
                   </div>
+
 
                   {isOpen && (
                     <div className="border-t border-border bg-background/30 px-4 py-3 sm:px-5">
