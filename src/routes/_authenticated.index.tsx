@@ -614,25 +614,27 @@ function Index() {
       <Toaster theme="dark" position="top-center" />
 
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <div className="flex items-center gap-3">
             <div
-              className="flex h-10 w-10 items-center justify-center rounded-xl"
+              className="flex h-10 w-10 items-center justify-center rounded-xl ring-1 ring-primary/30"
               style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
             >
               <Clapperboard className="h-5 w-5 text-primary-foreground" />
             </div>
-            <div>
-              <h1 className="text-lg font-bold tracking-tight sm:text-xl">Anime Watchlist</h1>
-              <p className="text-xs text-muted-foreground">Sua lista pessoal</p>
+            <div className="leading-tight">
+              <h1 className="font-display text-lg font-bold tracking-tight sm:text-xl">
+                Anime <span className="text-gold-gradient">Watchlist</span>
+              </h1>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Sua coleção pessoal</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center rounded-lg border border-border bg-card p-0.5">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center rounded-lg border border-border/60 bg-card p-0.5">
               <button
                 onClick={() => setViewMode("list")}
-                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${viewMode === "list" ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${viewMode === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
                 aria-label="Visualização em lista"
                 aria-pressed={viewMode === "list"}
               >
@@ -640,7 +642,7 @@ function Index() {
               </button>
               <button
                 onClick={() => setViewMode("grid")}
-                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${viewMode === "grid" ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
                 aria-label="Visualização em grade"
                 aria-pressed={viewMode === "grid"}
               >
@@ -648,12 +650,12 @@ function Index() {
               </button>
             </div>
             <div className="hidden text-right sm:block">
-              <p className="text-xs text-muted-foreground">Animes</p>
-              <p className="text-lg font-semibold">{animes.length}</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Animes</p>
+              <p className="font-display text-lg font-semibold">{animes.length}</p>
             </div>
             <Link
               to="/upcoming"
-              className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+              className="flex h-9 items-center gap-1.5 rounded-lg border border-border/60 bg-card px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/60 hover:text-primary"
               aria-label="Próximas temporadas"
             >
               <CalendarClock className="h-4 w-4 text-primary" />
@@ -661,7 +663,7 @@ function Index() {
             </Link>
             <Link
               to="/watched"
-              className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+              className="flex h-9 items-center gap-1.5 rounded-lg border border-border/60 bg-card px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/60 hover:text-primary"
               aria-label="Animes já assistidos"
             >
               <CheckCircle2 className="h-4 w-4 text-primary" />
@@ -669,7 +671,7 @@ function Index() {
             </Link>
             <button
               onClick={() => signOut()}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-card text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive"
               aria-label="Sair"
               title={user?.email ?? "Sair"}
             >
@@ -679,16 +681,17 @@ function Index() {
         </div>
         <div className="mx-auto max-w-5xl px-4 pb-4 sm:px-6">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar anime..."
-              className="h-11 border-border bg-card pl-10 text-base"
+              placeholder="Buscar na sua coleção..."
+              className="h-11 border-border/60 bg-card pl-10 text-base placeholder:text-muted-foreground/70 focus-visible:ring-primary/40"
             />
           </div>
         </div>
       </header>
+
 
       {/* List */}
       <main className="mx-auto max-w-5xl px-4 pb-32 pt-6 sm:px-6">
