@@ -1120,14 +1120,15 @@ function Index() {
         )}
         <button
           onClick={() => setFabOpen((v) => !v)}
-          className="flex h-14 w-14 items-center justify-center rounded-full text-primary-foreground transition-transform hover:scale-110 active:scale-95"
-          style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
+          className="flex h-14 w-14 items-center justify-center rounded-full text-primary-foreground ring-1 ring-primary/40 transition-transform hover:scale-110 active:scale-95"
+          style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-elegant)" }}
           aria-label="Adicionar"
         >
           <Plus
             className={`h-7 w-7 transition-transform ${fabOpen ? "rotate-45" : ""}`}
           />
         </button>
+
       </div>
 
       {/* Add Anime Dialog */}
