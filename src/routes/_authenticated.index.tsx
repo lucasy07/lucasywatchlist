@@ -702,27 +702,28 @@ function Index() {
             onValueChange={(v) => {
               if (v === "mal" || v === "personal") setSortMode(v);
             }}
-            className="bg-card border border-border rounded-lg p-0.5"
+            className="rounded-lg border border-border/60 bg-card p-0.5"
           >
             <ToggleGroupItem
               value="mal"
               aria-label="Ordenar por nota MAL"
-              className="h-8 px-3 text-xs font-medium data-[state=on]:bg-secondary data-[state=on]:text-foreground text-muted-foreground"
+              className="h-8 px-3 text-xs font-medium text-muted-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
               MAL
             </ToggleGroupItem>
             <ToggleGroupItem
               value="personal"
               aria-label="Ordenar por minhas notas"
-              className="h-8 px-3 text-xs font-medium data-[state=on]:bg-secondary data-[state=on]:text-foreground text-muted-foreground"
+              className="h-8 px-3 text-xs font-medium text-muted-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
               Minhas notas
             </ToggleGroupItem>
           </ToggleGroup>
-          <p className="text-xs text-muted-foreground">
-            {ranked.length} anime{ranked.length === 1 ? "" : "s"}
+          <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
+            {ranked.length} {ranked.length === 1 ? "anime" : "animes"}
           </p>
         </div>
+
         {!hydrated ? (
           <p className="py-20 text-center text-sm text-muted-foreground">Carregando...</p>
         ) : ranked.length === 0 ? (
