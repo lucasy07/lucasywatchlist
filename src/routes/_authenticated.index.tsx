@@ -614,25 +614,27 @@ function Index() {
       <Toaster theme="dark" position="top-center" />
 
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <div className="flex items-center gap-3">
             <div
-              className="flex h-10 w-10 items-center justify-center rounded-xl"
+              className="flex h-10 w-10 items-center justify-center rounded-xl ring-1 ring-primary/30"
               style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
             >
               <Clapperboard className="h-5 w-5 text-primary-foreground" />
             </div>
-            <div>
-              <h1 className="text-lg font-bold tracking-tight sm:text-xl">Anime Watchlist</h1>
-              <p className="text-xs text-muted-foreground">Sua lista pessoal</p>
+            <div className="leading-tight">
+              <h1 className="font-display text-lg font-bold tracking-tight sm:text-xl">
+                Anime <span className="text-gold-gradient">Watchlist</span>
+              </h1>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Sua coleção pessoal</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center rounded-lg border border-border bg-card p-0.5">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center rounded-lg border border-border/60 bg-card p-0.5">
               <button
                 onClick={() => setViewMode("list")}
-                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${viewMode === "list" ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${viewMode === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
                 aria-label="Visualização em lista"
                 aria-pressed={viewMode === "list"}
               >
@@ -640,7 +642,7 @@ function Index() {
               </button>
               <button
                 onClick={() => setViewMode("grid")}
-                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${viewMode === "grid" ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
                 aria-label="Visualização em grade"
                 aria-pressed={viewMode === "grid"}
               >
@@ -648,12 +650,12 @@ function Index() {
               </button>
             </div>
             <div className="hidden text-right sm:block">
-              <p className="text-xs text-muted-foreground">Animes</p>
-              <p className="text-lg font-semibold">{animes.length}</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Animes</p>
+              <p className="font-display text-lg font-semibold">{animes.length}</p>
             </div>
             <Link
               to="/upcoming"
-              className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+              className="flex h-9 items-center gap-1.5 rounded-lg border border-border/60 bg-card px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/60 hover:text-primary"
               aria-label="Próximas temporadas"
             >
               <CalendarClock className="h-4 w-4 text-primary" />
@@ -661,7 +663,7 @@ function Index() {
             </Link>
             <Link
               to="/watched"
-              className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+              className="flex h-9 items-center gap-1.5 rounded-lg border border-border/60 bg-card px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/60 hover:text-primary"
               aria-label="Animes já assistidos"
             >
               <CheckCircle2 className="h-4 w-4 text-primary" />
@@ -669,7 +671,7 @@ function Index() {
             </Link>
             <button
               onClick={() => signOut()}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-card text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive"
               aria-label="Sair"
               title={user?.email ?? "Sair"}
             >
@@ -679,16 +681,17 @@ function Index() {
         </div>
         <div className="mx-auto max-w-5xl px-4 pb-4 sm:px-6">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar anime..."
-              className="h-11 border-border bg-card pl-10 text-base"
+              placeholder="Buscar na sua coleção..."
+              className="h-11 border-border/60 bg-card pl-10 text-base placeholder:text-muted-foreground/70 focus-visible:ring-primary/40"
             />
           </div>
         </div>
       </header>
+
 
       {/* List */}
       <main className="mx-auto max-w-5xl px-4 pb-32 pt-6 sm:px-6">
@@ -699,27 +702,28 @@ function Index() {
             onValueChange={(v) => {
               if (v === "mal" || v === "personal") setSortMode(v);
             }}
-            className="bg-card border border-border rounded-lg p-0.5"
+            className="rounded-lg border border-border/60 bg-card p-0.5"
           >
             <ToggleGroupItem
               value="mal"
               aria-label="Ordenar por nota MAL"
-              className="h-8 px-3 text-xs font-medium data-[state=on]:bg-secondary data-[state=on]:text-foreground text-muted-foreground"
+              className="h-8 px-3 text-xs font-medium text-muted-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
               MAL
             </ToggleGroupItem>
             <ToggleGroupItem
               value="personal"
               aria-label="Ordenar por minhas notas"
-              className="h-8 px-3 text-xs font-medium data-[state=on]:bg-secondary data-[state=on]:text-foreground text-muted-foreground"
+              className="h-8 px-3 text-xs font-medium text-muted-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
               Minhas notas
             </ToggleGroupItem>
           </ToggleGroup>
-          <p className="text-xs text-muted-foreground">
-            {ranked.length} anime{ranked.length === 1 ? "" : "s"}
+          <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
+            {ranked.length} {ranked.length === 1 ? "anime" : "animes"}
           </p>
         </div>
+
         {!hydrated ? (
           <p className="py-20 text-center text-sm text-muted-foreground">Carregando...</p>
         ) : ranked.length === 0 ? (
@@ -737,39 +741,45 @@ function Index() {
               return (
                 <li
                   key={anime.id}
-                  className="group relative overflow-hidden rounded-2xl border border-border transition-all hover:border-primary/40"
+                  className="group relative overflow-hidden rounded-2xl border border-border/60 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)]"
                   style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
                 >
-                  <div className="relative aspect-[2/3] w-full overflow-hidden bg-secondary">
+                  <div className="relative aspect-[2/3] w-full overflow-hidden bg-card-elevated">
                     {anime.imageUrl || anime.cover ? (
                       <img
                         src={anime.imageUrl ?? anime.cover}
                         alt={anime.name}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                        <Tv className="h-10 w-10" />
+                      <div className="flex h-full w-full items-center justify-center text-primary/40">
+                        <ImageIcon className="h-10 w-10" />
                       </div>
                     )}
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
-                    <div className="absolute left-2 top-2 flex h-7 min-w-7 items-center justify-center rounded-full border border-border bg-background/80 px-2 text-xs font-bold backdrop-blur">
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                    <div
+                      className={`font-display absolute left-2 top-2 flex h-7 min-w-7 items-center justify-center rounded-full border px-2 text-xs font-bold backdrop-blur ${
+                        idx === 0
+                          ? "border-primary/60 bg-primary/20 text-primary"
+                          : "border-border/60 bg-background/70 text-foreground/80"
+                      }`}
+                    >
                       #{idx + 1}
                     </div>
                     <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
-                      <div className="flex items-center gap-1 rounded-full border border-border bg-background/80 px-2 py-1 backdrop-blur">
-                        <Star className={`h-3.5 w-3.5 ${primaryColor}`} fill="currentColor" />
-                        <span className={`text-xs font-bold tabular-nums ${primaryColor}`}>
+                      <div className="flex items-baseline gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
+                        <span className="font-display text-sm font-bold tabular-nums text-gold-gradient">
                           {primaryValue}
                         </span>
+                        <span className="text-[9px] text-muted-foreground">/10</span>
                       </div>
                       {secondary != null && (
                         <Badge
                           variant="outline"
-                          className="gap-1 border-border bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
+                          className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
                         >
-                          <Star className="h-2.5 w-2.5" />
+                          <Star className="h-2.5 w-2.5 text-primary" fill="currentColor" />
                           {sortMode === "mal" ? "Minha" : "MAL"} {secondary.toFixed(2)}
                         </Badge>
                       )}
@@ -784,15 +794,16 @@ function Index() {
                       </Link>
                     )}
                     <div className="absolute inset-x-0 bottom-0 p-3">
-                      <h3 className="line-clamp-2 text-sm font-semibold leading-tight">
+                      <h3 className="font-display line-clamp-2 text-sm font-semibold leading-tight tracking-tight">
                         {anime.name}
                       </h3>
-                      <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
                         {anime.seasons.length}{" "}
                         {anime.seasons.length === 1 ? "temporada" : "temporadas"}
                       </p>
                     </div>
                   </div>
+
                   <div className="flex gap-1 p-2">
                     <Button
                       variant="secondary"
@@ -850,37 +861,49 @@ function Index() {
               return (
                 <li
                   key={anime.id}
-                  className="group relative overflow-hidden rounded-2xl border border-border transition-all hover:border-primary/40"
+                  className="group relative overflow-hidden rounded-2xl border border-border/60 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)]"
                   style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
                 >
                   <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5">
-                    <div className="flex h-10 w-8 shrink-0 items-center justify-center text-sm font-bold text-muted-foreground sm:h-14 sm:w-10 sm:text-lg">
+                    <div
+                      className={`font-display flex h-10 w-8 shrink-0 items-center justify-center text-sm font-bold sm:h-14 sm:w-10 sm:text-xl ${
+                        idx === 0
+                          ? "text-primary"
+                          : idx === 1
+                            ? "text-foreground/80"
+                            : idx === 2
+                              ? "text-primary/60"
+                              : "text-muted-foreground/70"
+                      }`}
+                    >
                       #{idx + 1}
                     </div>
-                    <div className="relative self-stretch min-h-[120px] w-20 shrink-0 overflow-hidden rounded-lg bg-muted sm:min-h-[168px] sm:w-28">
+                    <div className="relative self-stretch min-h-[120px] w-20 shrink-0 overflow-hidden rounded-lg bg-card-elevated ring-1 ring-border/40 sm:min-h-[168px] sm:w-28">
                       {anime.imageUrl || anime.cover ? (
                         <img
                           src={anime.imageUrl ?? anime.cover}
                           alt={anime.name}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                           loading="lazy"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center">
-                          <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                          <ImageIcon className="h-7 w-7 text-primary/40" />
                         </div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-sm font-semibold sm:text-lg">{anime.name}</h3>
-                      <p className="text-xs text-muted-foreground">
+                      <h3 className="font-display truncate text-base font-semibold tracking-tight sm:text-lg">
+                        {anime.name}
+                      </h3>
+                      <p className="mt-0.5 text-[11px] uppercase tracking-wider text-muted-foreground">
                         {anime.seasons.length}{" "}
                         {anime.seasons.length === 1 ? "temporada" : "temporadas"}
                       </p>
                       {anime.upcoming?.releaseDate && (
                         <Link
                           to="/upcoming"
-                          className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary"
+                          className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary"
                         >
                           <CalendarClock className="h-3 w-3" />
                           {formatReleaseLabel(anime.upcoming.releaseDate)}
@@ -888,18 +911,18 @@ function Index() {
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-1">
-                      <div className="flex items-center gap-1">
-                        <Star className={`h-5 w-5 ${primaryColor}`} fill="currentColor" />
-                        <span className={`text-xl font-bold tabular-nums sm:text-2xl ${primaryColor}`}>
+                      <div className="flex items-baseline gap-1">
+                        <span className="font-display text-2xl font-bold tabular-nums text-gold-gradient sm:text-3xl">
                           {primaryValue}
                         </span>
+                        <span className="text-[10px] text-muted-foreground">/10</span>
                       </div>
-                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                         {primaryLabel}
                       </span>
                       {secondary != null && (
-                        <Badge variant="outline" className="gap-1 px-1.5 py-0 text-[10px]">
-                          <Star className="h-2.5 w-2.5" />
+                        <Badge variant="outline" className="gap-1 border-primary/30 px-1.5 py-0 text-[10px] text-foreground/80">
+                          <Star className="h-2.5 w-2.5 text-primary" fill="currentColor" />
                           {sortMode === "mal" ? "Minha" : "MAL"} {secondary.toFixed(2)}
                         </Badge>
                       )}
@@ -908,7 +931,7 @@ function Index() {
                       variant="ghost"
                       size="icon"
                       onClick={() => toggleExpand(anime.id)}
-                      className="shrink-0 rounded-full text-muted-foreground hover:text-foreground"
+                      className="shrink-0 rounded-full text-muted-foreground hover:text-primary"
                       aria-label={isOpen ? "Recolher" : "Expandir"}
                     >
                       {isOpen ? (
@@ -918,6 +941,7 @@ function Index() {
                       )}
                     </Button>
                   </div>
+
 
                   {isOpen && (
                     <div className="border-t border-border bg-background/30 px-4 py-3 sm:px-5">
@@ -1096,14 +1120,15 @@ function Index() {
         )}
         <button
           onClick={() => setFabOpen((v) => !v)}
-          className="flex h-14 w-14 items-center justify-center rounded-full text-primary-foreground transition-transform hover:scale-110 active:scale-95"
-          style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
+          className="flex h-14 w-14 items-center justify-center rounded-full text-primary-foreground ring-1 ring-primary/40 transition-transform hover:scale-110 active:scale-95"
+          style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-elegant)" }}
           aria-label="Adicionar"
         >
           <Plus
             className={`h-7 w-7 transition-transform ${fabOpen ? "rotate-45" : ""}`}
           />
         </button>
+
       </div>
 
       {/* Add Anime Dialog */}
