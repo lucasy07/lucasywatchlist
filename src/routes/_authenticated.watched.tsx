@@ -275,7 +275,7 @@ function WatchedPage() {
         ) : (
           <ul className="grid gap-3">
             {watched.map((anime) => {
-              const avg = average(anime.seasons);
+              const p = mediaPessoal(anime.seasons);
               return (
                 <li
                   key={anime.id}
@@ -303,10 +303,21 @@ function WatchedPage() {
                       {anime.seasons.length === 1 ? "temporada" : "temporadas"}
                     </p>
                     <div className="mt-1 flex items-center gap-1">
-                      <Star className={`h-3.5 w-3.5 ${rankColor(avg)}`} fill="currentColor" />
-                      <span className={`text-xs font-bold tabular-nums ${rankColor(avg)}`}>
-                        {avg.toFixed(2)}
-                      </span>
+                      {p === null ? (
+                        <>
+                          <Star className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span className="text-xs font-medium tabular-nums text-muted-foreground">
+                            Sem nota
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Star className={`h-3.5 w-3.5 ${rankColor(p)}`} fill="currentColor" />
+                          <span className={`text-xs font-bold tabular-nums ${rankColor(p)}`}>
+                            {p.toFixed(2)}
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-col gap-1.5 sm:flex-row">
