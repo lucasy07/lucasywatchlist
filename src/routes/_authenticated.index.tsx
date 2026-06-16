@@ -118,6 +118,7 @@ function Index() {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [sortMode, setSortMode] = useState<"mal" | "personal">("mal");
+  const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
 
   // Add Anime dialog
   const [animeDialogOpen, setAnimeDialogOpen] = useState(false);
