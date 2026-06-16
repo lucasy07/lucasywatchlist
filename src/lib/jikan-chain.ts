@@ -25,7 +25,7 @@ type JikanFull = {
   images?: { jpg?: { large_image_url?: string; image_url?: string } };
 };
 
-const KEEP_TYPES = new Set(["TV", "ONA"]);
+const KEEP_TYPES = new Set(["TV", "ONA", "Movie"]);
 const MAX_ENTRIES = 15;
 const DELAY_MS = 400;
 
