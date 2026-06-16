@@ -109,6 +109,7 @@ function WatchedPage() {
   // Upcoming dialog
   const [upcomingOpen, setUpcomingOpen] = useState(false);
   const [upcomingAnimeId, setUpcomingAnimeId] = useState<string>("");
+  const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     if (!user) return;
