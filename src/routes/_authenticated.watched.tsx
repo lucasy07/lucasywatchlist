@@ -363,7 +363,7 @@ function WatchedPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => remove(anime.id)}
+                      onClick={() => setConfirmDelete({ id: anime.id, name: anime.name })}
                       className="h-8 w-8 text-muted-foreground hover:text-destructive"
                       aria-label="Remover anime"
                     >
