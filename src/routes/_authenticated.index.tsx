@@ -1081,7 +1081,7 @@ function Index() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => deleteAnime(anime.id)}
+                          onClick={() => setConfirmDelete({ id: anime.id, name: anime.name })}
                           className="text-muted-foreground hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
