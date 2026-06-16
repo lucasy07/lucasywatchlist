@@ -36,6 +36,7 @@ import {
   updateAnime,
   updateSeasons,
   average,
+  mediaPessoal,
   rankColor,
   uid,
 } from "@/lib/anime-storage";
