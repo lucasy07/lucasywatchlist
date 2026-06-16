@@ -39,6 +39,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Badge } from "@/components/ui/badge";
@@ -108,6 +118,7 @@ function Index() {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [sortMode, setSortMode] = useState<"mal" | "personal">("mal");
+  const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
 
   // Add Anime dialog
   const [animeDialogOpen, setAnimeDialogOpen] = useState(false);
@@ -836,7 +847,7 @@ function Index() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => deleteAnime(anime.id)}
+                      onClick={() => setConfirmDelete({ id: anime.id, name: anime.name })}
                       className="h-8 w-8 text-muted-foreground hover:text-destructive"
                       aria-label="Remover anime"
                     >
@@ -1070,7 +1081,7 @@ function Index() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => deleteAnime(anime.id)}
+                          onClick={() => setConfirmDelete({ id: anime.id, name: anime.name })}
                           className="text-muted-foreground hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -1470,6 +1481,32 @@ function Index() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={confirmDelete !== null}
+        onOpenChange={(open) => !open && setConfirmDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir anime?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Isso remove &quot;{confirmDelete?.name}&quot; e todas as suas temporadas. Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (confirmDelete) deleteAnime(confirmDelete.id);
+                setConfirmDelete(null);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

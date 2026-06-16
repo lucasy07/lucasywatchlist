@@ -25,6 +25,16 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import {
@@ -99,6 +109,7 @@ function WatchedPage() {
   // Upcoming dialog
   const [upcomingOpen, setUpcomingOpen] = useState(false);
   const [upcomingAnimeId, setUpcomingAnimeId] = useState<string>("");
+  const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -352,7 +363,7 @@ function WatchedPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => remove(anime.id)}
+                      onClick={() => setConfirmDelete({ id: anime.id, name: anime.name })}
                       className="h-8 w-8 text-muted-foreground hover:text-destructive"
                       aria-label="Remover anime"
                     >
@@ -500,6 +511,32 @@ function WatchedPage() {
           />
         );
       })()}
+
+      <AlertDialog
+        open={confirmDelete !== null}
+        onOpenChange={(open) => !open && setConfirmDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir anime?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Isso remove &quot;{confirmDelete?.name}&quot; e todas as suas temporadas. Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (confirmDelete) remove(confirmDelete.id);
+                setConfirmDelete(null);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
