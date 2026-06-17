@@ -1060,7 +1060,7 @@ function Index() {
                           className="flex-1"
                         >
                           <CalendarClock className="mr-1 h-4 w-4" />
-                          {anime.upcoming ? "Editar" : "Em breve"}
+                          {anime.upcoming ? "Lançamento" : "Em breve"}
                         </Button>
                         <Button
                           variant="outline"
@@ -1068,7 +1068,7 @@ function Index() {
                           onClick={() => openEdit(anime.id)}
                           className="flex-1"
                         >
-                          <Pencil className="mr-1 h-4 w-4" /> Editar
+                          <Pencil className="mr-1 h-4 w-4" /> Editar anime
                         </Button>
                         <Button
                           variant="outline"
