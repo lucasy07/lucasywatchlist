@@ -748,7 +748,7 @@ function Index() {
               const secondary = sortMode === "mal" ? personalAvg : malAvg;
               const primaryLabel = sortMode === "mal" ? "MAL" : "Minha";
               const primaryValue = primary != null ? primary.toFixed(2) : "—";
-              const primaryColor = sortMode === "mal" ? rankColor(primary ?? 0) : rankColor(primary ?? 0);
+              const primaryColor = primary != null ? rankColor(primary) : "text-muted-foreground";
               return (
                 <li
                   key={anime.id}
@@ -867,7 +867,7 @@ function Index() {
               const secondary = sortMode === "mal" ? personalAvg : malAvg;
               const primaryLabel = sortMode === "mal" ? "MAL" : "Minha";
               const primaryValue = primary != null ? primary.toFixed(2) : "—";
-              const primaryColor = rankColor(primary ?? 0);
+              const primaryColor = primary != null ? rankColor(primary) : "text-muted-foreground";
               const isOpen = expanded[anime.id] ?? false;
               return (
                 <li
