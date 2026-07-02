@@ -469,11 +469,51 @@ function Index() {
   async function deleteSeason(animeId: string, seasonId: string) {
     const target = animes.find((a) => a.id === animeId);
     if (!target) return;
+    const index = target.seasons.findIndex((s) => s.id === seasonId);
+    if (index === -1) return;
+    const removed = target.seasons[index];
+    const originalSeasons = target.seasons;
     const newSeasons = target.seasons.filter((s) => s.id !== seasonId);
     setAnimes((prev) =>
       prev.map((a) => (a.id === animeId ? { ...a, seasons: newSeasons } : a)),
     );
-    await persistSeasons(animeId, newSeasons);
+    try {
+      await updateSeasons(animeId, newSeasons);
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao remover temporada");
+      setAnimes((prev) =>
+        prev.map((a) => (a.id === animeId ? { ...a, seasons: originalSeasons } : a)),
+      );
+      return;
+    }
+    toast("Temporada removida", {
+      duration: 6000,
+      action: {
+        label: "Desfazer",
+        onClick: async () => {
+          let restored: Season[] = [];
+          let base: Season[] = [];
+          setAnimes((prev) =>
+            prev.map((a) => {
+              if (a.id !== animeId) return a;
+              base = a.seasons;
+              restored = [...a.seasons.slice(0, index), removed, ...a.seasons.slice(index)];
+              return { ...a, seasons: restored };
+            }),
+          );
+          try {
+            await updateSeasons(animeId, restored);
+          } catch (err) {
+            console.error(err);
+            toast.error("Falha ao desfazer");
+            setAnimes((prev) =>
+              prev.map((a) => (a.id === animeId ? { ...a, seasons: base } : a)),
+            );
+          }
+        },
+      },
+    });
   }
 
   async function updateSeasonRating(animeId: string, seasonId: string, rating: number | null) {
