@@ -492,12 +492,15 @@ function Index() {
       action: {
         label: "Desfazer",
         onClick: async () => {
-          const current = animes;
-          const cur = current.find((a) => a.id === animeId);
-          const base = cur ? cur.seasons : newSeasons;
-          const restored = [...base.slice(0, index), removed, ...base.slice(index)];
+          let restored: Season[] = [];
+          let base: Season[] = [];
           setAnimes((prev) =>
-            prev.map((a) => (a.id === animeId ? { ...a, seasons: restored } : a)),
+            prev.map((a) => {
+              if (a.id !== animeId) return a;
+              base = a.seasons;
+              restored = [...a.seasons.slice(0, index), removed, ...a.seasons.slice(index)];
+              return { ...a, seasons: restored };
+            }),
           );
           try {
             await updateSeasons(animeId, restored);
