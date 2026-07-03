@@ -1334,7 +1334,7 @@ function Index() {
         <DialogContent className="border-border bg-card">
           <DialogHeader>
             <DialogTitle>Nova Temporada</DialogTitle>
-            <DialogDescription>Atribua uma nota de 0 a 10.</DialogDescription>
+            <DialogDescription>Nomeie a nova temporada.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
             <div className="grid gap-2">
