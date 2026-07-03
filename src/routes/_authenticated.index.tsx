@@ -240,6 +240,38 @@ function Index() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated]);
 
+  // One-time migration: derive tier from legacy per-season ratings.
+  useEffect(() => {
+    if (!hydrated) return;
+    const candidates = animes.filter(
+      (a) => a.tier == null && a.seasons.some((s) => typeof s.rating === "number"),
+    );
+    if (candidates.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      for (const a of candidates) {
+        if (cancelled) return;
+        const rated = a.seasons.filter(
+          (s): s is Season & { rating: number } => typeof s.rating === "number",
+        );
+        if (rated.length === 0) continue;
+        const avg = rated.reduce((sum, s) => sum + s.rating, 0) / rated.length;
+        const tier = tierFromAverage(avg);
+        try {
+          await updateTier(a.id, tier);
+          if (cancelled) return;
+          setAnimes((prev) => prev.map((x) => (x.id === a.id ? { ...x, tier } : x)));
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
+
   const ranked = useMemo(() => {
     const filtered = animes.filter(
       (a) =>
