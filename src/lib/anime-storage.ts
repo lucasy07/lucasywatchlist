@@ -56,11 +56,16 @@ type DbRow = {
   mal_id: number | null;
   image_url: string | null;
   mal_score: number | null;
+  tier: string | null;
 };
 
 function rowToAnime(row: DbRow): Anime {
   const seasons = Array.isArray(row.seasons) ? (row.seasons as Season[]) : [];
   const upcoming = (row.upcoming ?? undefined) as UpcomingSeason | undefined;
+  const tier =
+    row.tier === "S" || row.tier === "A" || row.tier === "B" || row.tier === "C" || row.tier === "D"
+      ? (row.tier as Tier)
+      : null;
   return {
     id: row.id,
     name: row.name,
@@ -71,6 +76,7 @@ function rowToAnime(row: DbRow): Anime {
     malId: row.mal_id ?? null,
     imageUrl: row.image_url ?? null,
     malScore: row.mal_score ?? null,
+    tier,
   };
 }
 
