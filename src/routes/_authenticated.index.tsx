@@ -670,9 +670,12 @@ function Index() {
     }
     const cleaned = editSeasons.map((s) => ({ ...s, name: s.name.trim() }));
     const original = animes.find((a) => a.id === editAnimeId);
+    const nextTier = editTier;
     setAnimes((prev) =>
       prev.map((a) =>
-        a.id === editAnimeId ? { ...a, name, cover: editCover, seasons: cleaned } : a,
+        a.id === editAnimeId
+          ? { ...a, name, cover: editCover, seasons: cleaned, tier: nextTier }
+          : a,
       ),
     );
     setEditDialogOpen(false);
@@ -682,6 +685,9 @@ function Index() {
         tasks.push(updateAnime(editAnimeId, { name, cover: editCover ?? null }));
       }
       tasks.push(updateSeasons(editAnimeId, cleaned));
+      if (!original || original.tier !== nextTier) {
+        tasks.push(updateTier(editAnimeId, nextTier));
+      }
       await Promise.all(tasks);
       toast.success("Alterações salvas");
     } catch (err) {
