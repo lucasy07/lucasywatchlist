@@ -443,6 +443,10 @@ function WatchedPage() {
               </div>
             </div>
             <div className="space-y-2">
+              <Label>Meu tier</Label>
+              <TierPicker value={editTier} onChange={setEditTier} />
+            </div>
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>Temporadas</Label>
                 <Button type="button" variant="outline" size="sm" onClick={addEditSeason}>
@@ -460,20 +464,6 @@ function WatchedPage() {
                         onChange={(e) => updateEditSeason(s.id, { name: e.target.value })}
                         placeholder="Nome"
                         className="flex-1"
-                      />
-                      <Input
-                        type="number"
-                        min={0}
-                        max={10}
-                        step={0.1}
-                        value={s.rating == null ? "" : s.rating}
-                        onChange={(e) => {
-                          const raw = e.target.value.trim();
-                          if (raw === "") return updateEditSeason(s.id, { rating: null });
-                          const v = parseFloat(raw.replace(",", "."));
-                          updateEditSeason(s.id, { rating: Number.isNaN(v) ? null : v });
-                        }}
-                        className="w-20"
                       />
                       <Button
                         type="button"
