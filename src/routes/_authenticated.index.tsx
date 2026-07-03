@@ -449,7 +449,7 @@ function Index() {
     }
     setSeasonAnimeId(animeId ?? animes[0].id);
     setSeasonName("");
-    setSeasonRating("");
+    
     setSeasonDialogOpen(true);
   }
 
