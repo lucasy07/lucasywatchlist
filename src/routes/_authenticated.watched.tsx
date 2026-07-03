@@ -172,6 +172,7 @@ function WatchedPage() {
     setEditName(a.name);
     setEditCover(a.cover);
     setEditSeasons(a.seasons.map((s) => ({ ...s })));
+    setEditTier(a.tier);
     setEditDialogOpen(true);
   }
 
