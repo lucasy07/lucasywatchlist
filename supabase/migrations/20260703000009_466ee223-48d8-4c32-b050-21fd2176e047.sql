@@ -1,0 +1,1 @@
+ALTER TABLE public.animes ADD COLUMN tier TEXT NULL CHECK (tier IS NULL OR tier IN ('S','A','B','C','D'));
