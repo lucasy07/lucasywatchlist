@@ -1528,7 +1528,7 @@ function Index() {
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  setEditSeasons((prev) => [...prev, { id: uid(), name: "", rating: 0 }])
+                  setEditSeasons((prev) => [...prev, { id: uid(), name: "", rating: null }])
                 }
               >
                 <Plus className="mr-1 h-4 w-4" /> Temporada
