@@ -24,6 +24,7 @@ export type Database = {
           mal_score: number | null
           name: string
           seasons: Json
+          tier: string | null
           upcoming: Json | null
           updated_at: string
           user_id: string
@@ -38,6 +39,7 @@ export type Database = {
           mal_score?: number | null
           name: string
           seasons?: Json
+          tier?: string | null
           upcoming?: Json | null
           updated_at?: string
           user_id: string
@@ -52,6 +54,7 @@ export type Database = {
           mal_score?: number | null
           name?: string
           seasons?: Json
+          tier?: string | null
           upcoming?: Json | null
           updated_at?: string
           user_id?: string

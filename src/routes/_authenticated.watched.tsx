@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   Tv,
   Sparkles,
-  Star,
   Undo2,
   Trash2,
   Pencil,
@@ -40,16 +39,17 @@ import { Toaster } from "@/components/ui/sonner";
 import {
   type Anime,
   type Season,
+  type Tier,
   fetchAnimes,
   setWatched,
   deleteAnime as deleteAnimeRow,
   updateAnime,
   updateSeasons,
-  average,
-  mediaPessoal,
-  rankColor,
+  updateTier,
+  TIER_VALUE,
   uid,
 } from "@/lib/anime-storage";
+import { TierPicker, tierColor } from "@/components/TierPicker";
 import { useAuth } from "@/auth/AuthProvider";
 import { UpcomingEditDialog } from "@/components/UpcomingEditDialog";
 
@@ -104,6 +104,7 @@ function WatchedPage() {
   const [editName, setEditName] = useState("");
   const [editCover, setEditCover] = useState<string | undefined>(undefined);
   const [editSeasons, setEditSeasons] = useState<Season[]>([]);
+  const [editTier, setEditTier] = useState<Tier | null>(null);
   const editCoverInputRef = useRef<HTMLInputElement>(null);
 
   // Upcoming dialog
@@ -133,7 +134,11 @@ function WatchedPage() {
   const watched = useMemo(() => {
     return animes
       .filter((a) => a.watched)
-      .sort((a, b) => average(b.seasons) - average(a.seasons));
+      .sort((a, b) => {
+        const va = a.tier ? TIER_VALUE[a.tier] : 0;
+        const vb = b.tier ? TIER_VALUE[b.tier] : 0;
+        return vb - va;
+      });
   }, [animes]);
 
   async function unmark(id: string) {
@@ -167,6 +172,7 @@ function WatchedPage() {
     setEditName(a.name);
     setEditCover(a.cover);
     setEditSeasons(a.seasons.map((s) => ({ ...s })));
+    setEditTier(a.tier);
     setEditDialogOpen(true);
   }
 
@@ -196,7 +202,7 @@ function WatchedPage() {
   }
 
   function addEditSeason() {
-    setEditSeasons((prev) => [...prev, { id: uid(), name: "", rating: 0 }]);
+    setEditSeasons((prev) => [...prev, { id: uid(), name: "", rating: null }]);
   }
 
   async function saveEdit() {
@@ -211,16 +217,15 @@ function WatchedPage() {
         toast.error("Toda temporada precisa de nome");
         return;
       }
-      if (s.rating !== null && (Number.isNaN(s.rating) || s.rating < 0 || s.rating > 10)) {
-        toast.error(`Nota inválida em "${s.name}"`);
-        return;
-      }
     }
     const cleaned = editSeasons.map((s) => ({ ...s, name: s.name.trim() }));
     const original = animes.find((a) => a.id === editAnimeId);
+    const nextTier = editTier;
     setAnimes((prev) =>
       prev.map((a) =>
-        a.id === editAnimeId ? { ...a, name, cover: editCover, seasons: cleaned } : a,
+        a.id === editAnimeId
+          ? { ...a, name, cover: editCover, seasons: cleaned, tier: nextTier }
+          : a,
       ),
     );
     setEditDialogOpen(false);
@@ -230,6 +235,9 @@ function WatchedPage() {
         tasks.push(updateAnime(editAnimeId, { name, cover: editCover ?? null }));
       }
       tasks.push(updateSeasons(editAnimeId, cleaned));
+      if (!original || original.tier !== nextTier) {
+        tasks.push(updateTier(editAnimeId, nextTier));
+      }
       await Promise.all(tasks);
       toast.success("Alterações salvas");
     } catch {
@@ -286,7 +294,7 @@ function WatchedPage() {
         ) : (
           <ul className="grid gap-3">
             {watched.map((anime) => {
-              const p = mediaPessoal(anime.seasons);
+              const t = anime.tier;
               return (
                 <li
                   key={anime.id}
@@ -313,19 +321,18 @@ function WatchedPage() {
                       {anime.seasons.length}{" "}
                       {anime.seasons.length === 1 ? "temporada" : "temporadas"}
                     </p>
-                    <div className="mt-1 flex items-center gap-1">
-                      {p === null ? (
-                        <>
-                          <Star className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span className="text-xs font-medium tabular-nums text-muted-foreground">
-                            Sem nota
-                          </span>
-                        </>
+                    <div className="mt-1 flex items-center gap-2">
+                      {t === null ? (
+                        <span className="text-xs font-medium text-muted-foreground">
+                          Sem nota
+                        </span>
                       ) : (
                         <>
-                          <Star className={`h-3.5 w-3.5 ${rankColor(p)}`} fill="currentColor" />
-                          <span className={`text-xs font-bold tabular-nums ${rankColor(p)}`}>
-                            {p.toFixed(2)}
+                          <span className={`font-display text-xl font-bold leading-none ${tierColor(t)}`}>
+                            {t}
+                          </span>
+                          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                            Tier
                           </span>
                         </>
                       )}
@@ -436,6 +443,10 @@ function WatchedPage() {
               </div>
             </div>
             <div className="space-y-2">
+              <Label>Meu tier</Label>
+              <TierPicker value={editTier} onChange={setEditTier} />
+            </div>
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>Temporadas</Label>
                 <Button type="button" variant="outline" size="sm" onClick={addEditSeason}>
@@ -453,20 +464,6 @@ function WatchedPage() {
                         onChange={(e) => updateEditSeason(s.id, { name: e.target.value })}
                         placeholder="Nome"
                         className="flex-1"
-                      />
-                      <Input
-                        type="number"
-                        min={0}
-                        max={10}
-                        step={0.1}
-                        value={s.rating == null ? "" : s.rating}
-                        onChange={(e) => {
-                          const raw = e.target.value.trim();
-                          if (raw === "") return updateEditSeason(s.id, { rating: null });
-                          const v = parseFloat(raw.replace(",", "."));
-                          updateEditSeason(s.id, { rating: Number.isNaN(v) ? null : v });
-                        }}
-                        className="w-20"
                       />
                       <Button
                         type="button"

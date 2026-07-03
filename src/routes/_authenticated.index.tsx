@@ -56,7 +56,10 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   type Anime,
   type Season,
+  type Tier,
   type UpcomingSeason,
+  TIER_VALUE,
+  tierFromAverage,
   fetchAnimes,
   createAnime,
   deleteAnime as deleteAnimeRow,
@@ -64,18 +67,19 @@ import {
   updateUpcoming,
   updateAnime,
   updateAnimeMeta,
+  updateTier,
   setWatched,
   importLegacyIfNeeded,
   uid,
   average,
   mediaMAL,
-  mediaPessoal,
   rankColor,
   formatReleaseLabel,
   formatDateBR,
 } from "@/lib/anime-storage";
 import { useAuth } from "@/auth/AuthProvider";
 import { JikanSearch, type JikanPick } from "@/components/JikanSearch";
+import { TierPicker, tierColor } from "@/components/TierPicker";
 import { buildChain, type ChainSeason } from "@/lib/jikan-chain";
 
 
@@ -136,7 +140,7 @@ function Index() {
   const [seasonDialogOpen, setSeasonDialogOpen] = useState(false);
   const [seasonAnimeId, setSeasonAnimeId] = useState<string>("");
   const [seasonName, setSeasonName] = useState("");
-  const [seasonRating, setSeasonRating] = useState("");
+  
 
   // Upcoming season dialog
   const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
@@ -153,6 +157,7 @@ function Index() {
   const [editName, setEditName] = useState("");
   const [editCover, setEditCover] = useState<string | undefined>(undefined);
   const [editSeasons, setEditSeasons] = useState<Season[]>([]);
+  const [editTier, setEditTier] = useState<Tier | null>(null);
   const editCoverInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -237,6 +242,38 @@ function Index() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated]);
 
+  // One-time migration: derive tier from legacy per-season ratings.
+  useEffect(() => {
+    if (!hydrated) return;
+    const candidates = animes.filter(
+      (a) => a.tier == null && a.seasons.some((s) => typeof s.rating === "number"),
+    );
+    if (candidates.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      for (const a of candidates) {
+        if (cancelled) return;
+        const rated = a.seasons.filter(
+          (s): s is Season & { rating: number } => typeof s.rating === "number",
+        );
+        if (rated.length === 0) continue;
+        const avg = rated.reduce((sum, s) => sum + s.rating, 0) / rated.length;
+        const tier = tierFromAverage(avg);
+        try {
+          await updateTier(a.id, tier);
+          if (cancelled) return;
+          setAnimes((prev) => prev.map((x) => (x.id === a.id ? { ...x, tier } : x)));
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
+
   const ranked = useMemo(() => {
     const filtered = animes.filter(
       (a) =>
@@ -252,12 +289,12 @@ function Index() {
         if (mb === null) return -1;
         return mb - ma;
       }
-      const pa = mediaPessoal(a.seasons);
-      const pb = mediaPessoal(b.seasons);
-      if (pa === null && pb === null) return 0;
-      if (pa === null) return 1;
-      if (pb === null) return -1;
-      return pb - pa;
+      const va = a.tier ? TIER_VALUE[a.tier] : 0;
+      const vb = b.tier ? TIER_VALUE[b.tier] : 0;
+      if (va === 0 && vb === 0) return 0;
+      if (va === 0) return 1;
+      if (vb === 0) return -1;
+      return vb - va;
     });
   }, [animes, search, sortMode]);
 
@@ -414,7 +451,7 @@ function Index() {
     }
     setSeasonAnimeId(animeId ?? animes[0].id);
     setSeasonName("");
-    setSeasonRating("");
+    
     setSeasonDialogOpen(true);
   }
 
@@ -429,7 +466,6 @@ function Index() {
 
   async function addSeason() {
     const name = seasonName.trim();
-    const rating = parseFloat(seasonRating.replace(",", "."));
     if (!seasonAnimeId) {
       toast.error("Selecione um anime");
       return;
@@ -438,19 +474,27 @@ function Index() {
       toast.error("Informe o nome da temporada");
       return;
     }
-    if (Number.isNaN(rating) || rating < 0 || rating > 10) {
-      toast.error("A nota deve estar entre 0 e 10");
-      return;
-    }
     const target = animes.find((a) => a.id === seasonAnimeId);
     if (!target) return;
-    const newSeasons = [...target.seasons, { id: uid(), name, rating }];
+    const newSeasons = [...target.seasons, { id: uid(), name, rating: null }];
     setAnimes((prev) =>
       prev.map((a) => (a.id === seasonAnimeId ? { ...a, seasons: newSeasons } : a)),
     );
     setSeasonDialogOpen(false);
     toast.success("Temporada adicionada");
     await persistSeasons(seasonAnimeId, newSeasons);
+  }
+
+  async function setAnimeTier(animeId: string, tier: Tier | null) {
+    const prev = animes;
+    setAnimes((p) => p.map((a) => (a.id === animeId ? { ...a, tier } : a)));
+    try {
+      await updateTier(animeId, tier);
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao salvar tier");
+      setAnimes(prev);
+    }
   }
 
   async function deleteAnime(id: string) {
@@ -516,17 +560,6 @@ function Index() {
     });
   }
 
-  async function updateSeasonRating(animeId: string, seasonId: string, rating: number | null) {
-    const target = animes.find((a) => a.id === animeId);
-    if (!target) return;
-    const newSeasons = target.seasons.map((s) =>
-      s.id === seasonId ? { ...s, rating } : s,
-    );
-    setAnimes((prev) =>
-      prev.map((a) => (a.id === animeId ? { ...a, seasons: newSeasons } : a)),
-    );
-    await persistSeasons(animeId, newSeasons);
-  }
 
   function toggleExpand(id: string) {
     setExpanded((e) => ({ ...e, [id]: !e[id] }));
@@ -590,6 +623,7 @@ function Index() {
     setEditName(a.name);
     setEditCover(a.cover);
     setEditSeasons(a.seasons.map((s) => ({ ...s })));
+    setEditTier(a.tier);
     setEditDialogOpen(true);
   }
 
@@ -637,9 +671,12 @@ function Index() {
     }
     const cleaned = editSeasons.map((s) => ({ ...s, name: s.name.trim() }));
     const original = animes.find((a) => a.id === editAnimeId);
+    const nextTier = editTier;
     setAnimes((prev) =>
       prev.map((a) =>
-        a.id === editAnimeId ? { ...a, name, cover: editCover, seasons: cleaned } : a,
+        a.id === editAnimeId
+          ? { ...a, name, cover: editCover, seasons: cleaned, tier: nextTier }
+          : a,
       ),
     );
     setEditDialogOpen(false);
@@ -649,6 +686,9 @@ function Index() {
         tasks.push(updateAnime(editAnimeId, { name, cover: editCover ?? null }));
       }
       tasks.push(updateSeasons(editAnimeId, cleaned));
+      if (!original || original.tier !== nextTier) {
+        tasks.push(updateTier(editAnimeId, nextTier));
+      }
       await Promise.all(tasks);
       toast.success("Alterações salvas");
     } catch (err) {
@@ -782,13 +822,11 @@ function Index() {
         ) : viewMode === "grid" ? (
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
             {ranked.map((anime, idx) => {
-              const personalAvg = mediaPessoal(anime.seasons);
               const malAvg = mediaMAL(anime.seasons);
-              const primary = sortMode === "mal" ? malAvg : personalAvg;
-              const secondary = sortMode === "mal" ? personalAvg : malAvg;
-              const primaryLabel = sortMode === "mal" ? "MAL" : "Minha";
-              const primaryValue = primary != null ? primary.toFixed(2) : "—";
-              const primaryColor = primary != null ? rankColor(primary) : "text-muted-foreground";
+              const primaryIsTier = sortMode === "personal";
+              const primaryTier = anime.tier;
+              const primaryValue = malAvg != null ? malAvg.toFixed(2) : "—";
+              const primaryColor = malAvg != null ? rankColor(malAvg) : "text-muted-foreground";
               return (
                 <li
                   key={anime.id}
@@ -819,21 +857,38 @@ function Index() {
                       #{idx + 1}
                     </div>
                     <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
-                      <div className="flex items-baseline gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
-                        <span className="font-display text-sm font-bold tabular-nums text-gold-gradient">
-                          {primaryValue}
-                        </span>
-                        <span className="text-[9px] text-muted-foreground">/10</span>
-                      </div>
-                      {secondary != null && (
-                        <Badge
-                          variant="outline"
-                          className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
-                        >
-                          <Star className="h-2.5 w-2.5 text-primary" fill="currentColor" />
-                          {sortMode === "mal" ? "Minha" : "MAL"} {secondary.toFixed(2)}
-                        </Badge>
+                      {primaryIsTier ? (
+                        <div className="flex items-center gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
+                          <span className={`font-display text-sm font-bold ${tierColor(primaryTier)}`}>
+                            {primaryTier ?? "—"}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-baseline gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
+                          <span className={`font-display text-sm font-bold tabular-nums ${primaryColor}`}>
+                            {primaryValue}
+                          </span>
+                          <span className="text-[9px] text-muted-foreground">/10</span>
+                        </div>
                       )}
+                      {primaryIsTier
+                        ? malAvg != null && (
+                            <Badge
+                              variant="outline"
+                              className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
+                            >
+                              <Star className="h-2.5 w-2.5 text-primary" fill="currentColor" />
+                              MAL {malAvg.toFixed(2)}
+                            </Badge>
+                          )
+                        : (
+                          <Badge
+                            variant="outline"
+                            className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
+                          >
+                            Tier {anime.tier ?? "—"}
+                          </Badge>
+                        )}
                     </div>
                     {anime.upcoming?.releaseDate && (
                       <Link
@@ -901,13 +956,11 @@ function Index() {
         ) : (
           <ul className="grid gap-4">
             {ranked.map((anime, idx) => {
-              const personalAvg = mediaPessoal(anime.seasons);
               const malAvg = mediaMAL(anime.seasons);
-              const primary = sortMode === "mal" ? malAvg : personalAvg;
-              const secondary = sortMode === "mal" ? personalAvg : malAvg;
-              const primaryLabel = sortMode === "mal" ? "MAL" : "Minha";
-              const primaryValue = primary != null ? primary.toFixed(2) : "—";
-              const primaryColor = primary != null ? rankColor(primary) : "text-muted-foreground";
+              const primaryIsTier = sortMode === "personal";
+              const primaryTier = anime.tier;
+              const primaryValue = malAvg != null ? malAvg.toFixed(2) : "—";
+              const primaryColor = malAvg != null ? rankColor(malAvg) : "text-muted-foreground";
               const isOpen = expanded[anime.id] ?? false;
               return (
                 <li
@@ -962,20 +1015,36 @@ function Index() {
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-1">
-                      <div className="flex items-baseline gap-1">
-                        <span className="font-display text-2xl font-bold tabular-nums text-gold-gradient sm:text-3xl">
-                          {primaryValue}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">/10</span>
-                      </div>
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                        {primaryLabel}
-                      </span>
-                      {secondary != null && (
-                        <Badge variant="outline" className="gap-1 border-primary/30 px-1.5 py-0 text-[10px] text-foreground/80">
-                          <Star className="h-2.5 w-2.5 text-primary" fill="currentColor" />
-                          {sortMode === "mal" ? "Minha" : "MAL"} {secondary.toFixed(2)}
-                        </Badge>
+                      {primaryIsTier ? (
+                        <>
+                          <span className={`font-display text-3xl font-bold sm:text-4xl ${tierColor(primaryTier)}`}>
+                            {primaryTier ?? "—"}
+                          </span>
+                          <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                            Tier
+                          </span>
+                          {malAvg != null && (
+                            <Badge variant="outline" className="gap-1 border-primary/30 px-1.5 py-0 text-[10px] text-foreground/80">
+                              <Star className="h-2.5 w-2.5 text-primary" fill="currentColor" />
+                              MAL {malAvg.toFixed(2)}
+                            </Badge>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-baseline gap-1">
+                            <span className={`font-display text-2xl font-bold tabular-nums sm:text-3xl ${primaryColor}`}>
+                              {primaryValue}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">/10</span>
+                          </div>
+                          <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                            MAL
+                          </span>
+                          <Badge variant="outline" className="gap-1 border-primary/30 px-1.5 py-0 text-[10px] text-foreground/80">
+                            Tier {anime.tier ?? "—"}
+                          </Badge>
+                        </>
                       )}
                     </div>
                     <Button
@@ -996,6 +1065,15 @@ function Index() {
 
                   {isOpen && (
                     <div className="border-t border-border bg-background/30 px-4 py-3 sm:px-5">
+                      <div className="mb-3 flex flex-wrap items-center gap-2">
+                        <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                          Meu tier
+                        </span>
+                        <TierPicker
+                          value={anime.tier}
+                          onChange={(t) => setAnimeTier(anime.id, t)}
+                        />
+                      </div>
                       {anime.seasons.length === 0 ? (
                         <p className="py-2 text-center text-sm text-muted-foreground">
                           Nenhuma temporada ainda
@@ -1023,31 +1101,6 @@ function Index() {
                                   )}
                                 </p>
                               </div>
-                              <Input
-                                type="number"
-                                inputMode="decimal"
-                                step="0.1"
-                                min={0}
-                                max={10}
-                                placeholder="—"
-                                defaultValue={s.rating != null ? String(s.rating) : ""}
-                                onBlur={(e) => {
-                                  const raw = e.currentTarget.value.trim().replace(",", ".");
-                                  if (raw === "") {
-                                    if (s.rating !== null) updateSeasonRating(anime.id, s.id, null);
-                                    return;
-                                  }
-                                  const v = parseFloat(raw);
-                                  if (Number.isNaN(v) || v < 0 || v > 10) {
-                                    toast.error("A nota deve estar entre 0 e 10");
-                                    e.currentTarget.value = s.rating != null ? String(s.rating) : "";
-                                    return;
-                                  }
-                                  if (v !== s.rating) updateSeasonRating(anime.id, s.id, v);
-                                }}
-                                className="h-8 w-20 text-center text-sm tabular-nums"
-                                aria-label={`Minha nota para ${s.name}`}
-                              />
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -1290,7 +1343,7 @@ function Index() {
         <DialogContent className="border-border bg-card">
           <DialogHeader>
             <DialogTitle>Nova Temporada</DialogTitle>
-            <DialogDescription>Atribua uma nota de 0 a 10.</DialogDescription>
+            <DialogDescription>Nomeie a nova temporada.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
             <div className="grid gap-2">
@@ -1314,18 +1367,8 @@ function Index() {
                 id="season-name"
                 value={seasonName}
                 onChange={(e) => setSeasonName(e.target.value)}
-                placeholder="Ex: Temporada 1"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="season-rating">Nota (0 - 10)</Label>
-              <Input
-                id="season-rating"
-                value={seasonRating}
-                onChange={(e) => setSeasonRating(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addSeason()}
-                inputMode="decimal"
-                placeholder="8.5"
+                placeholder="Ex: Temporada 1"
               />
             </div>
           </div>
@@ -1460,6 +1503,10 @@ function Index() {
               />
             </div>
             <div className="grid gap-2">
+              <Label>Meu tier</Label>
+              <TierPicker value={editTier} onChange={setEditTier} />
+            </div>
+            <div className="grid gap-2">
               <Label>Temporadas</Label>
               {editSeasons.length === 0 ? (
                 <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
@@ -1474,18 +1521,6 @@ function Index() {
                         onChange={(e) => updateEditSeason(s.id, { name: e.target.value })}
                         placeholder="Nome"
                         className="flex-1"
-                      />
-                      <Input
-                        value={s.rating == null ? "" : String(s.rating)}
-                        onChange={(e) => {
-                          const raw = e.target.value.trim();
-                          if (raw === "") return updateEditSeason(s.id, { rating: null });
-                          const v = parseFloat(raw.replace(",", "."));
-                          updateEditSeason(s.id, { rating: Number.isNaN(v) ? null : v });
-                        }}
-                        inputMode="decimal"
-                        placeholder="0-10"
-                        className="w-20"
                       />
                       <Button
                         type="button"
@@ -1506,7 +1541,7 @@ function Index() {
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  setEditSeasons((prev) => [...prev, { id: uid(), name: "", rating: 0 }])
+                  setEditSeasons((prev) => [...prev, { id: uid(), name: "", rating: null }])
                 }
               >
                 <Plus className="mr-1 h-4 w-4" /> Temporada

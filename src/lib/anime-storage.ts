@@ -10,6 +10,18 @@ export type Season = {
   malScore?: number | null;
 };
 
+export type Tier = "S" | "A" | "B" | "C" | "D";
+
+export const TIER_VALUE: Record<Tier, number> = { S: 5, A: 4, B: 3, C: 2, D: 1 };
+
+export function tierFromAverage(avg: number): Tier {
+  if (avg >= 9) return "S";
+  if (avg >= 8) return "A";
+  if (avg >= 7) return "B";
+  if (avg >= 5) return "C";
+  return "D";
+}
+
 export type UpcomingSeason = {
   title: string;
   /** ISO date string (YYYY-MM-DD) */
@@ -26,6 +38,7 @@ export type Anime = {
   malId?: number | null;
   imageUrl?: string | null;
   malScore?: number | null;
+  tier: Tier | null;
 };
 
 /** Legacy localStorage key — used only for one-time auto-import. */
@@ -43,11 +56,16 @@ type DbRow = {
   mal_id: number | null;
   image_url: string | null;
   mal_score: number | null;
+  tier: string | null;
 };
 
 function rowToAnime(row: DbRow): Anime {
   const seasons = Array.isArray(row.seasons) ? (row.seasons as Season[]) : [];
   const upcoming = (row.upcoming ?? undefined) as UpcomingSeason | undefined;
+  const tier =
+    row.tier === "S" || row.tier === "A" || row.tier === "B" || row.tier === "C" || row.tier === "D"
+      ? (row.tier as Tier)
+      : null;
   return {
     id: row.id,
     name: row.name,
@@ -58,6 +76,7 @@ function rowToAnime(row: DbRow): Anime {
     malId: row.mal_id ?? null,
     imageUrl: row.image_url ?? null,
     malScore: row.mal_score ?? null,
+    tier,
   };
 }
 
@@ -78,7 +97,7 @@ function readLegacyLocal(): Anime[] {
 export async function fetchAnimes(): Promise<Anime[]> {
   const { data, error } = await supabase
     .from("animes")
-    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score")
+    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier")
     .order("created_at", { ascending: true });
   if (error) throw error;
   return (data as DbRow[]).map(rowToAnime);
@@ -129,11 +148,18 @@ export async function createAnime(input: {
       mal_id: input.malId ?? null,
       image_url: input.imageUrl ?? null,
       mal_score: input.malScore ?? null,
+      tier: null,
     })
-    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score")
+    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier")
     .single();
   if (error) throw error;
   return rowToAnime(data as DbRow);
+}
+
+
+export async function updateTier(id: string, tier: Tier | null): Promise<void> {
+  const { error } = await supabase.from("animes").update({ tier }).eq("id", id);
+  if (error) throw error;
 }
 
 
