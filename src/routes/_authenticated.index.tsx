@@ -1502,6 +1502,10 @@ function Index() {
               />
             </div>
             <div className="grid gap-2">
+              <Label>Meu tier</Label>
+              <TierPicker value={editTier} onChange={setEditTier} />
+            </div>
+            <div className="grid gap-2">
               <Label>Temporadas</Label>
               {editSeasons.length === 0 ? (
                 <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
