@@ -290,7 +290,7 @@ function WatchedPage() {
         ) : (
           <ul className="grid gap-3">
             {watched.map((anime) => {
-              const p = mediaPessoal(anime.seasons);
+              const t = anime.tier;
               return (
                 <li
                   key={anime.id}
@@ -317,19 +317,18 @@ function WatchedPage() {
                       {anime.seasons.length}{" "}
                       {anime.seasons.length === 1 ? "temporada" : "temporadas"}
                     </p>
-                    <div className="mt-1 flex items-center gap-1">
-                      {p === null ? (
-                        <>
-                          <Star className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span className="text-xs font-medium tabular-nums text-muted-foreground">
-                            Sem nota
-                          </span>
-                        </>
+                    <div className="mt-1 flex items-center gap-2">
+                      {t === null ? (
+                        <span className="text-xs font-medium text-muted-foreground">
+                          Sem nota
+                        </span>
                       ) : (
                         <>
-                          <Star className={`h-3.5 w-3.5 ${rankColor(p)}`} fill="currentColor" />
-                          <span className={`text-xs font-bold tabular-nums ${rankColor(p)}`}>
-                            {p.toFixed(2)}
+                          <span className={`font-display text-xl font-bold leading-none ${tierColor(t)}`}>
+                            {t}
+                          </span>
+                          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                            Tier
                           </span>
                         </>
                       )}
