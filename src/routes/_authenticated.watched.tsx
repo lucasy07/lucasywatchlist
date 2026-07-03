@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   Tv,
   Sparkles,
-  Star,
   Undo2,
   Trash2,
   Pencil,
