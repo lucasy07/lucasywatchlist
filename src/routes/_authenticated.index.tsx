@@ -464,7 +464,6 @@ function Index() {
 
   async function addSeason() {
     const name = seasonName.trim();
-    const rating = parseFloat(seasonRating.replace(",", "."));
     if (!seasonAnimeId) {
       toast.error("Selecione um anime");
       return;
@@ -473,19 +472,27 @@ function Index() {
       toast.error("Informe o nome da temporada");
       return;
     }
-    if (Number.isNaN(rating) || rating < 0 || rating > 10) {
-      toast.error("A nota deve estar entre 0 e 10");
-      return;
-    }
     const target = animes.find((a) => a.id === seasonAnimeId);
     if (!target) return;
-    const newSeasons = [...target.seasons, { id: uid(), name, rating }];
+    const newSeasons = [...target.seasons, { id: uid(), name, rating: null }];
     setAnimes((prev) =>
       prev.map((a) => (a.id === seasonAnimeId ? { ...a, seasons: newSeasons } : a)),
     );
     setSeasonDialogOpen(false);
     toast.success("Temporada adicionada");
     await persistSeasons(seasonAnimeId, newSeasons);
+  }
+
+  async function setAnimeTier(animeId: string, tier: Tier | null) {
+    const prev = animes;
+    setAnimes((p) => p.map((a) => (a.id === animeId ? { ...a, tier } : a)));
+    try {
+      await updateTier(animeId, tier);
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao salvar tier");
+      setAnimes(prev);
+    }
   }
 
   async function deleteAnime(id: string) {
