@@ -1385,18 +1385,8 @@ function Index() {
                 id="season-name"
                 value={seasonName}
                 onChange={(e) => setSeasonName(e.target.value)}
-                placeholder="Ex: Temporada 1"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="season-rating">Nota (0 - 10)</Label>
-              <Input
-                id="season-rating"
-                value={seasonRating}
-                onChange={(e) => setSeasonRating(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addSeason()}
-                inputMode="decimal"
-                placeholder="8.5"
+                placeholder="Ex: Temporada 1"
               />
             </div>
           </div>
