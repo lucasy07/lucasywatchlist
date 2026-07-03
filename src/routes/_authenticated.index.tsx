@@ -1083,31 +1083,6 @@ function Index() {
                                   )}
                                 </p>
                               </div>
-                              <Input
-                                type="number"
-                                inputMode="decimal"
-                                step="0.1"
-                                min={0}
-                                max={10}
-                                placeholder="—"
-                                defaultValue={s.rating != null ? String(s.rating) : ""}
-                                onBlur={(e) => {
-                                  const raw = e.currentTarget.value.trim().replace(",", ".");
-                                  if (raw === "") {
-                                    if (s.rating !== null) updateSeasonRating(anime.id, s.id, null);
-                                    return;
-                                  }
-                                  const v = parseFloat(raw);
-                                  if (Number.isNaN(v) || v < 0 || v > 10) {
-                                    toast.error("A nota deve estar entre 0 e 10");
-                                    e.currentTarget.value = s.rating != null ? String(s.rating) : "";
-                                    return;
-                                  }
-                                  if (v !== s.rating) updateSeasonRating(anime.id, s.id, v);
-                                }}
-                                className="h-8 w-20 text-center text-sm tabular-nums"
-                                aria-label={`Minha nota para ${s.name}`}
-                              />
                               <Button
                                 variant="ghost"
                                 size="icon"
