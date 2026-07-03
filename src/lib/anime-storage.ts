@@ -10,6 +10,18 @@ export type Season = {
   malScore?: number | null;
 };
 
+export type Tier = "S" | "A" | "B" | "C" | "D";
+
+export const TIER_VALUE: Record<Tier, number> = { S: 5, A: 4, B: 3, C: 2, D: 1 };
+
+export function tierFromAverage(avg: number): Tier {
+  if (avg >= 9) return "S";
+  if (avg >= 8) return "A";
+  if (avg >= 7) return "B";
+  if (avg >= 5) return "C";
+  return "D";
+}
+
 export type UpcomingSeason = {
   title: string;
   /** ISO date string (YYYY-MM-DD) */
@@ -26,6 +38,7 @@ export type Anime = {
   malId?: number | null;
   imageUrl?: string | null;
   malScore?: number | null;
+  tier: Tier | null;
 };
 
 /** Legacy localStorage key — used only for one-time auto-import. */
