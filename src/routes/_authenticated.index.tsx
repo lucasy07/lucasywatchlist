@@ -919,13 +919,11 @@ function Index() {
         ) : (
           <ul className="grid gap-4">
             {ranked.map((anime, idx) => {
-              const personalAvg = mediaPessoal(anime.seasons);
               const malAvg = mediaMAL(anime.seasons);
-              const primary = sortMode === "mal" ? malAvg : personalAvg;
-              const secondary = sortMode === "mal" ? personalAvg : malAvg;
-              const primaryLabel = sortMode === "mal" ? "MAL" : "Minha";
-              const primaryValue = primary != null ? primary.toFixed(2) : "—";
-              const primaryColor = primary != null ? rankColor(primary) : "text-muted-foreground";
+              const primaryIsTier = sortMode === "personal";
+              const primaryTier = anime.tier;
+              const primaryValue = malAvg != null ? malAvg.toFixed(2) : "—";
+              const primaryColor = malAvg != null ? rankColor(malAvg) : "text-muted-foreground";
               const isOpen = expanded[anime.id] ?? false;
               return (
                 <li
@@ -980,20 +978,36 @@ function Index() {
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-1">
-                      <div className="flex items-baseline gap-1">
-                        <span className="font-display text-2xl font-bold tabular-nums text-gold-gradient sm:text-3xl">
-                          {primaryValue}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">/10</span>
-                      </div>
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                        {primaryLabel}
-                      </span>
-                      {secondary != null && (
-                        <Badge variant="outline" className="gap-1 border-primary/30 px-1.5 py-0 text-[10px] text-foreground/80">
-                          <Star className="h-2.5 w-2.5 text-primary" fill="currentColor" />
-                          {sortMode === "mal" ? "Minha" : "MAL"} {secondary.toFixed(2)}
-                        </Badge>
+                      {primaryIsTier ? (
+                        <>
+                          <span className={`font-display text-3xl font-bold sm:text-4xl ${tierColor(primaryTier)}`}>
+                            {primaryTier ?? "—"}
+                          </span>
+                          <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                            Tier
+                          </span>
+                          {malAvg != null && (
+                            <Badge variant="outline" className="gap-1 border-primary/30 px-1.5 py-0 text-[10px] text-foreground/80">
+                              <Star className="h-2.5 w-2.5 text-primary" fill="currentColor" />
+                              MAL {malAvg.toFixed(2)}
+                            </Badge>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-baseline gap-1">
+                            <span className={`font-display text-2xl font-bold tabular-nums sm:text-3xl ${primaryColor}`}>
+                              {primaryValue}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">/10</span>
+                          </div>
+                          <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                            MAL
+                          </span>
+                          <Badge variant="outline" className="gap-1 border-primary/30 px-1.5 py-0 text-[10px] text-foreground/80">
+                            Tier {anime.tier ?? "—"}
+                          </Badge>
+                        </>
                       )}
                     </div>
                     <Button
