@@ -202,7 +202,7 @@ function WatchedPage() {
   }
 
   function addEditSeason() {
-    setEditSeasons((prev) => [...prev, { id: uid(), name: "", rating: 0 }]);
+    setEditSeasons((prev) => [...prev, { id: uid(), name: "", rating: null }]);
   }
 
   async function saveEdit() {
@@ -217,16 +217,15 @@ function WatchedPage() {
         toast.error("Toda temporada precisa de nome");
         return;
       }
-      if (s.rating !== null && (Number.isNaN(s.rating) || s.rating < 0 || s.rating > 10)) {
-        toast.error(`Nota inválida em "${s.name}"`);
-        return;
-      }
     }
     const cleaned = editSeasons.map((s) => ({ ...s, name: s.name.trim() }));
     const original = animes.find((a) => a.id === editAnimeId);
+    const nextTier = editTier;
     setAnimes((prev) =>
       prev.map((a) =>
-        a.id === editAnimeId ? { ...a, name, cover: editCover, seasons: cleaned } : a,
+        a.id === editAnimeId
+          ? { ...a, name, cover: editCover, seasons: cleaned, tier: nextTier }
+          : a,
       ),
     );
     setEditDialogOpen(false);
@@ -236,6 +235,9 @@ function WatchedPage() {
         tasks.push(updateAnime(editAnimeId, { name, cover: editCover ?? null }));
       }
       tasks.push(updateSeasons(editAnimeId, cleaned));
+      if (!original || original.tier !== nextTier) {
+        tasks.push(updateTier(editAnimeId, nextTier));
+      }
       await Promise.all(tasks);
       toast.success("Alterações salvas");
     } catch {
