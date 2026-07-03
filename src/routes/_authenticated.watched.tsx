@@ -133,7 +133,11 @@ function WatchedPage() {
   const watched = useMemo(() => {
     return animes
       .filter((a) => a.watched)
-      .sort((a, b) => average(b.seasons) - average(a.seasons));
+      .sort((a, b) => {
+        const va = a.tier ? TIER_VALUE[a.tier] : 0;
+        const vb = b.tier ? TIER_VALUE[b.tier] : 0;
+        return vb - va;
+      });
   }, [animes]);
 
   async function unmark(id: string) {
