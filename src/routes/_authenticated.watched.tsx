@@ -104,6 +104,7 @@ function WatchedPage() {
   const [editName, setEditName] = useState("");
   const [editCover, setEditCover] = useState<string | undefined>(undefined);
   const [editSeasons, setEditSeasons] = useState<Season[]>([]);
+  const [editTier, setEditTier] = useState<Tier | null>(null);
   const editCoverInputRef = useRef<HTMLInputElement>(null);
 
   // Upcoming dialog
