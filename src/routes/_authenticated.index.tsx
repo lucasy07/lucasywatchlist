@@ -1509,18 +1509,6 @@ function Index() {
                         placeholder="Nome"
                         className="flex-1"
                       />
-                      <Input
-                        value={s.rating == null ? "" : String(s.rating)}
-                        onChange={(e) => {
-                          const raw = e.target.value.trim();
-                          if (raw === "") return updateEditSeason(s.id, { rating: null });
-                          const v = parseFloat(raw.replace(",", "."));
-                          updateEditSeason(s.id, { rating: Number.isNaN(v) ? null : v });
-                        }}
-                        inputMode="decimal"
-                        placeholder="0-10"
-                        className="w-20"
-                      />
                       <Button
                         type="button"
                         variant="ghost"
