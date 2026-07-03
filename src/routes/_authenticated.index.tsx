@@ -1635,7 +1635,7 @@ function TierPicker({
   );
 }
 
-
+function EmptyState({ onAdd, hasAnimes }: { onAdd: () => void; hasAnimes: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
       <div
