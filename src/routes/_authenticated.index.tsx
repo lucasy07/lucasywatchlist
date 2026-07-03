@@ -785,13 +785,11 @@ function Index() {
         ) : viewMode === "grid" ? (
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
             {ranked.map((anime, idx) => {
-              const personalAvg = mediaPessoal(anime.seasons);
               const malAvg = mediaMAL(anime.seasons);
-              const primary = sortMode === "mal" ? malAvg : personalAvg;
-              const secondary = sortMode === "mal" ? personalAvg : malAvg;
-              const primaryLabel = sortMode === "mal" ? "MAL" : "Minha";
-              const primaryValue = primary != null ? primary.toFixed(2) : "—";
-              const primaryColor = primary != null ? rankColor(primary) : "text-muted-foreground";
+              const primaryIsTier = sortMode === "personal";
+              const primaryTier = anime.tier;
+              const primaryValue = malAvg != null ? malAvg.toFixed(2) : "—";
+              const primaryColor = malAvg != null ? rankColor(malAvg) : "text-muted-foreground";
               return (
                 <li
                   key={anime.id}
@@ -822,21 +820,38 @@ function Index() {
                       #{idx + 1}
                     </div>
                     <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
-                      <div className="flex items-baseline gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
-                        <span className="font-display text-sm font-bold tabular-nums text-gold-gradient">
-                          {primaryValue}
-                        </span>
-                        <span className="text-[9px] text-muted-foreground">/10</span>
-                      </div>
-                      {secondary != null && (
-                        <Badge
-                          variant="outline"
-                          className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
-                        >
-                          <Star className="h-2.5 w-2.5 text-primary" fill="currentColor" />
-                          {sortMode === "mal" ? "Minha" : "MAL"} {secondary.toFixed(2)}
-                        </Badge>
+                      {primaryIsTier ? (
+                        <div className="flex items-center gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
+                          <span className={`font-display text-sm font-bold ${tierColor(primaryTier)}`}>
+                            {primaryTier ?? "—"}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-baseline gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
+                          <span className={`font-display text-sm font-bold tabular-nums ${primaryColor}`}>
+                            {primaryValue}
+                          </span>
+                          <span className="text-[9px] text-muted-foreground">/10</span>
+                        </div>
                       )}
+                      {primaryIsTier
+                        ? malAvg != null && (
+                            <Badge
+                              variant="outline"
+                              className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
+                            >
+                              <Star className="h-2.5 w-2.5 text-primary" fill="currentColor" />
+                              MAL {malAvg.toFixed(2)}
+                            </Badge>
+                          )
+                        : (
+                          <Badge
+                            variant="outline"
+                            className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
+                          >
+                            Tier {anime.tier ?? "—"}
+                          </Badge>
+                        )}
                     </div>
                     {anime.upcoming?.releaseDate && (
                       <Link
