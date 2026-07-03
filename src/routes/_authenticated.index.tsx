@@ -139,7 +139,7 @@ function Index() {
   const [seasonDialogOpen, setSeasonDialogOpen] = useState(false);
   const [seasonAnimeId, setSeasonAnimeId] = useState<string>("");
   const [seasonName, setSeasonName] = useState("");
-  const [seasonRating, setSeasonRating] = useState("");
+  
 
   // Upcoming season dialog
   const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
