@@ -1056,6 +1056,15 @@ function Index() {
 
                   {isOpen && (
                     <div className="border-t border-border bg-background/30 px-4 py-3 sm:px-5">
+                      <div className="mb-3 flex flex-wrap items-center gap-2">
+                        <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                          Meu tier
+                        </span>
+                        <TierPicker
+                          value={anime.tier}
+                          onChange={(t) => setAnimeTier(anime.id, t)}
+                        />
+                      </div>
                       {anime.seasons.length === 0 ? (
                         <p className="py-2 text-center text-sm text-muted-foreground">
                           Nenhuma temporada ainda
