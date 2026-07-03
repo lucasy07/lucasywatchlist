@@ -39,16 +39,17 @@ import { Toaster } from "@/components/ui/sonner";
 import {
   type Anime,
   type Season,
+  type Tier,
   fetchAnimes,
   setWatched,
   deleteAnime as deleteAnimeRow,
   updateAnime,
   updateSeasons,
-  average,
-  mediaPessoal,
-  rankColor,
+  updateTier,
+  TIER_VALUE,
   uid,
 } from "@/lib/anime-storage";
+import { TierPicker, tierColor } from "@/components/TierPicker";
 import { useAuth } from "@/auth/AuthProvider";
 import { UpcomingEditDialog } from "@/components/UpcomingEditDialog";
 
