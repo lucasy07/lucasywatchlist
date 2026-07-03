@@ -255,12 +255,12 @@ function Index() {
         if (mb === null) return -1;
         return mb - ma;
       }
-      const pa = mediaPessoal(a.seasons);
-      const pb = mediaPessoal(b.seasons);
-      if (pa === null && pb === null) return 0;
-      if (pa === null) return 1;
-      if (pb === null) return -1;
-      return pb - pa;
+      const va = a.tier ? TIER_VALUE[a.tier] : 0;
+      const vb = b.tier ? TIER_VALUE[b.tier] : 0;
+      if (va === 0 && vb === 0) return 0;
+      if (va === 0) return 1;
+      if (vb === 0) return -1;
+      return vb - va;
     });
   }, [animes, search, sortMode]);
 
