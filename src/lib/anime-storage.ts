@@ -148,11 +148,18 @@ export async function createAnime(input: {
       mal_id: input.malId ?? null,
       image_url: input.imageUrl ?? null,
       mal_score: input.malScore ?? null,
+      tier: null,
     })
-    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score")
+    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier")
     .single();
   if (error) throw error;
   return rowToAnime(data as DbRow);
+}
+
+
+export async function updateTier(id: string, tier: Tier | null): Promise<void> {
+  const { error } = await supabase.from("animes").update({ tier }).eq("id", id);
+  if (error) throw error;
 }
 
 
