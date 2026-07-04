@@ -773,30 +773,7 @@ function Index() {
 
       {/* List */}
       <main className="mx-auto max-w-5xl px-4 pb-32 pt-6 sm:px-6">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <ToggleGroup
-            type="single"
-            value={sortMode}
-            onValueChange={(v) => {
-              if (v === "mal" || v === "personal") setSortMode(v);
-            }}
-            className="rounded-lg border border-border/60 bg-card p-0.5"
-          >
-            <ToggleGroupItem
-              value="mal"
-              aria-label="Ordenar por nota MAL"
-              className="h-8 px-3 text-xs font-medium text-muted-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-            >
-              MAL
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              value="personal"
-              aria-label="Ordenar por minhas notas"
-              className="h-8 px-3 text-xs font-medium text-muted-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-            >
-              Minhas notas
-            </ToggleGroupItem>
-          </ToggleGroup>
+        <div className="mb-4 flex items-center justify-end gap-3">
           <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
             {ranked.length} {ranked.length === 1 ? "anime" : "animes"}
           </p>
