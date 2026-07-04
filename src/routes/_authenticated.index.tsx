@@ -901,8 +901,6 @@ function Index() {
           <ul className="grid gap-4">
             {ranked.map((anime, idx) => {
               const malAvg = mediaMAL(anime.seasons);
-              const primaryIsTier = sortMode === "personal";
-              const primaryTier = anime.tier;
               const primaryValue = malAvg != null ? malAvg.toFixed(2) : "—";
               const primaryColor = malAvg != null ? rankColor(malAvg) : "text-muted-foreground";
               const isOpen = expanded[anime.id] ?? false;
