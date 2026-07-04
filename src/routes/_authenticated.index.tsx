@@ -787,8 +787,6 @@ function Index() {
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
             {ranked.map((anime, idx) => {
               const malAvg = mediaMAL(anime.seasons);
-              const primaryIsTier = sortMode === "personal";
-              const primaryTier = anime.tier;
               const primaryValue = malAvg != null ? malAvg.toFixed(2) : "—";
               const primaryColor = malAvg != null ? rankColor(malAvg) : "text-muted-foreground";
               return (
