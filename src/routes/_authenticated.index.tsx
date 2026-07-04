@@ -52,13 +52,13 @@ import {
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Badge } from "@/components/ui/badge";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
 import {
   type Anime,
   type Season,
   type Tier,
   type UpcomingSeason,
-  TIER_VALUE,
+  
   tierFromAverage,
   fetchAnimes,
   createAnime,
@@ -121,7 +121,7 @@ function Index() {
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
-  const [sortMode, setSortMode] = useState<"mal" | "personal">("mal");
+  
   const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
 
   // Add Anime dialog
@@ -183,9 +183,6 @@ function Index() {
     const savedView =
       typeof window !== "undefined" ? localStorage.getItem("anime-ranker:v1:view") : null;
     if (savedView === "grid" || savedView === "list") setViewMode(savedView);
-    const savedSort =
-      typeof window !== "undefined" ? localStorage.getItem("anime-ranker:v1:sort") : null;
-    if (savedSort === "mal" || savedSort === "personal") setSortMode(savedSort);
     return () => {
       cancelled = true;
     };
@@ -196,10 +193,8 @@ function Index() {
     localStorage.setItem("anime-ranker:v1:view", viewMode);
   }, [viewMode, hydrated]);
 
-  useEffect(() => {
-    if (!hydrated) return;
-    localStorage.setItem("anime-ranker:v1:sort", sortMode);
-  }, [sortMode, hydrated]);
+
+
 
   // Auto-backfill missing imageUrl from Jikan for older entries
   useEffect(() => {
@@ -281,22 +276,14 @@ function Index() {
         a.name.toLowerCase().includes(search.toLowerCase().trim()),
     );
     return [...filtered].sort((a, b) => {
-      if (sortMode === "mal") {
-        const ma = mediaMAL(a.seasons);
-        const mb = mediaMAL(b.seasons);
-        if (ma === null && mb === null) return 0;
-        if (ma === null) return 1;
-        if (mb === null) return -1;
-        return mb - ma;
-      }
-      const va = a.tier ? TIER_VALUE[a.tier] : 0;
-      const vb = b.tier ? TIER_VALUE[b.tier] : 0;
-      if (va === 0 && vb === 0) return 0;
-      if (va === 0) return 1;
-      if (vb === 0) return -1;
-      return vb - va;
+      const ma = mediaMAL(a.seasons);
+      const mb = mediaMAL(b.seasons);
+      if (ma === null && mb === null) return 0;
+      if (ma === null) return 1;
+      if (mb === null) return -1;
+      return mb - ma;
     });
-  }, [animes, search, sortMode]);
+  }, [animes, search]);
 
   const watchedCount = useMemo(() => animes.filter((a) => a.watched).length, [animes]);
 
@@ -786,30 +773,7 @@ function Index() {
 
       {/* List */}
       <main className="mx-auto max-w-5xl px-4 pb-32 pt-6 sm:px-6">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <ToggleGroup
-            type="single"
-            value={sortMode}
-            onValueChange={(v) => {
-              if (v === "mal" || v === "personal") setSortMode(v);
-            }}
-            className="rounded-lg border border-border/60 bg-card p-0.5"
-          >
-            <ToggleGroupItem
-              value="mal"
-              aria-label="Ordenar por nota MAL"
-              className="h-8 px-3 text-xs font-medium text-muted-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-            >
-              MAL
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              value="personal"
-              aria-label="Ordenar por minhas notas"
-              className="h-8 px-3 text-xs font-medium text-muted-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-            >
-              Minhas notas
-            </ToggleGroupItem>
-          </ToggleGroup>
+        <div className="mb-4 flex items-center justify-end gap-3">
           <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
             {ranked.length} {ranked.length === 1 ? "anime" : "animes"}
           </p>
@@ -823,8 +787,6 @@ function Index() {
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
             {ranked.map((anime, idx) => {
               const malAvg = mediaMAL(anime.seasons);
-              const primaryIsTier = sortMode === "personal";
-              const primaryTier = anime.tier;
               const primaryValue = malAvg != null ? malAvg.toFixed(2) : "—";
               const primaryColor = malAvg != null ? rankColor(malAvg) : "text-muted-foreground";
               return (
@@ -857,38 +819,20 @@ function Index() {
                       #{idx + 1}
                     </div>
                     <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
-                      {primaryIsTier ? (
-                        <div className="flex items-center gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
-                          <span className={`font-display text-sm font-bold ${tierColor(primaryTier)}`}>
-                            {primaryTier ?? "—"}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="flex items-baseline gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
-                          <span className={`font-display text-sm font-bold tabular-nums ${primaryColor}`}>
-                            {primaryValue}
-                          </span>
-                          <span className="text-[9px] text-muted-foreground">/10</span>
-                        </div>
-                      )}
-                      {primaryIsTier
-                        ? malAvg != null && (
-                            <Badge
-                              variant="outline"
-                              className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
-                            >
-                              <Star className="h-2.5 w-2.5 text-primary" fill="currentColor" />
-                              MAL {malAvg.toFixed(2)}
-                            </Badge>
-                          )
-                        : (
-                          <Badge
-                            variant="outline"
-                            className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
-                          >
-                            Tier {anime.tier ?? "—"}
-                          </Badge>
-                        )}
+                      <div className="flex items-baseline gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
+                        <span className={`font-display text-sm font-bold tabular-nums ${primaryColor}`}>
+                          {primaryValue}
+                        </span>
+                        <span className="text-[9px] text-muted-foreground">/10</span>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
+                      >
+                        <span className={`font-display font-bold ${tierColor(anime.tier)}`}>
+                          {anime.tier ?? "—"}
+                        </span>
+                      </Badge>
                     </div>
                     {anime.upcoming?.releaseDate && (
                       <Link
@@ -957,8 +901,6 @@ function Index() {
           <ul className="grid gap-4">
             {ranked.map((anime, idx) => {
               const malAvg = mediaMAL(anime.seasons);
-              const primaryIsTier = sortMode === "personal";
-              const primaryTier = anime.tier;
               const primaryValue = malAvg != null ? malAvg.toFixed(2) : "—";
               const primaryColor = malAvg != null ? rankColor(malAvg) : "text-muted-foreground";
               const isOpen = expanded[anime.id] ?? false;
@@ -1015,37 +957,20 @@ function Index() {
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-1">
-                      {primaryIsTier ? (
-                        <>
-                          <span className={`font-display text-3xl font-bold sm:text-4xl ${tierColor(primaryTier)}`}>
-                            {primaryTier ?? "—"}
-                          </span>
-                          <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                            Tier
-                          </span>
-                          {malAvg != null && (
-                            <Badge variant="outline" className="gap-1 border-primary/30 px-1.5 py-0 text-[10px] text-foreground/80">
-                              <Star className="h-2.5 w-2.5 text-primary" fill="currentColor" />
-                              MAL {malAvg.toFixed(2)}
-                            </Badge>
-                          )}
-                        </>
-                      ) : (
-                        <>
-                          <div className="flex items-baseline gap-1">
-                            <span className={`font-display text-2xl font-bold tabular-nums sm:text-3xl ${primaryColor}`}>
-                              {primaryValue}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground">/10</span>
-                          </div>
-                          <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                            MAL
-                          </span>
-                          <Badge variant="outline" className="gap-1 border-primary/30 px-1.5 py-0 text-[10px] text-foreground/80">
-                            Tier {anime.tier ?? "—"}
-                          </Badge>
-                        </>
-                      )}
+                      <div className="flex items-baseline gap-1">
+                        <span className={`font-display text-2xl font-bold tabular-nums sm:text-3xl ${primaryColor}`}>
+                          {primaryValue}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">/10</span>
+                      </div>
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                        MAL
+                      </span>
+                      <Badge variant="outline" className="gap-1 border-primary/30 px-1.5 py-0 text-[10px] text-foreground/80">
+                        <span className={`font-display font-bold ${tierColor(anime.tier)}`}>
+                          {anime.tier ?? "—"}
+                        </span>
+                      </Badge>
                     </div>
                     <Button
                       variant="ghost"
