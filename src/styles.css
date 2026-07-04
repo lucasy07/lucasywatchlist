@@ -120,7 +120,8 @@
 
 @utility font-display {
   font-family: var(--font-display);
-  letter-spacing: -0.015em;
+  letter-spacing: -0.022em;
+  font-feature-settings: "ss01", "cv11";
 }
 
 @utility text-gold-gradient {
