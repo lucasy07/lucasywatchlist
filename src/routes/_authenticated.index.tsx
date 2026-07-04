@@ -819,38 +819,20 @@ function Index() {
                       #{idx + 1}
                     </div>
                     <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
-                      {primaryIsTier ? (
-                        <div className="flex items-center gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
-                          <span className={`font-display text-sm font-bold ${tierColor(primaryTier)}`}>
-                            {primaryTier ?? "—"}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="flex items-baseline gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
-                          <span className={`font-display text-sm font-bold tabular-nums ${primaryColor}`}>
-                            {primaryValue}
-                          </span>
-                          <span className="text-[9px] text-muted-foreground">/10</span>
-                        </div>
-                      )}
-                      {primaryIsTier
-                        ? malAvg != null && (
-                            <Badge
-                              variant="outline"
-                              className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
-                            >
-                              <Star className="h-2.5 w-2.5 text-primary" fill="currentColor" />
-                              MAL {malAvg.toFixed(2)}
-                            </Badge>
-                          )
-                        : (
-                          <Badge
-                            variant="outline"
-                            className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
-                          >
-                            Tier {anime.tier ?? "—"}
-                          </Badge>
-                        )}
+                      <div className="flex items-baseline gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
+                        <span className={`font-display text-sm font-bold tabular-nums ${primaryColor}`}>
+                          {primaryValue}
+                        </span>
+                        <span className="text-[9px] text-muted-foreground">/10</span>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
+                      >
+                        <span className={`font-display font-bold ${tierColor(anime.tier)}`}>
+                          {anime.tier ?? "—"}
+                        </span>
+                      </Badge>
                     </div>
                     {anime.upcoming?.releaseDate && (
                       <Link
