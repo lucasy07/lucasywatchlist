@@ -183,9 +183,6 @@ function Index() {
     const savedView =
       typeof window !== "undefined" ? localStorage.getItem("anime-ranker:v1:view") : null;
     if (savedView === "grid" || savedView === "list") setViewMode(savedView);
-    const savedSort =
-      typeof window !== "undefined" ? localStorage.getItem("anime-ranker:v1:sort") : null;
-    if (savedSort === "mal" || savedSort === "personal") setSortMode(savedSort);
     return () => {
       cancelled = true;
     };
