@@ -276,22 +276,14 @@ function Index() {
         a.name.toLowerCase().includes(search.toLowerCase().trim()),
     );
     return [...filtered].sort((a, b) => {
-      if (sortMode === "mal") {
-        const ma = mediaMAL(a.seasons);
-        const mb = mediaMAL(b.seasons);
-        if (ma === null && mb === null) return 0;
-        if (ma === null) return 1;
-        if (mb === null) return -1;
-        return mb - ma;
-      }
-      const va = a.tier ? TIER_VALUE[a.tier] : 0;
-      const vb = b.tier ? TIER_VALUE[b.tier] : 0;
-      if (va === 0 && vb === 0) return 0;
-      if (va === 0) return 1;
-      if (vb === 0) return -1;
-      return vb - va;
+      const ma = mediaMAL(a.seasons);
+      const mb = mediaMAL(b.seasons);
+      if (ma === null && mb === null) return 0;
+      if (ma === null) return 1;
+      if (mb === null) return -1;
+      return mb - ma;
     });
-  }, [animes, search, sortMode]);
+  }, [animes, search]);
 
   const watchedCount = useMemo(() => animes.filter((a) => a.watched).length, [animes]);
 
