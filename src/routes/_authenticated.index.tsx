@@ -58,7 +58,7 @@ import {
   type Season,
   type Tier,
   type UpcomingSeason,
-  TIER_VALUE,
+  
   tierFromAverage,
   fetchAnimes,
   createAnime,
