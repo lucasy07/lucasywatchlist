@@ -8,6 +8,7 @@ export type ChainSeason = {
   year: number | null;
   malScore: number | null;
   imageUrl: string | null;
+  type: string | null;
 };
 
 type JikanRelation = {
