@@ -236,17 +236,21 @@ export function average(seasons: Season[]) {
   return rated.reduce((s, x) => s + x.rating, 0) / rated.length;
 }
 
-/** Arithmetic mean of user scores across rated seasons. null if none rated. */
+/** Arithmetic mean of user scores across rated seasons. OVAs excluded. null if none rated. */
 export function mediaPessoal(seasons: Season[]): number | null {
-  const rated = seasons.filter((s): s is Season & { rating: number } => typeof s.rating === "number");
+  const rated = seasons.filter(
+    (s): s is Season & { rating: number } =>
+      typeof s.rating === "number" && !isExcludedFromAverage(s),
+  );
   if (rated.length === 0) return null;
   return rated.reduce((s, x) => s + x.rating, 0) / rated.length;
 }
 
-/** Arithmetic mean of MAL scores across seasons. null if none. */
+/** Arithmetic mean of MAL scores across seasons. OVAs excluded. null if none. */
 export function mediaMAL(seasons: Season[]): number | null {
   const scored = seasons.filter(
-    (s): s is Season & { malScore: number } => typeof s.malScore === "number",
+    (s): s is Season & { malScore: number } =>
+      typeof s.malScore === "number" && !isExcludedFromAverage(s),
   );
   if (scored.length === 0) return null;
   return scored.reduce((s, x) => s + x.malScore, 0) / scored.length;
