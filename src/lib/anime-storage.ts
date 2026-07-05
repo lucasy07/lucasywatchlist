@@ -8,7 +8,14 @@ export type Season = {
   malId?: number | null;
   year?: number | null;
   malScore?: number | null;
+  /** Jikan/MAL type: TV, Movie, OVA, ONA, Special, Music, etc. */
+  type?: string | null;
 };
+
+/** OVAs are excluded from average calculations. */
+export function isExcludedFromAverage(season: Season): boolean {
+  return typeof season.type === "string" && season.type.toLowerCase() === "ova";
+}
 
 export type Tier = "S" | "A" | "B" | "C" | "D";
 
