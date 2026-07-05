@@ -379,6 +379,7 @@ function Index() {
           malId: s.malId,
           year: s.year,
           malScore: s.malScore,
+          type: s.type,
         }));
         const created = await createAnime({
           name: first.title,
