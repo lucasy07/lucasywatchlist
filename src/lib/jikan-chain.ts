@@ -8,6 +8,7 @@ export type ChainSeason = {
   year: number | null;
   malScore: number | null;
   imageUrl: string | null;
+  type: string | null;
 };
 
 type JikanRelation = {
@@ -121,6 +122,7 @@ export async function buildChain(
         malScore: d.score ?? null,
         imageUrl:
           d.images?.jpg?.large_image_url ?? d.images?.jpg?.image_url ?? null,
+        type: d.type,
       });
     }
     onProgress?.({ current: i + 1, total });
