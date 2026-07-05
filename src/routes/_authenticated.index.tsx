@@ -1065,7 +1065,31 @@ function Index() {
                             >
                               <Tv className="h-4 w-4 shrink-0 text-muted-foreground" />
                               <div className="min-w-0 flex-1">
-                                <p className="truncate text-sm">{s.name}</p>
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <p className="truncate text-sm">{s.name}</p>
+                                  {s.type && (
+                                    <Badge
+                                      variant="outline"
+                                      title={
+                                        s.type.toLowerCase() === "ova"
+                                          ? "OVA — fora da média"
+                                          : s.type
+                                      }
+                                      className={`px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wider ${
+                                        s.type.toLowerCase() === "ova"
+                                          ? "border-border/50 bg-muted/40 text-muted-foreground"
+                                          : "border-border/60 text-foreground/70"
+                                      }`}
+                                    >
+                                      {s.type}
+                                      {s.type.toLowerCase() === "ova" && (
+                                        <span className="ml-1 hidden sm:inline text-[8px] font-normal normal-case tracking-normal opacity-80">
+                                          fora da média
+                                        </span>
+                                      )}
+                                    </Badge>
+                                  )}
+                                </div>
                                 <p className="text-[11px] text-muted-foreground">
                                   {s.year ?? "Ano —"}
                                   {typeof s.malScore === "number" && (
