@@ -337,6 +337,7 @@ function Index() {
                 year: null,
                 malScore: pick.score,
                 imageUrl: pick.imageUrl,
+                type: null,
               },
             ];
       setChainSeasons(finalSeasons);
