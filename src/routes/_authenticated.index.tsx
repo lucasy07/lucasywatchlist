@@ -237,6 +237,57 @@ function Index() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated]);
 
+  // Auto-backfill missing season.type from Jikan (used to exclude OVAs from averages)
+  useEffect(() => {
+    if (!hydrated) return;
+    const targets = animes.filter((a) =>
+      a.seasons.some((s) => s.malId && (s.type == null || s.type === "")),
+    );
+    if (targets.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      for (const anime of targets) {
+        if (cancelled) return;
+        const seasons = [...anime.seasons];
+        let changed = false;
+        for (let i = 0; i < seasons.length; i++) {
+          if (cancelled) return;
+          const s = seasons[i];
+          if (!s.malId || (s.type != null && s.type !== "")) continue;
+          try {
+            const res = await fetch(`https://api.jikan.moe/v4/anime/${s.malId}`);
+            if (res.ok) {
+              const json = await res.json();
+              const t: string | null = json?.data?.type ?? null;
+              if (t) {
+                seasons[i] = { ...s, type: t };
+                changed = true;
+              }
+            }
+          } catch {
+            // ignore
+          }
+          await new Promise((r) => setTimeout(r, 400));
+        }
+        if (changed && !cancelled) {
+          try {
+            await updateSeasons(anime.id, seasons);
+            if (cancelled) return;
+            setAnimes((prev) =>
+              prev.map((a) => (a.id === anime.id ? { ...a, seasons } : a)),
+            );
+          } catch {
+            // ignore
+          }
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
+
   // One-time migration: derive tier from legacy per-season ratings.
   useEffect(() => {
     if (!hydrated) return;
