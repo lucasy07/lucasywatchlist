@@ -1720,6 +1720,79 @@ function Index() {
         </DialogContent>
       </Dialog>
 
+      {/* Check new seasons summary */}
+      <Dialog open={checkDialogOpen} onOpenChange={setCheckDialogOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-card">
+          <DialogHeader>
+            <DialogTitle>Novas temporadas</DialogTitle>
+            <DialogDescription>
+              Resultado da verificação a partir do MyAnimeList.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-6">
+            <section className="grid gap-2">
+              <h3 className="font-display text-xs uppercase tracking-widest text-muted-foreground">
+                Já disponíveis (adicionar)
+              </h3>
+              {foundAvailable.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
+                  Nada novo pra adicionar.
+                </p>
+              ) : (
+                <ul className="grid gap-2">
+                  {foundAvailable.map((f) => (
+                    <li
+                      key={`${f.parentId}-${f.malId}`}
+                      className="flex items-center gap-2 rounded-lg border border-border/60 bg-card-elevated p-2"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">{f.title}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">
+                          em {f.parentName}
+                          {f.type ? ` • ${f.type}` : ""}
+                          {f.year ? ` • ${f.year}` : ""}
+                        </p>
+                      </div>
+                      <Button size="sm" onClick={() => addFoundSeason(f)}>
+                        <Plus className="mr-1 h-3.5 w-3.5" /> Adicionar
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+            <section className="grid gap-2">
+              <h3 className="font-display text-xs uppercase tracking-widest text-muted-foreground">
+                Em breve (salvas em Upcoming)
+              </h3>
+              {foundUpcoming.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
+                  Nenhuma continuação futura encontrada.
+                </p>
+              ) : (
+                <ul className="grid gap-2">
+                  {foundUpcoming.map((u) => (
+                    <li
+                      key={`${u.parentId}-${u.title}`}
+                      className="rounded-lg border border-border/60 bg-card-elevated p-2"
+                    >
+                      <p className="truncate text-sm font-medium">{u.title}</p>
+                      <p className="truncate text-[11px] text-muted-foreground">
+                        em {u.parentName} • {formatDateBR(u.releaseDate)} •{" "}
+                        {formatReleaseLabel(u.releaseDate)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setCheckDialogOpen(false)}>Fechar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <AlertDialog
         open={confirmDelete !== null}
         onOpenChange={(open) => !open && setConfirmDelete(null)}
