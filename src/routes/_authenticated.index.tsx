@@ -161,6 +161,26 @@ function Index() {
   const [editTier, setEditTier] = useState<Tier | null>(null);
   const editCoverInputRef = useRef<HTMLInputElement>(null);
 
+  // Check for new seasons
+  type FoundSeason = {
+    parentId: string;
+    parentName: string;
+    malId: number;
+    title: string;
+    malScore: number | null;
+    imageUrl: string | null;
+    type: string | null;
+    year: number | null;
+  };
+  const [checking, setChecking] = useState(false);
+  const [checkProgress, setCheckProgress] = useState<{ current: number; total: number } | null>(null);
+  const [checkDialogOpen, setCheckDialogOpen] = useState(false);
+  const [foundAvailable, setFoundAvailable] = useState<FoundSeason[]>([]);
+  const [foundUpcoming, setFoundUpcoming] = useState<
+    Array<{ parentId: string; parentName: string; title: string; releaseDate: string }>
+  >([]);
+
+
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
