@@ -9,6 +9,8 @@ export type ChainSeason = {
   malScore: number | null;
   imageUrl: string | null;
   type: string | null;
+  status: string | null;
+  airedFrom: string | null;
 };
 
 type JikanRelation = {
