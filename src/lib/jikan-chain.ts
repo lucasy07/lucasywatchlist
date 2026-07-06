@@ -22,6 +22,7 @@ type JikanFull = {
   mal_id: number;
   title: string;
   type: string | null;
+  status: string | null;
   year: number | null;
   score: number | null;
   aired?: { from?: string | null } | null;
