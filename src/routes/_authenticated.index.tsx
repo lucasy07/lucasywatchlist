@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   Pencil,
   Image as ImageIcon,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -159,6 +160,26 @@ function Index() {
   const [editSeasons, setEditSeasons] = useState<Season[]>([]);
   const [editTier, setEditTier] = useState<Tier | null>(null);
   const editCoverInputRef = useRef<HTMLInputElement>(null);
+
+  // Check for new seasons
+  type FoundSeason = {
+    parentId: string;
+    parentName: string;
+    malId: number;
+    title: string;
+    malScore: number | null;
+    imageUrl: string | null;
+    type: string | null;
+    year: number | null;
+  };
+  const [checking, setChecking] = useState(false);
+  const [checkProgress, setCheckProgress] = useState<{ current: number; total: number } | null>(null);
+  const [checkDialogOpen, setCheckDialogOpen] = useState(false);
+  const [foundAvailable, setFoundAvailable] = useState<FoundSeason[]>([]);
+  const [foundUpcoming, setFoundUpcoming] = useState<
+    Array<{ parentId: string; parentName: string; title: string; releaseDate: string }>
+  >([]);
+
 
   useEffect(() => {
     if (!user) return;
@@ -389,6 +410,8 @@ function Index() {
                 malScore: pick.score,
                 imageUrl: pick.imageUrl,
                 type: null,
+                status: null,
+                airedFrom: null,
               },
             ];
       setChainSeasons(finalSeasons);
@@ -599,6 +622,131 @@ function Index() {
       },
     });
   }
+
+  async function checkNewSeasons() {
+    if (checking) return;
+    const targets = animes.filter((a) => typeof a.malId === "number" && a.malId !== null);
+    if (targets.length === 0) {
+      toast.error("Nenhum anime com vínculo ao MAL");
+      return;
+    }
+    const existing = new Set<number>();
+    for (const a of animes) {
+      if (a.malId) existing.add(a.malId);
+      for (const s of a.seasons) if (s.malId) existing.add(s.malId);
+    }
+    const available: FoundSeason[] = [];
+    const upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }> = [];
+    setChecking(true);
+    setCheckProgress({ current: 0, total: targets.length });
+    try {
+      for (let i = 0; i < targets.length; i++) {
+        const a = targets[i];
+        setCheckProgress({ current: i + 1, total: targets.length });
+        try {
+          const chain = await buildChain(a.malId!);
+          for (const s of chain) {
+            if (existing.has(s.malId)) continue;
+            existing.add(s.malId);
+            const notAired =
+              typeof s.status === "string" && s.status.toLowerCase().includes("not yet");
+            if (notAired) {
+              const iso = s.airedFrom
+                ? s.airedFrom.slice(0, 10)
+                : s.year
+                  ? `${s.year}-01-01`
+                  : null;
+              if (!iso) continue;
+              // Read latest upcoming from state via functional update pattern
+              let shouldSave = false;
+              const current = a.upcoming;
+              if (!current) shouldSave = true;
+              else {
+                const cur = new Date(current.releaseDate).getTime();
+                const nu = new Date(iso).getTime();
+                if (Number.isFinite(nu) && Number.isFinite(cur) && nu < cur) shouldSave = true;
+              }
+              if (shouldSave) {
+                const upcoming = { title: s.title, releaseDate: iso };
+                try {
+                  await updateUpcoming(a.id, upcoming);
+                  setAnimes((prev) => prev.map((x) => (x.id === a.id ? { ...x, upcoming } : x)));
+                  a.upcoming = upcoming;
+                  upcomingSaved.push({
+                    parentId: a.id,
+                    parentName: a.name,
+                    title: s.title,
+                    releaseDate: iso,
+                  });
+                } catch (err) {
+                  console.error(err);
+                }
+              }
+            } else {
+              available.push({
+                parentId: a.id,
+                parentName: a.name,
+                malId: s.malId,
+                title: s.title,
+                malScore: s.malScore,
+                imageUrl: s.imageUrl,
+                type: s.type,
+                year: s.year,
+              });
+            }
+          }
+        } catch (err) {
+          console.error("check chain failed for", a.name, err);
+          // skip and continue
+        }
+      }
+    } finally {
+      setChecking(false);
+      setCheckProgress(null);
+    }
+    if (available.length === 0 && upcomingSaved.length === 0) {
+      toast("Nenhuma temporada nova encontrada");
+      return;
+    }
+    setFoundAvailable(available);
+    setFoundUpcoming(upcomingSaved);
+    setCheckDialogOpen(true);
+  }
+
+  async function addFoundSeason(found: FoundSeason) {
+    const target = animes.find((a) => a.id === found.parentId);
+    if (!target) return;
+    if (target.seasons.some((s) => s.malId === found.malId)) {
+      setFoundAvailable((prev) => prev.filter((f) => f.malId !== found.malId));
+      return;
+    }
+    const newSeason: Season = {
+      id: uid(),
+      name: found.title,
+      rating: null,
+      malId: found.malId,
+      year: found.year,
+      malScore: found.malScore,
+      type: found.type,
+    };
+    const newSeasons = [...target.seasons, newSeason];
+    setAnimes((prev) =>
+      prev.map((a) => (a.id === found.parentId ? { ...a, seasons: newSeasons } : a)),
+    );
+    setFoundAvailable((prev) => prev.filter((f) => f.malId !== found.malId));
+    try {
+      await updateSeasons(found.parentId, newSeasons);
+      toast.success(`"${found.title}" adicionada`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao adicionar temporada");
+      setAnimes((prev) =>
+        prev.map((a) => (a.id === found.parentId ? { ...a, seasons: target.seasons } : a)),
+      );
+    }
+  }
+
+
 
 
   function toggleExpand(id: string) {
@@ -826,11 +974,24 @@ function Index() {
 
       {/* List */}
       <main className="mx-auto max-w-5xl px-4 pb-32 pt-6 sm:px-6">
-        <div className="mb-4 flex items-center justify-end gap-3">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={checkNewSeasons}
+            disabled={checking || animes.length === 0}
+            className="h-8 gap-1.5 text-xs"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${checking ? "animate-spin" : ""}`} />
+            {checking && checkProgress
+              ? `Verificando ${checkProgress.current}/${checkProgress.total}`
+              : "Verificar novas temporadas"}
+          </Button>
           <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
             {ranked.length} {ranked.length === 1 ? "anime" : "animes"}
           </p>
         </div>
+
 
         {!hydrated ? (
           <p className="py-20 text-center text-sm text-muted-foreground">Carregando...</p>
@@ -1555,6 +1716,79 @@ function Index() {
               Cancelar
             </Button>
             <Button onClick={saveEdit}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Check new seasons summary */}
+      <Dialog open={checkDialogOpen} onOpenChange={setCheckDialogOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-card">
+          <DialogHeader>
+            <DialogTitle>Novas temporadas</DialogTitle>
+            <DialogDescription>
+              Resultado da verificação a partir do MyAnimeList.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-6">
+            <section className="grid gap-2">
+              <h3 className="font-display text-xs uppercase tracking-widest text-muted-foreground">
+                Já disponíveis (adicionar)
+              </h3>
+              {foundAvailable.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
+                  Nada novo pra adicionar.
+                </p>
+              ) : (
+                <ul className="grid gap-2">
+                  {foundAvailable.map((f) => (
+                    <li
+                      key={`${f.parentId}-${f.malId}`}
+                      className="flex items-center gap-2 rounded-lg border border-border/60 bg-card-elevated p-2"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">{f.title}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">
+                          em {f.parentName}
+                          {f.type ? ` • ${f.type}` : ""}
+                          {f.year ? ` • ${f.year}` : ""}
+                        </p>
+                      </div>
+                      <Button size="sm" onClick={() => addFoundSeason(f)}>
+                        <Plus className="mr-1 h-3.5 w-3.5" /> Adicionar
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+            <section className="grid gap-2">
+              <h3 className="font-display text-xs uppercase tracking-widest text-muted-foreground">
+                Em breve (salvas em Upcoming)
+              </h3>
+              {foundUpcoming.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
+                  Nenhuma continuação futura encontrada.
+                </p>
+              ) : (
+                <ul className="grid gap-2">
+                  {foundUpcoming.map((u) => (
+                    <li
+                      key={`${u.parentId}-${u.title}`}
+                      className="rounded-lg border border-border/60 bg-card-elevated p-2"
+                    >
+                      <p className="truncate text-sm font-medium">{u.title}</p>
+                      <p className="truncate text-[11px] text-muted-foreground">
+                        em {u.parentName} • {formatDateBR(u.releaseDate)} •{" "}
+                        {formatReleaseLabel(u.releaseDate)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setCheckDialogOpen(false)}>Fechar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
