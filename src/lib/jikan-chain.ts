@@ -126,6 +126,8 @@ export async function buildChain(
         imageUrl:
           d.images?.jpg?.large_image_url ?? d.images?.jpg?.image_url ?? null,
         type: d.type,
+        status: d.status ?? null,
+        airedFrom: d.aired?.from ?? null,
       });
     }
     onProgress?.({ current: i + 1, total });
