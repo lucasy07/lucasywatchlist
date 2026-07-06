@@ -389,6 +389,8 @@ function Index() {
                 malScore: pick.score,
                 imageUrl: pick.imageUrl,
                 type: null,
+                status: null,
+                airedFrom: null,
               },
             ];
       setChainSeasons(finalSeasons);
