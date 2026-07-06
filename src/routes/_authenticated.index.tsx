@@ -623,6 +623,131 @@ function Index() {
     });
   }
 
+  async function checkNewSeasons() {
+    if (checking) return;
+    const targets = animes.filter((a) => typeof a.malId === "number" && a.malId !== null);
+    if (targets.length === 0) {
+      toast.error("Nenhum anime com vínculo ao MAL");
+      return;
+    }
+    const existing = new Set<number>();
+    for (const a of animes) {
+      if (a.malId) existing.add(a.malId);
+      for (const s of a.seasons) if (s.malId) existing.add(s.malId);
+    }
+    const available: FoundSeason[] = [];
+    const upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }> = [];
+    setChecking(true);
+    setCheckProgress({ current: 0, total: targets.length });
+    try {
+      for (let i = 0; i < targets.length; i++) {
+        const a = targets[i];
+        setCheckProgress({ current: i + 1, total: targets.length });
+        try {
+          const chain = await buildChain(a.malId!);
+          for (const s of chain) {
+            if (existing.has(s.malId)) continue;
+            existing.add(s.malId);
+            const notAired =
+              typeof s.status === "string" && s.status.toLowerCase().includes("not yet");
+            if (notAired) {
+              const iso = s.airedFrom
+                ? s.airedFrom.slice(0, 10)
+                : s.year
+                  ? `${s.year}-01-01`
+                  : null;
+              if (!iso) continue;
+              // Read latest upcoming from state via functional update pattern
+              let shouldSave = false;
+              const current = a.upcoming;
+              if (!current) shouldSave = true;
+              else {
+                const cur = new Date(current.releaseDate).getTime();
+                const nu = new Date(iso).getTime();
+                if (Number.isFinite(nu) && Number.isFinite(cur) && nu < cur) shouldSave = true;
+              }
+              if (shouldSave) {
+                const upcoming = { title: s.title, releaseDate: iso };
+                try {
+                  await updateUpcoming(a.id, upcoming);
+                  setAnimes((prev) => prev.map((x) => (x.id === a.id ? { ...x, upcoming } : x)));
+                  a.upcoming = upcoming;
+                  upcomingSaved.push({
+                    parentId: a.id,
+                    parentName: a.name,
+                    title: s.title,
+                    releaseDate: iso,
+                  });
+                } catch (err) {
+                  console.error(err);
+                }
+              }
+            } else {
+              available.push({
+                parentId: a.id,
+                parentName: a.name,
+                malId: s.malId,
+                title: s.title,
+                malScore: s.malScore,
+                imageUrl: s.imageUrl,
+                type: s.type,
+                year: s.year,
+              });
+            }
+          }
+        } catch (err) {
+          console.error("check chain failed for", a.name, err);
+          // skip and continue
+        }
+      }
+    } finally {
+      setChecking(false);
+      setCheckProgress(null);
+    }
+    if (available.length === 0 && upcomingSaved.length === 0) {
+      toast("Nenhuma temporada nova encontrada");
+      return;
+    }
+    setFoundAvailable(available);
+    setFoundUpcoming(upcomingSaved);
+    setCheckDialogOpen(true);
+  }
+
+  async function addFoundSeason(found: FoundSeason) {
+    const target = animes.find((a) => a.id === found.parentId);
+    if (!target) return;
+    if (target.seasons.some((s) => s.malId === found.malId)) {
+      setFoundAvailable((prev) => prev.filter((f) => f.malId !== found.malId));
+      return;
+    }
+    const newSeason: Season = {
+      id: uid(),
+      name: found.title,
+      rating: null,
+      malId: found.malId,
+      year: found.year,
+      malScore: found.malScore,
+      type: found.type,
+    };
+    const newSeasons = [...target.seasons, newSeason];
+    setAnimes((prev) =>
+      prev.map((a) => (a.id === found.parentId ? { ...a, seasons: newSeasons } : a)),
+    );
+    setFoundAvailable((prev) => prev.filter((f) => f.malId !== found.malId));
+    try {
+      await updateSeasons(found.parentId, newSeasons);
+      toast.success(`"${found.title}" adicionada`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao adicionar temporada");
+      setAnimes((prev) =>
+        prev.map((a) => (a.id === found.parentId ? { ...a, seasons: target.seasons } : a)),
+      );
+    }
+  }
+
+
+
 
   function toggleExpand(id: string) {
     setExpanded((e) => ({ ...e, [id]: !e[id] }));
