@@ -974,11 +974,24 @@ function Index() {
 
       {/* List */}
       <main className="mx-auto max-w-5xl px-4 pb-32 pt-6 sm:px-6">
-        <div className="mb-4 flex items-center justify-end gap-3">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={checkNewSeasons}
+            disabled={checking || animes.length === 0}
+            className="h-8 gap-1.5 text-xs"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${checking ? "animate-spin" : ""}`} />
+            {checking && checkProgress
+              ? `Verificando ${checkProgress.current}/${checkProgress.total}`
+              : "Verificar novas temporadas"}
+          </Button>
           <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
             {ranked.length} {ranked.length === 1 ? "anime" : "animes"}
           </p>
         </div>
+
 
         {!hydrated ? (
           <p className="py-20 text-center text-sm text-muted-foreground">Carregando...</p>
