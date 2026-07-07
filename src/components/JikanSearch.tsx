@@ -22,7 +22,7 @@ type JikanAnime = {
 async function searchJikan(q: string, signal: AbortSignal): Promise<JikanAnime[]> {
   const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=5&sfw=true`;
   const res = await fetch(url, { signal });
-  if (!res.ok) throw new Error("Jikan error");
+  if (!res.ok) throw new Error(String(res.status));
   const json = (await res.json()) as { data: JikanAnime[] };
   return json.data ?? [];
 }
