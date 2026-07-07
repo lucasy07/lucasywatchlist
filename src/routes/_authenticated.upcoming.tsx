@@ -239,6 +239,11 @@ function UpcomingRow({
           <span className="text-[11px] text-muted-foreground">
             {formatDateBR(anime.upcoming?.releaseDate)}
           </span>
+          {anime.upcoming?.source === "auto" && (
+            <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+              Detectado
+            </span>
+          )}
         </div>
       </div>
       <Button variant="outline" size="sm" onClick={onEdit} className="h-8 text-xs">

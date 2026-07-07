@@ -50,7 +50,7 @@ export function UpcomingEditDialog({
       toast.error("Informe a data de lançamento");
       return;
     }
-    const upcoming: UpcomingSeason = { title: t, releaseDate: date };
+    const upcoming: UpcomingSeason = { title: t, releaseDate: date, source: "manual" };
     onSaved(animeId, upcoming);
     onOpenChange(false);
     try {
