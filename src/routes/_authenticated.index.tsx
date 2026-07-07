@@ -660,14 +660,24 @@ function Index() {
               // Read latest upcoming from state via functional update pattern
               let shouldSave = false;
               const current = a.upcoming;
-              if (!current) shouldSave = true;
-              else {
+              const currentSource = current?.source ?? "manual";
+              if (!current) {
+                shouldSave = true;
+              } else if (currentSource === "manual") {
+                // Respect user-defined upcoming; never overwrite.
+                shouldSave = false;
+              } else {
                 const cur = new Date(current.releaseDate).getTime();
                 const nu = new Date(iso).getTime();
                 if (Number.isFinite(nu) && Number.isFinite(cur) && nu < cur) shouldSave = true;
               }
               if (shouldSave) {
-                const upcoming = { title: s.title, releaseDate: iso };
+                const upcoming: UpcomingSeason = {
+                  title: s.title,
+                  releaseDate: iso,
+                  source: "auto",
+                  malId: s.malId,
+                };
                 try {
                   await updateUpcoming(a.id, upcoming);
                   setAnimes((prev) => prev.map((x) => (x.id === a.id ? { ...x, upcoming } : x)));
