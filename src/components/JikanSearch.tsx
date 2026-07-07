@@ -27,6 +27,54 @@ async function searchJikan(q: string, signal: AbortSignal): Promise<JikanAnime[]
   return json.data ?? [];
 }
 
+type AniListMedia = {
+  idMal: number | null;
+  title: { romaji: string | null; english: string | null } | null;
+  startDate: { year: number | null } | null;
+  coverImage: { medium: string | null; large: string | null } | null;
+  averageScore: number | null;
+};
+
+async function searchAniList(q: string, signal: AbortSignal): Promise<JikanAnime[]> {
+  const query = `query ($search: String) { Page(perPage: 5) { media(search: $search, type: ANIME, isAdult: false) { idMal title { romaji english } startDate { year } coverImage { medium large } averageScore } } }`;
+  const res = await fetch("https://graphql.anilist.co", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ query, variables: { search: q } }),
+    signal,
+  });
+  if (!res.ok) throw new Error(String(res.status));
+  const json = (await res.json()) as { data?: { Page?: { media?: AniListMedia[] } } };
+  const media = json.data?.Page?.media ?? [];
+  return media
+    .filter((m) => m.idMal != null)
+    .map<JikanAnime>((m) => ({
+      mal_id: m.idMal as number,
+      title: m.title?.romaji ?? m.title?.english ?? "",
+      year: m.startDate?.year ?? null,
+      aired: null,
+      score: m.averageScore != null ? m.averageScore / 10 : null,
+      images: {
+        jpg: {
+          small_image_url: m.coverImage?.medium ?? undefined,
+          large_image_url: m.coverImage?.large ?? undefined,
+        },
+      },
+    }));
+}
+
+async function searchAnime(q: string, signal: AbortSignal): Promise<JikanAnime[]> {
+  try {
+    return await searchJikan(q, signal);
+  } catch (jikanErr) {
+    try {
+      return await searchAniList(q, signal);
+    } catch {
+      throw jikanErr;
+    }
+  }
+}
+
 function useDebounced<T>(value: T, delay: number): T {
   const [v, setV] = useState(value);
   useEffect(() => {
