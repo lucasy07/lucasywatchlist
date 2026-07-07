@@ -787,7 +787,7 @@ function Index() {
       toast.error("Informe a data de lançamento");
       return;
     }
-    const upcoming: UpcomingSeason = { title, releaseDate: upcomingDate };
+    const upcoming: UpcomingSeason = { title, releaseDate: upcomingDate, source: "manual" };
     setAnimes((prev) =>
       prev.map((a) => (a.id === upcomingAnimeId ? { ...a, upcoming } : a)),
     );
