@@ -22,7 +22,7 @@ type JikanAnime = {
 async function searchJikan(q: string, signal: AbortSignal): Promise<JikanAnime[]> {
   const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=5&sfw=true`;
   const res = await fetch(url, { signal });
-  if (!res.ok) throw new Error("Jikan error");
+  if (!res.ok) throw new Error(String(res.status));
   const json = (await res.json()) as { data: JikanAnime[] };
   return json.data ?? [];
 }
@@ -52,7 +52,7 @@ export function JikanSearch({ value, onChange, onPick, placeholder, id, autoFocu
   const debounced = useDebounced(value.trim(), 500);
   const enabled = focused && !suppress && debounced.length >= 3;
 
-  const { data, isFetching } = useQuery({
+  const { data, isFetching, isError, error, isSuccess } = useQuery({
     queryKey: ["jikan", debounced],
     queryFn: ({ signal }) => searchJikan(debounced, signal),
     enabled,
@@ -61,7 +61,16 @@ export function JikanSearch({ value, onChange, onPick, placeholder, id, autoFocu
   });
 
   const results = enabled ? (data ?? []) : [];
-  const showDropdown = focused && enabled && results.length > 0;
+  const showDropdown =
+    focused &&
+    enabled &&
+    (results.length > 0 || isError || (isSuccess && results.length === 0));
+
+  const errorMessage = isError
+    ? error?.message === "429"
+      ? "Muitas buscas em sequência. Aguarde alguns segundos e tente de novo."
+      : "Erro ao buscar no MyAnimeList. Tente novamente."
+    : null;
 
   return (
     <div className="relative">
@@ -88,50 +97,58 @@ export function JikanSearch({ value, onChange, onPick, placeholder, id, autoFocu
       )}
       {showDropdown && (
         <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md">
-          <ul className="max-h-72 overflow-y-auto py-1">
-            {results.map((r) => {
-              const year =
-                r.year ??
-                (r.aired?.from ? new Date(r.aired.from).getFullYear() : null);
-              const thumb = r.images?.jpg?.small_image_url;
-              return (
-                <li key={r.mal_id}>
-                  <button
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => {
-                      onPick({
-                        malId: r.mal_id,
-                        title: r.title,
-                        imageUrl: r.images?.jpg?.large_image_url ?? null,
-                        score: r.score ?? null,
-                      });
-                      onChange(r.title);
-                      setSuppress(true);
-                    }}
-                    className="flex w-full items-center gap-3 px-2 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-                  >
-                    {thumb ? (
-                      <img
-                        src={thumb}
-                        alt=""
-                        className="h-12 w-9 flex-shrink-0 rounded object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="h-12 w-9 flex-shrink-0 rounded bg-muted" />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium">{r.title}</p>
-                      {year && (
-                        <p className="text-xs text-muted-foreground">{year}</p>
+          {isError ? (
+            <p className="px-3 py-3 text-sm text-destructive">{errorMessage}</p>
+          ) : results.length === 0 ? (
+            <p className="px-3 py-3 text-sm text-muted-foreground">
+              Nenhum resultado para "{debounced}".
+            </p>
+          ) : (
+            <ul className="max-h-72 overflow-y-auto py-1">
+              {results.map((r) => {
+                const year =
+                  r.year ??
+                  (r.aired?.from ? new Date(r.aired.from).getFullYear() : null);
+                const thumb = r.images?.jpg?.small_image_url;
+                return (
+                  <li key={r.mal_id}>
+                    <button
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        onPick({
+                          malId: r.mal_id,
+                          title: r.title,
+                          imageUrl: r.images?.jpg?.large_image_url ?? null,
+                          score: r.score ?? null,
+                        });
+                        onChange(r.title);
+                        setSuppress(true);
+                      }}
+                      className="flex w-full items-center gap-3 px-2 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                    >
+                      {thumb ? (
+                        <img
+                          src={thumb}
+                          alt=""
+                          className="h-12 w-9 flex-shrink-0 rounded object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="h-12 w-9 flex-shrink-0 rounded bg-muted" />
                       )}
-                    </div>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium">{r.title}</p>
+                        {year && (
+                          <p className="text-xs text-muted-foreground">{year}</p>
+                        )}
+                      </div>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       )}
     </div>
