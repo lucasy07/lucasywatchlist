@@ -57,7 +57,13 @@ export function JikanSearch({ value, onChange, onPick, placeholder, id, autoFocu
     queryFn: ({ signal }) => searchJikan(debounced, signal),
     enabled,
     staleTime: 60_000,
-    retry: false,
+    retry: (failureCount, error) => {
+      if (failureCount >= 3) return false;
+      const status = Number(error.message);
+      if (Number.isNaN(status)) return true;
+      return status === 429 || status >= 500;
+    },
+    retryDelay: (attemptIndex) => Math.min(800 * 2 ** attemptIndex, 4000),
   });
 
   const results = enabled ? (data ?? []) : [];
