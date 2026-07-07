@@ -102,7 +102,7 @@ export function JikanSearch({ value, onChange, onPick, placeholder, id, autoFocu
 
   const { data, isFetching, isError, error, isSuccess } = useQuery({
     queryKey: ["jikan", debounced],
-    queryFn: ({ signal }) => searchJikan(debounced, signal),
+    queryFn: ({ signal }) => searchAnime(debounced, signal),
     enabled,
     staleTime: 60_000,
     retry: (failureCount, error) => {
