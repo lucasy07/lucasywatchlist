@@ -33,6 +33,10 @@ export type UpcomingSeason = {
   title: string;
   /** ISO date string (YYYY-MM-DD) */
   releaseDate: string;
+  /** Origin: "auto" from continuation scan, "manual" from user. Missing = manual (legacy). */
+  source?: "auto" | "manual";
+  /** MAL id of the detected continuation season (only when source === "auto"). */
+  malId?: number | null;
 };
 
 export type Anime = {
