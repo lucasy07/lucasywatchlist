@@ -36,9 +36,38 @@ const DELAY_MS = 400;
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const res = await fetch(url, { signal });
-  if (!res.ok) throw new Error(`Jikan ${res.status}`);
-  return (await res.json()) as T;
+  const backoffs = [700, 1400];
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+    try {
+      const res = await fetch(url, { signal });
+      if (res.ok) return (await res.json()) as T;
+      const transient = res.status === 429 || res.status >= 500;
+      const err = new Error(`Jikan ${res.status}`);
+      if (!transient) throw err;
+      lastErr = err;
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") throw e;
+      if ((e as { name?: string })?.name === "AbortError") throw e;
+      if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+      // If this was a non-transient HTTP error we threw above, rethrow.
+      if (e instanceof Error && /^Jikan \d+$/.test(e.message)) {
+        const status = Number(e.message.slice(6));
+        if (!(status === 429 || status >= 500)) throw e;
+      }
+      lastErr = e;
+    }
+    if (attempt < 2) {
+      const wait = backoffs[attempt];
+      const start = Date.now();
+      while (Date.now() - start < wait) {
+        if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+        await sleep(Math.min(100, wait - (Date.now() - start)));
+      }
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error("Jikan error");
 }
 
 async function getRelations(malId: number, signal?: AbortSignal): Promise<number[]> {
