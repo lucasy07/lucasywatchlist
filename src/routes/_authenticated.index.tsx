@@ -227,17 +227,85 @@ function Index() {
       for (const anime of missing) {
         if (cancelled) return;
         try {
-          const res = await fetch(
-            `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(anime.name)}&limit=1&sfw=true`,
-          );
-          if (!res.ok) continue;
-          const json = await res.json();
-          const top = json?.data?.[0];
-          const imageUrl: string | undefined =
-            top?.images?.jpg?.large_image_url ?? top?.images?.jpg?.image_url;
+          let malId: number | null = null;
+          let imageUrl: string | undefined;
+          let malScore: number | null = null;
+
+          let jikanOk = false;
+          try {
+            const res = await fetch(
+              `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(anime.name)}&limit=1&sfw=true`,
+            );
+            if (res.ok) {
+              const json = await res.json();
+              const top = json?.data?.[0];
+              const img: string | undefined =
+                top?.images?.jpg?.large_image_url ??
+                top?.images?.jpg?.image_url;
+              if (img) {
+                jikanOk = true;
+                imageUrl = img;
+                malId = top?.mal_id ?? null;
+                malScore = top?.score ?? null;
+              }
+            }
+          } catch {
+            // fall through to AniList fallback
+          }
+
+          if (!jikanOk) {
+            try {
+              const alRes = await fetch("https://graphql.anilist.co", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "application/json",
+                },
+                body: JSON.stringify({
+                  query:
+                    "query ($search: String) { Page(perPage: 1) { media(search: $search, type: ANIME, isAdult: false) { idMal coverImage { large } } } }",
+                  variables: { search: anime.name },
+                }),
+              });
+              if (!alRes.ok) continue;
+              const alJson = await alRes.json();
+              const media = alJson?.data?.Page?.media?.[0];
+              const idMal: number | null = media?.idMal ?? null;
+              if (!idMal) continue;
+
+              let gotDetails = false;
+              try {
+                const dRes = await fetch(
+                  `https://api.jikan.moe/v4/anime/${idMal}`,
+                );
+                if (dRes.ok) {
+                  const dJson = await dRes.json();
+                  const data = dJson?.data;
+                  const img: string | undefined =
+                    data?.images?.jpg?.large_image_url ??
+                    data?.images?.jpg?.image_url;
+                  if (img) {
+                    gotDetails = true;
+                    malId = data?.mal_id ?? idMal;
+                    imageUrl = img;
+                    malScore = data?.score ?? null;
+                  }
+                }
+              } catch {
+                // fall through to AniList cover
+              }
+
+              if (!gotDetails) {
+                malId = idMal;
+                imageUrl = media?.coverImage?.large ?? undefined;
+                malScore = null;
+              }
+            } catch {
+              continue;
+            }
+          }
+
           if (!imageUrl) continue;
-          const malId: number | null = top?.mal_id ?? null;
-          const malScore: number | null = top?.score ?? null;
           await updateAnimeMeta(anime.id, { malId, imageUrl, malScore });
           if (cancelled) return;
           setAnimes((prev) =>
