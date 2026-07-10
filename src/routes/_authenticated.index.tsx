@@ -1909,21 +1909,37 @@ function Index() {
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="season-name">Temporada</Label>
-              <Input
-                id="season-name"
-                value={seasonName}
-                onChange={(e) => setSeasonName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addSeason()}
-                placeholder="Ex: Temporada 1"
+              <Label htmlFor="season-search">Temporada</Label>
+              <JikanSearch
+                id="season-search"
+                value={seasonSearch}
+                onChange={(v) => {
+                  setSeasonSearch(v);
+                  if (seasonPick && seasonPick.title !== v) {
+                    setSeasonPick(null);
+                    setSeasonDetails(null);
+                    setSeasonDetailsLoading(false);
+                  }
+                }}
+                onPick={(pick) => {
+                  setSeasonSearch(pick.title);
+                  void pickSeasonEntry(pick);
+                }}
+                placeholder="Buscar temporada, OVA, filme..."
               />
+              {seasonDetailsLoading && (
+                <p className="text-xs text-muted-foreground">Buscando detalhes...</p>
+              )}
             </div>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setSeasonDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={addSeason}>Adicionar</Button>
+            <Button onClick={addSeason} disabled={!seasonPick || seasonDetailsLoading}>
+              Adicionar
+            </Button>
+
           </DialogFooter>
         </DialogContent>
       </Dialog>
