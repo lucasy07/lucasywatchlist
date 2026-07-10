@@ -33,7 +33,7 @@ export function TierPicker({
             className={`font-display h-9 w-9 rounded-md text-sm font-bold transition-colors ${
               active
                 ? "bg-primary text-primary-foreground ring-1 ring-primary/60"
-                : "bg-secondary text-muted-foreground hover:bg-secondary/70 hover:text-foreground"
+                : `bg-secondary ${tierColor(t)} hover:bg-secondary/70`
             }`}
           >
             {t}
