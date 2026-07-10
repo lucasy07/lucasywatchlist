@@ -60,6 +60,7 @@ import {
   type Tier,
   type UpcomingSeason,
   
+  TIER_VALUE,
   tierFromAverage,
   fetchAnimes,
   createAnime,
@@ -122,6 +123,7 @@ function Index() {
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [scoreMode, setScoreMode] = useState<"mal" | "gosto">("mal");
   
   const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
 
@@ -204,6 +206,9 @@ function Index() {
     const savedView =
       typeof window !== "undefined" ? localStorage.getItem("anime-ranker:v1:view") : null;
     if (savedView === "grid" || savedView === "list") setViewMode(savedView);
+    const savedScoreMode =
+      typeof window !== "undefined" ? localStorage.getItem("anime-ranker:v1:scoreMode") : null;
+    if (savedScoreMode === "mal" || savedScoreMode === "gosto") setScoreMode(savedScoreMode);
     return () => {
       cancelled = true;
     };
@@ -213,6 +218,11 @@ function Index() {
     if (!hydrated) return;
     localStorage.setItem("anime-ranker:v1:view", viewMode);
   }, [viewMode, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    localStorage.setItem("anime-ranker:v1:scoreMode", scoreMode);
+  }, [scoreMode, hydrated]);
 
 
 
@@ -415,6 +425,13 @@ function Index() {
         !a.watched &&
         a.name.toLowerCase().includes(search.toLowerCase().trim()),
     );
+    if (scoreMode === "gosto") {
+      return [...filtered].sort((a, b) => {
+        const va = a.tier === null ? -1 : TIER_VALUE[a.tier];
+        const vb = b.tier === null ? -1 : TIER_VALUE[b.tier];
+        return vb - va;
+      });
+    }
     return [...filtered].sort((a, b) => {
       const ma = mediaMAL(a.seasons);
       const mb = mediaMAL(b.seasons);
@@ -423,7 +440,7 @@ function Index() {
       if (mb === null) return -1;
       return mb - ma;
     });
-  }, [animes, search]);
+  }, [animes, search, scoreMode]);
 
   const watchedCount = useMemo(() => animes.filter((a) => a.watched).length, [animes]);
 
@@ -1004,6 +1021,22 @@ function Index() {
                 aria-pressed={viewMode === "grid"}
               >
                 <LayoutGrid className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex items-center rounded-lg border border-border/60 bg-card p-0.5">
+              <button
+                onClick={() => setScoreMode("gosto")}
+                className={`flex h-8 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors ${scoreMode === "gosto" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                aria-pressed={scoreMode === "gosto"}
+              >
+                Meu gosto
+              </button>
+              <button
+                onClick={() => setScoreMode("mal")}
+                className={`flex h-8 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors ${scoreMode === "mal" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                aria-pressed={scoreMode === "mal"}
+              >
+                MAL
               </button>
             </div>
             <div className="hidden text-right sm:block">
