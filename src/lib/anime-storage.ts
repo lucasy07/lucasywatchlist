@@ -17,9 +17,9 @@ export function isExcludedFromAverage(season: Season): boolean {
   return typeof season.type === "string" && season.type.toLowerCase() === "ova";
 }
 
-export type Tier = "S" | "A" | "B" | "C" | "D";
+export type Tier = "S" | "A" | "B" | "C" | "D" | "E";
 
-export const TIER_VALUE: Record<Tier, number> = { S: 5, A: 4, B: 3, C: 2, D: 1 };
+export const TIER_VALUE: Record<Tier, number> = { S: 5, A: 4, B: 3, C: 2, D: 1, E: 0 };
 
 export function tierFromAverage(avg: number): Tier {
   if (avg >= 9) return "S";
