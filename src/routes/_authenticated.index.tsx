@@ -429,11 +429,23 @@ function Index() {
   }, [hydrated]);
 
   const ranked = useMemo(() => {
-    const filtered = animes.filter(
-      (a) =>
-        !a.watched &&
-        a.name.toLowerCase().includes(search.toLowerCase().trim()),
+    const q = search.toLowerCase().trim();
+    const wantedTypes = new Set(
+      [...typeFilter].map((t) => t.toLowerCase()),
     );
+    const filtered = animes.filter((a) => {
+      if (a.watched) return false;
+      if (!a.name.toLowerCase().includes(q)) return false;
+      if (tierFilter.size > 0 && (a.tier === null || !tierFilter.has(a.tier))) return false;
+      if (
+        wantedTypes.size > 0 &&
+        !a.seasons.some((s) => s.type && wantedTypes.has(s.type.toLowerCase()))
+      ) {
+        return false;
+      }
+      if (semDadosFilter && !(a.tier === null || mediaMAL(a.seasons) === null)) return false;
+      return true;
+    });
     if (scoreMode === "gosto") {
       return [...filtered].sort((a, b) => {
         const va = a.tier === null ? -1 : TIER_VALUE[a.tier];
