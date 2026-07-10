@@ -12,6 +12,16 @@ export function tierColor(t: Tier | null): string {
   return "text-muted-foreground";
 }
 
+export function tierBg(t: Tier | null): string {
+  if (t === "S") return "bg-tier-s";
+  if (t === "A") return "bg-tier-a";
+  if (t === "B") return "bg-tier-b";
+  if (t === "C") return "bg-tier-c";
+  if (t === "D") return "bg-tier-d";
+  if (t === "E") return "bg-tier-e";
+  return "bg-secondary";
+}
+
 export function TierPicker({
   value,
   onChange,
