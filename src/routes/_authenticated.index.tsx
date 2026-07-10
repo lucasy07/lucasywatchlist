@@ -85,6 +85,10 @@ import { TierPicker, tierColor } from "@/components/TierPicker";
 import { buildChain, type ChainSeason } from "@/lib/jikan-chain";
 
 
+const TIER_ROWS = (Object.keys(TIER_VALUE) as Tier[]).sort(
+  (a, b) => TIER_VALUE[b] - TIER_VALUE[a],
+);
+
 export const Route = createFileRoute("/_authenticated/")({
   codeSplitGroupings: [["component"]],
   component: Index,
@@ -1108,6 +1112,74 @@ function Index() {
           <p className="py-20 text-center text-sm text-muted-foreground">Carregando...</p>
         ) : ranked.length === 0 ? (
           <EmptyState onAdd={() => setAnimeDialogOpen(true)} hasAnimes={animes.length > 0} />
+        ) : scoreMode === "gosto" ? (
+          <div className="overflow-hidden rounded-xl border border-border/60">
+            {TIER_ROWS.map((t) => {
+              const items = ranked.filter((a) => a.tier === t);
+              return (
+                <div key={t} className="flex items-stretch border-b border-border/60 last:border-b-0">
+                  <div className="flex w-16 shrink-0 items-center justify-center bg-secondary">
+                    <span className={`font-display text-xl font-bold ${tierColor(t)}`}>{t}</span>
+                  </div>
+                  <div className="flex flex-1 flex-wrap gap-2 p-2">
+                    {items.map((anime) => {
+                      const img = anime.imageUrl ?? anime.cover;
+                      return (
+                        <div key={anime.id} className="w-16" title={anime.name}>
+                          {img ? (
+                            <img
+                              src={img}
+                              alt={anime.name}
+                              loading="lazy"
+                              className="aspect-[2/3] w-16 rounded-md object-cover"
+                            />
+                          ) : (
+                            <div className="flex aspect-[2/3] w-16 items-center justify-center rounded-md bg-secondary text-muted-foreground">
+                              <ImageIcon className="h-5 w-5" />
+                            </div>
+                          )}
+                          <p className="mt-1 line-clamp-2 text-[10px] text-muted-foreground">{anime.name}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+            {ranked.some((a) => a.tier === null) && (
+              <div className="flex items-stretch border-t border-border/60">
+                <div className="flex w-16 shrink-0 items-center justify-center bg-secondary">
+                  <span className="font-display text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    Sem tier
+                  </span>
+                </div>
+                <div className="flex flex-1 flex-wrap gap-2 p-2">
+                  {ranked
+                    .filter((a) => a.tier === null)
+                    .map((anime) => {
+                      const img = anime.imageUrl ?? anime.cover;
+                      return (
+                        <div key={anime.id} className="w-16" title={anime.name}>
+                          {img ? (
+                            <img
+                              src={img}
+                              alt={anime.name}
+                              loading="lazy"
+                              className="aspect-[2/3] w-16 rounded-md object-cover"
+                            />
+                          ) : (
+                            <div className="flex aspect-[2/3] w-16 items-center justify-center rounded-md bg-secondary text-muted-foreground">
+                              <ImageIcon className="h-5 w-5" />
+                            </div>
+                          )}
+                          <p className="mt-1 line-clamp-2 text-[10px] text-muted-foreground">{anime.name}</p>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+          </div>
         ) : viewMode === "grid" ? (
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
             {ranked.map((anime, idx) => {
