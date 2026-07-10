@@ -10,11 +10,16 @@ export type Season = {
   malScore?: number | null;
   /** Jikan/MAL type: TV, Movie, OVA, ONA, Special, Music, etc. */
   type?: string | null;
+  /** Override explícito de inclusão na média. undefined = usa o default por tipo. */
+  includeInAverage?: boolean;
 };
 
-/** OVAs are excluded from average calculations. */
 export function isExcludedFromAverage(season: Season): boolean {
-  return typeof season.type === "string" && season.type.toLowerCase() === "ova";
+  if (season.includeInAverage === true) return false;
+  if (season.includeInAverage === false) return true;
+
+  const t = typeof season.type === "string" ? season.type.toLowerCase() : "";
+  return t === "ova" || t === "special";
 }
 
 export type Tier = "S" | "A" | "B" | "C" | "D" | "E";
