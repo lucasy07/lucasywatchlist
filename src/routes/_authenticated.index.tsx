@@ -465,6 +465,7 @@ function Index() {
   }, [animes, search, scoreMode, tierFilter, typeFilter, semDadosFilter]);
 
   const filtersActive = tierFilter.size > 0 || typeFilter.size > 0 || semDadosFilter;
+  const filtersActiveCount = tierFilter.size + typeFilter.size + (semDadosFilter ? 1 : 0);
   function clearFilters() {
     setTierFilter(new Set());
     setTypeFilter(new Set());
