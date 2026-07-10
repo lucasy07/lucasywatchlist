@@ -17,9 +17,9 @@ export function isExcludedFromAverage(season: Season): boolean {
   return typeof season.type === "string" && season.type.toLowerCase() === "ova";
 }
 
-export type Tier = "S" | "A" | "B" | "C" | "D";
+export type Tier = "S" | "A" | "B" | "C" | "D" | "E";
 
-export const TIER_VALUE: Record<Tier, number> = { S: 5, A: 4, B: 3, C: 2, D: 1 };
+export const TIER_VALUE: Record<Tier, number> = { S: 5, A: 4, B: 3, C: 2, D: 1, E: 0 };
 
 export function tierFromAverage(avg: number): Tier {
   if (avg >= 9) return "S";
@@ -74,7 +74,7 @@ function rowToAnime(row: DbRow): Anime {
   const seasons = Array.isArray(row.seasons) ? (row.seasons as Season[]) : [];
   const upcoming = (row.upcoming ?? undefined) as UpcomingSeason | undefined;
   const tier =
-    row.tier === "S" || row.tier === "A" || row.tier === "B" || row.tier === "C" || row.tier === "D"
+    row.tier === "S" || row.tier === "A" || row.tier === "B" || row.tier === "C" || row.tier === "D" || row.tier === "E"
       ? (row.tier as Tier)
       : null;
   return {

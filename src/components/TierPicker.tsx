@@ -1,6 +1,6 @@
 import type { Tier } from "@/lib/anime-storage";
 
-const TIER_ORDER: readonly Tier[] = ["S", "A", "B", "C", "D"];
+const TIER_ORDER: readonly Tier[] = ["S", "A", "B", "C", "D", "E"];
 
 export function tierColor(t: Tier | null): string {
   if (t === "S") return "text-primary";
@@ -8,6 +8,7 @@ export function tierColor(t: Tier | null): string {
   if (t === "B") return "text-foreground/80";
   if (t === "C") return "text-muted-foreground";
   if (t === "D") return "text-muted-foreground/60";
+  if (t === "E") return "text-muted-foreground/40";
   return "text-muted-foreground";
 }
 
