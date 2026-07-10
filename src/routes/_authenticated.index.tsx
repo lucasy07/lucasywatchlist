@@ -461,7 +461,28 @@ function Index() {
       if (mb === null) return -1;
       return mb - ma;
     });
-  }, [animes, search, scoreMode]);
+  }, [animes, search, scoreMode, tierFilter, typeFilter, semDadosFilter]);
+
+  const filtersActive = tierFilter.size > 0 || typeFilter.size > 0 || semDadosFilter;
+  function clearFilters() {
+    setTierFilter(new Set());
+    setTypeFilter(new Set());
+    setSemDadosFilter(false);
+  }
+  function toggleTier(t: Tier) {
+    setTierFilter((prev) => {
+      const n = new Set(prev);
+      if (n.has(t)) n.delete(t); else n.add(t);
+      return n;
+    });
+  }
+  function toggleType(t: string) {
+    setTypeFilter((prev) => {
+      const n = new Set(prev);
+      if (n.has(t)) n.delete(t); else n.add(t);
+      return n;
+    });
+  }
 
   const watchedCount = useMemo(() => animes.filter((a) => a.watched).length, [animes]);
 
