@@ -74,7 +74,7 @@ function rowToAnime(row: DbRow): Anime {
   const seasons = Array.isArray(row.seasons) ? (row.seasons as Season[]) : [];
   const upcoming = (row.upcoming ?? undefined) as UpcomingSeason | undefined;
   const tier =
-    row.tier === "S" || row.tier === "A" || row.tier === "B" || row.tier === "C" || row.tier === "D"
+    row.tier === "S" || row.tier === "A" || row.tier === "B" || row.tier === "C" || row.tier === "D" || row.tier === "E"
       ? (row.tier as Tier)
       : null;
   return {
