@@ -132,6 +132,7 @@ function Index() {
   const [tierFilter, setTierFilter] = useState<Set<Tier>>(() => new Set());
   const [typeFilter, setTypeFilter] = useState<Set<string>>(() => new Set());
   const [semDadosFilter, setSemDadosFilter] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   
   
   const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
