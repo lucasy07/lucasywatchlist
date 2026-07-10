@@ -648,8 +648,10 @@ function Index() {
       return;
     }
     setSeasonAnimeId(animeId ?? animes[0].id);
-    setSeasonName("");
-    
+    setSeasonSearch("");
+    setSeasonPick(null);
+    setSeasonDetails(null);
+    setSeasonDetailsLoading(false);
     setSeasonDialogOpen(true);
   }
 
@@ -662,26 +664,70 @@ function Index() {
     }
   }
 
+  async function pickSeasonEntry(pick: JikanPick) {
+    setSeasonPick(pick);
+    setSeasonDetails(null);
+    setSeasonDetailsLoading(true);
+    try {
+      const res = await fetch(`https://api.jikan.moe/v4/anime/${pick.malId}`);
+      if (res.ok) {
+        const json = await res.json();
+        const data = json?.data;
+        const t: string | null = data?.type ?? null;
+        const y: number | null =
+          data?.year ??
+          (data?.aired?.from ? new Date(data.aired.from).getFullYear() : null);
+        setSeasonDetails({ malId: pick.malId, type: t, year: Number.isFinite(y as number) ? (y as number) : null });
+      } else {
+        setSeasonDetails({ malId: pick.malId, type: null, year: null });
+      }
+    } catch {
+      setSeasonDetails({ malId: pick.malId, type: null, year: null });
+    } finally {
+      setSeasonDetailsLoading(false);
+    }
+  }
+
   async function addSeason() {
-    const name = seasonName.trim();
     if (!seasonAnimeId) {
       toast.error("Selecione um anime");
       return;
     }
-    if (!name) {
-      toast.error("Informe o nome da temporada");
+    if (!seasonPick || seasonDetailsLoading) {
+      toast.error("Escolha uma entrada");
       return;
     }
     const target = animes.find((a) => a.id === seasonAnimeId);
     if (!target) return;
-    const newSeasons = [...target.seasons, { id: uid(), name, rating: null }];
-    setAnimes((prev) =>
-      prev.map((a) => (a.id === seasonAnimeId ? { ...a, seasons: newSeasons } : a)),
+    if (target.seasons.some((s) => s.malId === seasonPick.malId)) {
+      toast.error("Essa entrada já está no anime");
+      return;
+    }
+    const newSeason: Season = {
+      id: uid(),
+      name: seasonPick.title,
+      rating: null,
+      malId: seasonPick.malId,
+      malScore: seasonPick.score ?? null,
+      year: seasonDetails?.year ?? null,
+      type: seasonDetails?.type ?? null,
+    };
+    const newSeasons = [...target.seasons, newSeason];
+    const prev = animes;
+    setAnimes((p) =>
+      p.map((a) => (a.id === seasonAnimeId ? { ...a, seasons: newSeasons } : a)),
     );
     setSeasonDialogOpen(false);
-    toast.success("Temporada adicionada");
-    await persistSeasons(seasonAnimeId, newSeasons);
+    try {
+      await updateSeasons(seasonAnimeId, newSeasons);
+      toast.success("Temporada adicionada");
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao adicionar temporada");
+      setAnimes(prev);
+    }
   }
+
 
   async function setAnimeTier(animeId: string, tier: Tier | null) {
     const prev = animes;
