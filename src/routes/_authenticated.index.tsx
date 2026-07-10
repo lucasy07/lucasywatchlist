@@ -1118,8 +1118,8 @@ function Index() {
               const items = ranked.filter((a) => a.tier === t);
               return (
                 <div key={t} className="flex items-stretch border-b border-border/60 last:border-b-0">
-                  <div className="flex w-16 shrink-0 items-center justify-center bg-secondary">
-                    <span className={`font-display text-xl font-bold ${tierColor(t)}`}>{t}</span>
+                  <div className={`flex w-16 shrink-0 items-center justify-center ${tierBg(t)}`}>
+                    <span className="font-display text-xl font-bold text-tier-foreground">{t}</span>
                   </div>
                   <div className="flex flex-1 flex-wrap gap-2 p-2">
                     {items.map((anime) => {
