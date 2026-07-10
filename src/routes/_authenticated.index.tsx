@@ -132,6 +132,7 @@ function Index() {
   const [tierFilter, setTierFilter] = useState<Set<Tier>>(() => new Set());
   const [typeFilter, setTypeFilter] = useState<Set<string>>(() => new Set());
   const [semDadosFilter, setSemDadosFilter] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   
   
   const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
@@ -464,6 +465,7 @@ function Index() {
   }, [animes, search, scoreMode, tierFilter, typeFilter, semDadosFilter]);
 
   const filtersActive = tierFilter.size > 0 || typeFilter.size > 0 || semDadosFilter;
+  const filtersActiveCount = tierFilter.size + typeFilter.size + (semDadosFilter ? 1 : 0);
   function clearFilters() {
     setTierFilter(new Set());
     setTypeFilter(new Set());
@@ -1081,6 +1083,31 @@ function Index() {
                 MAL
               </button>
             </div>
+            <button
+              type="button"
+              onClick={() => setShowFilters((v) => !v)}
+              aria-expanded={showFilters}
+              aria-label="Filtros"
+              className={`flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition-colors ${
+                showFilters || filtersActive
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border/60 bg-card text-foreground hover:border-primary/60 hover:text-primary"
+              }`}
+            >
+              <Filter className="h-4 w-4" />
+              <span className="hidden sm:inline">Filtros</span>
+              {filtersActive && (
+                <span
+                  className={`ml-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold ${
+                    showFilters
+                      ? "bg-primary-foreground text-primary"
+                      : "bg-primary text-primary-foreground"
+                  }`}
+                >
+                  {filtersActiveCount}
+                </span>
+              )}
+            </button>
             <div className="hidden text-right sm:block">
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Animes</p>
               <p className="font-display text-lg font-semibold">{animes.length}</p>
@@ -1145,7 +1172,9 @@ function Index() {
           </p>
         </div>
 
+        {showFilters && (
         <div className="mb-4 flex flex-wrap items-center gap-2">
+
           <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
             <Filter className="h-3.5 w-3.5" />
             Tier
@@ -1211,6 +1240,9 @@ function Index() {
             </button>
           )}
         </div>
+        )}
+
+
 
 
         {!hydrated ? (
