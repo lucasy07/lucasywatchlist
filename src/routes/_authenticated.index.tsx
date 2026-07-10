@@ -1566,18 +1566,18 @@ function Index() {
                                     <Badge
                                       variant="outline"
                                       title={
-                                        s.type.toLowerCase() === "ova"
-                                          ? "OVA — fora da média"
+                                        isExcludedFromAverage(s)
+                                          ? `${s.type} — fora da média`
                                           : s.type
                                       }
                                       className={`px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wider ${
-                                        s.type.toLowerCase() === "ova"
+                                        isExcludedFromAverage(s)
                                           ? "border-border/50 bg-muted/40 text-muted-foreground"
                                           : "border-border/60 text-foreground/70"
                                       }`}
                                     >
                                       {s.type}
-                                      {s.type.toLowerCase() === "ova" && (
+                                      {isExcludedFromAverage(s) && (
                                         <span className="ml-1 hidden sm:inline text-[8px] font-normal normal-case tracking-normal opacity-80">
                                           fora da média
                                         </span>
