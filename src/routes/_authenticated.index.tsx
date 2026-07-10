@@ -154,7 +154,11 @@ function Index() {
   // Add Season dialog
   const [seasonDialogOpen, setSeasonDialogOpen] = useState(false);
   const [seasonAnimeId, setSeasonAnimeId] = useState<string>("");
-  const [seasonName, setSeasonName] = useState("");
+  const [seasonSearch, setSeasonSearch] = useState("");
+  const [seasonPick, setSeasonPick] = useState<JikanPick | null>(null);
+  const [seasonDetailsLoading, setSeasonDetailsLoading] = useState(false);
+  const [seasonDetails, setSeasonDetails] = useState<{ malId: number; type: string | null; year: number | null } | null>(null);
+  
   
 
   // Upcoming season dialog
