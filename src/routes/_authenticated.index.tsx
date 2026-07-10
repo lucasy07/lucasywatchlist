@@ -54,6 +54,7 @@ import {
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 
 import {
   type Anime,
@@ -79,6 +80,7 @@ import {
   rankColor,
   formatReleaseLabel,
   formatDateBR,
+  isExcludedFromAverage,
 } from "@/lib/anime-storage";
 import { useAuth } from "@/auth/AuthProvider";
 import { JikanSearch, type JikanPick } from "@/components/JikanSearch";

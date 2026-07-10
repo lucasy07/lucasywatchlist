@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { Switch } from "@/components/ui/switch";
 import {
   type Anime,
   type Season,
@@ -48,6 +49,7 @@ import {
   updateTier,
   TIER_VALUE,
   uid,
+  isExcludedFromAverage,
 } from "@/lib/anime-storage";
 import { TierPicker, tierColor } from "@/components/TierPicker";
 import { useAuth } from "@/auth/AuthProvider";
