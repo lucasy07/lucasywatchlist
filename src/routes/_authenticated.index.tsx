@@ -21,6 +21,7 @@ import {
   Pencil,
   Image as ImageIcon,
   RefreshCw,
+  Filter,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -128,6 +129,10 @@ function Index() {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [scoreMode, setScoreMode] = useState<"mal" | "gosto">("mal");
+  const [tierFilter, setTierFilter] = useState<Set<Tier>>(() => new Set());
+  const [typeFilter, setTypeFilter] = useState<Set<string>>(() => new Set());
+  const [semDadosFilter, setSemDadosFilter] = useState(false);
+  
   
   const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
 
@@ -424,11 +429,23 @@ function Index() {
   }, [hydrated]);
 
   const ranked = useMemo(() => {
-    const filtered = animes.filter(
-      (a) =>
-        !a.watched &&
-        a.name.toLowerCase().includes(search.toLowerCase().trim()),
+    const q = search.toLowerCase().trim();
+    const wantedTypes = new Set(
+      [...typeFilter].map((t) => t.toLowerCase()),
     );
+    const filtered = animes.filter((a) => {
+      if (a.watched) return false;
+      if (!a.name.toLowerCase().includes(q)) return false;
+      if (tierFilter.size > 0 && (a.tier === null || !tierFilter.has(a.tier))) return false;
+      if (
+        wantedTypes.size > 0 &&
+        !a.seasons.some((s) => s.type && wantedTypes.has(s.type.toLowerCase()))
+      ) {
+        return false;
+      }
+      if (semDadosFilter && !(a.tier === null || mediaMAL(a.seasons) === null)) return false;
+      return true;
+    });
     if (scoreMode === "gosto") {
       return [...filtered].sort((a, b) => {
         const va = a.tier === null ? -1 : TIER_VALUE[a.tier];
@@ -444,7 +461,28 @@ function Index() {
       if (mb === null) return -1;
       return mb - ma;
     });
-  }, [animes, search, scoreMode]);
+  }, [animes, search, scoreMode, tierFilter, typeFilter, semDadosFilter]);
+
+  const filtersActive = tierFilter.size > 0 || typeFilter.size > 0 || semDadosFilter;
+  function clearFilters() {
+    setTierFilter(new Set());
+    setTypeFilter(new Set());
+    setSemDadosFilter(false);
+  }
+  function toggleTier(t: Tier) {
+    setTierFilter((prev) => {
+      const n = new Set(prev);
+      if (n.has(t)) n.delete(t); else n.add(t);
+      return n;
+    });
+  }
+  function toggleType(t: string) {
+    setTypeFilter((prev) => {
+      const n = new Set(prev);
+      if (n.has(t)) n.delete(t); else n.add(t);
+      return n;
+    });
+  }
 
   const watchedCount = useMemo(() => animes.filter((a) => a.watched).length, [animes]);
 
@@ -1107,11 +1145,90 @@ function Index() {
           </p>
         </div>
 
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+            <Filter className="h-3.5 w-3.5" />
+            Tier
+          </div>
+          {TIER_ROWS.map((t) => {
+            const active = tierFilter.has(t);
+            return (
+              <button
+                key={t}
+                type="button"
+                onClick={() => toggleTier(t)}
+                aria-pressed={active}
+                className={`h-7 rounded-full border px-2.5 text-xs font-semibold transition-colors ${
+                  active
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t}
+              </button>
+            );
+          })}
+          <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Tipo
+          </div>
+          {["TV", "Movie", "ONA"].map((t) => {
+            const active = typeFilter.has(t);
+            return (
+              <button
+                key={t}
+                type="button"
+                onClick={() => toggleType(t)}
+                aria-pressed={active}
+                className={`h-7 rounded-full border px-2.5 text-xs font-medium transition-colors ${
+                  active
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t}
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => setSemDadosFilter((v) => !v)}
+            aria-pressed={semDadosFilter}
+            className={`ml-2 h-7 rounded-full border px-2.5 text-xs font-medium transition-colors ${
+              semDadosFilter
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Sem dados
+          </button>
+          {filtersActive && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="ml-auto h-7 rounded-full border border-border/60 bg-card px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:text-destructive"
+            >
+              Limpar
+            </button>
+          )}
+        </div>
+
 
         {!hydrated ? (
           <p className="py-20 text-center text-sm text-muted-foreground">Carregando...</p>
+        ) : ranked.length === 0 && filtersActive ? (
+          <div className="py-16 text-center">
+            <p className="text-sm text-muted-foreground">Nenhum anime com esses filtros.</p>
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="mt-3 inline-flex h-8 items-center rounded-full border border-border/60 bg-card px-3 text-xs font-medium text-muted-foreground hover:text-foreground"
+            >
+              Limpar filtros
+            </button>
+          </div>
         ) : ranked.length === 0 ? (
           <EmptyState onAdd={() => setAnimeDialogOpen(true)} hasAnimes={animes.length > 0} />
+
         ) : scoreMode === "gosto" ? (
           <div className="overflow-hidden rounded-xl border border-border/60">
             {TIER_ROWS.map((t) => {
