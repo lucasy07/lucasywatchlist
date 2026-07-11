@@ -55,6 +55,7 @@ import {
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 
@@ -147,6 +148,7 @@ function Index() {
   const [newAnimeCover, setNewAnimeCover] = useState<string | undefined>(undefined);
   const [newAnimeMal, setNewAnimeMal] = useState<JikanPick | null>(null);
   const [chainSeasons, setChainSeasons] = useState<ChainSeason[] | null>(null);
+  const [selectedChainIds, setSelectedChainIds] = useState<Set<number>>(() => new Set());
   const [chainLoading, setChainLoading] = useState(false);
   const [chainProgress, setChainProgress] = useState<{ current: number; total: number } | null>(null);
   const [chainError, setChainError] = useState(false);
@@ -520,7 +522,9 @@ function Index() {
     setChainLoading(false);
     setChainProgress(null);
     setChainError(false);
+    setSelectedChainIds(new Set());
   }
+
 
   async function startChainFetch(pick: JikanPick) {
     chainAbortRef.current?.abort();
@@ -528,6 +532,7 @@ function Index() {
     chainAbortRef.current = ctrl;
     setChainLoading(true);
     setChainSeasons(null);
+    setSelectedChainIds(new Set());
     setChainProgress({ current: 0, total: 0 });
     setChainError(false);
     try {
@@ -555,6 +560,7 @@ function Index() {
               },
             ];
       setChainSeasons(finalSeasons);
+      setSelectedChainIds(new Set(finalSeasons.map((s) => s.malId)));
     } catch (err) {
       if ((err as { name?: string })?.name === "AbortError") return;
       console.error(err);
@@ -577,17 +583,22 @@ function Index() {
     try {
       // MAL pick → save as one anime with full season chain
       if (pick && chainSeasons && chainSeasons.length > 0) {
+        const selected = chainSeasons.filter((s) => selectedChainIds.has(s.malId));
+        if (selected.length === 0) {
+          toast.error("Selecione ao menos uma temporada");
+          return;
+        }
         const existingIds = new Set<number>();
         for (const a of animes) {
           if (a.malId) existingIds.add(a.malId);
           for (const s of a.seasons) if (s.malId) existingIds.add(s.malId);
         }
-        if (chainSeasons.some((s) => existingIds.has(s.malId))) {
+        if (selected.some((s) => existingIds.has(s.malId))) {
           toast.error("Esse anime já está na sua lista");
           return;
         }
-        const first = chainSeasons[0];
-        const seasons: Season[] = chainSeasons.map((s) => ({
+        const first = selected[0];
+        const seasons: Season[] = selected.map((s) => ({
           id: uid(),
           name: s.title,
           rating: null,
@@ -1903,9 +1914,46 @@ function Index() {
               </div>
             )}
             {!chainLoading && !chainError && chainSeasons && chainSeasons.length > 0 && (
-              <p className="text-xs text-muted-foreground">
-                {chainSeasons.length} temporada{chainSeasons.length === 1 ? "" : "s"} encontrada{chainSeasons.length === 1 ? "" : "s"} no MAL.
-              </p>
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  {selectedChainIds.size} de {chainSeasons.length} selecionada{chainSeasons.length === 1 ? "" : "s"}
+                </p>
+                <ul className="max-h-56 space-y-1 overflow-y-auto rounded-md border border-border p-2">
+                  {chainSeasons.map((s) => {
+                    const checked = selectedChainIds.has(s.malId);
+                    return (
+                      <li key={s.malId} className="flex items-center gap-2">
+                        <Checkbox
+                          id={`chain-${s.malId}`}
+                          checked={checked}
+                          onCheckedChange={(v) => {
+                            setSelectedChainIds((prev) => {
+                              const next = new Set(prev);
+                              if (v) next.add(s.malId);
+                              else next.delete(s.malId);
+                              return next;
+                            });
+                          }}
+                        />
+                        <label
+                          htmlFor={`chain-${s.malId}`}
+                          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-sm"
+                        >
+                          <span className="min-w-0 flex-1 truncate">{s.title}</span>
+                          {s.year != null && (
+                            <span className="text-xs text-muted-foreground">{s.year}</span>
+                          )}
+                          {s.type && (
+                            <Badge variant="outline" className="px-1.5 py-0 text-[10px]">
+                              {s.type}
+                            </Badge>
+                          )}
+                        </label>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             )}
           </div>
           <DialogFooter>
@@ -1918,7 +1966,13 @@ function Index() {
             >
               Cancelar
             </Button>
-            <Button onClick={addAnime} disabled={chainLoading}>
+            <Button
+              onClick={addAnime}
+              disabled={
+                chainLoading ||
+                (!!chainSeasons && chainSeasons.length > 0 && selectedChainIds.size === 0)
+              }
+            >
               Adicionar
             </Button>
           </DialogFooter>
