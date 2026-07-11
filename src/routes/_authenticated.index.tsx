@@ -529,6 +529,7 @@ function Index() {
     setChainLoading(true);
     setChainSeasons(null);
     setChainProgress({ current: 0, total: 0 });
+    setChainError(false);
     try {
       const seasons = await buildChain(
         pick.malId,
@@ -559,6 +560,7 @@ function Index() {
       console.error(err);
       toast.error("Falha ao buscar temporadas no MAL");
       setChainSeasons(null);
+      setChainError(true);
     } finally {
       if (!ctrl.signal.aborted) setChainLoading(false);
     }
