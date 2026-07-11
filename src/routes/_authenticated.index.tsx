@@ -1914,9 +1914,46 @@ function Index() {
               </div>
             )}
             {!chainLoading && !chainError && chainSeasons && chainSeasons.length > 0 && (
-              <p className="text-xs text-muted-foreground">
-                {chainSeasons.length} temporada{chainSeasons.length === 1 ? "" : "s"} encontrada{chainSeasons.length === 1 ? "" : "s"} no MAL.
-              </p>
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  {selectedChainIds.size} de {chainSeasons.length} selecionada{chainSeasons.length === 1 ? "" : "s"}
+                </p>
+                <ul className="max-h-56 space-y-1 overflow-y-auto rounded-md border border-border p-2">
+                  {chainSeasons.map((s) => {
+                    const checked = selectedChainIds.has(s.malId);
+                    return (
+                      <li key={s.malId} className="flex items-center gap-2">
+                        <Checkbox
+                          id={`chain-${s.malId}`}
+                          checked={checked}
+                          onCheckedChange={(v) => {
+                            setSelectedChainIds((prev) => {
+                              const next = new Set(prev);
+                              if (v) next.add(s.malId);
+                              else next.delete(s.malId);
+                              return next;
+                            });
+                          }}
+                        />
+                        <label
+                          htmlFor={`chain-${s.malId}`}
+                          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-sm"
+                        >
+                          <span className="min-w-0 flex-1 truncate">{s.title}</span>
+                          {s.year != null && (
+                            <span className="text-xs text-muted-foreground">{s.year}</span>
+                          )}
+                          {s.type && (
+                            <Badge variant="outline" className="px-1.5 py-0 text-[10px]">
+                              {s.type}
+                            </Badge>
+                          )}
+                        </label>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             )}
           </div>
           <DialogFooter>
