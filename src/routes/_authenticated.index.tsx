@@ -522,7 +522,9 @@ function Index() {
     setChainLoading(false);
     setChainProgress(null);
     setChainError(false);
+    setSelectedChainIds(new Set());
   }
+
 
   async function startChainFetch(pick: JikanPick) {
     chainAbortRef.current?.abort();
