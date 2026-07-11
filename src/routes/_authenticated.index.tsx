@@ -519,6 +519,7 @@ function Index() {
     setChainSeasons(null);
     setChainLoading(false);
     setChainProgress(null);
+    setChainError(false);
   }
 
   async function startChainFetch(pick: JikanPick) {
