@@ -560,6 +560,7 @@ function Index() {
               },
             ];
       setChainSeasons(finalSeasons);
+      setSelectedChainIds(new Set(finalSeasons.map((s) => s.malId)));
     } catch (err) {
       if ((err as { name?: string })?.name === "AbortError") return;
       console.error(err);
