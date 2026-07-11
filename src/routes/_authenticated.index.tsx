@@ -532,6 +532,7 @@ function Index() {
     chainAbortRef.current = ctrl;
     setChainLoading(true);
     setChainSeasons(null);
+    setSelectedChainIds(new Set());
     setChainProgress({ current: 0, total: 0 });
     setChainError(false);
     try {
