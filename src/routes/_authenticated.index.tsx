@@ -148,6 +148,7 @@ function Index() {
   const [newAnimeCover, setNewAnimeCover] = useState<string | undefined>(undefined);
   const [newAnimeMal, setNewAnimeMal] = useState<JikanPick | null>(null);
   const [chainSeasons, setChainSeasons] = useState<ChainSeason[] | null>(null);
+  const [selectedChainIds, setSelectedChainIds] = useState<Set<number>>(() => new Set());
   const [chainLoading, setChainLoading] = useState(false);
   const [chainProgress, setChainProgress] = useState<{ current: number; total: number } | null>(null);
   const [chainError, setChainError] = useState(false);
