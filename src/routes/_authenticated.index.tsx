@@ -583,17 +583,22 @@ function Index() {
     try {
       // MAL pick → save as one anime with full season chain
       if (pick && chainSeasons && chainSeasons.length > 0) {
+        const selected = chainSeasons.filter((s) => selectedChainIds.has(s.malId));
+        if (selected.length === 0) {
+          toast.error("Selecione ao menos uma temporada");
+          return;
+        }
         const existingIds = new Set<number>();
         for (const a of animes) {
           if (a.malId) existingIds.add(a.malId);
           for (const s of a.seasons) if (s.malId) existingIds.add(s.malId);
         }
-        if (chainSeasons.some((s) => existingIds.has(s.malId))) {
+        if (selected.some((s) => existingIds.has(s.malId))) {
           toast.error("Esse anime já está na sua lista");
           return;
         }
-        const first = chainSeasons[0];
-        const seasons: Season[] = chainSeasons.map((s) => ({
+        const first = selected[0];
+        const seasons: Season[] = selected.map((s) => ({
           id: uid(),
           name: s.title,
           rating: null,
