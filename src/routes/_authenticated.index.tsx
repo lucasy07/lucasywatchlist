@@ -1966,7 +1966,13 @@ function Index() {
             >
               Cancelar
             </Button>
-            <Button onClick={addAnime} disabled={chainLoading}>
+            <Button
+              onClick={addAnime}
+              disabled={
+                chainLoading ||
+                (!!chainSeasons && chainSeasons.length > 0 && selectedChainIds.size === 0)
+              }
+            >
               Adicionar
             </Button>
           </DialogFooter>
