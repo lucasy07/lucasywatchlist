@@ -1861,14 +1861,48 @@ function Index() {
             </div>
 
             {chainLoading && (
-              <p className="text-xs text-muted-foreground">
-                Buscando temporadas...
-                {chainProgress && chainProgress.total > 0
-                  ? ` ${chainProgress.current} de ${chainProgress.total}`
-                  : ""}
-              </p>
+              <div className="grid gap-2">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span>Buscando temporadas...</span>
+                  {chainProgress && chainProgress.total > 0 && (
+                    <span>{chainProgress.current} de {chainProgress.total}</span>
+                  )}
+                </div>
+                {chainProgress && chainProgress.total > 0 ? (
+                  <Progress
+                    value={(chainProgress.current / chainProgress.total) * 100}
+                    className="h-2"
+                  />
+                ) : (
+                  <div className="relative h-2 w-full overflow-hidden rounded-full bg-primary/20">
+                    <div className="h-full w-1/3 animate-pulse rounded-full bg-primary/70" />
+                  </div>
+                )}
+              </div>
             )}
-            {!chainLoading && chainSeasons && chainSeasons.length > 0 && (
+            {!chainLoading && chainError && (
+              <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                <div className="grid gap-1.5">
+                  <p className="text-xs text-destructive">
+                    Não foi possível buscar as temporadas no MAL.
+                  </p>
+                  {newAnimeMal && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => startChainFetch(newAnimeMal)}
+                      className="h-7 w-fit gap-1.5 text-xs"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      Tentar novamente
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+            {!chainLoading && !chainError && chainSeasons && chainSeasons.length > 0 && (
               <p className="text-xs text-muted-foreground">
                 {chainSeasons.length} temporada{chainSeasons.length === 1 ? "" : "s"} encontrada{chainSeasons.length === 1 ? "" : "s"} no MAL.
               </p>
