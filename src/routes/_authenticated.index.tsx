@@ -1846,6 +1846,7 @@ function Index() {
                     setNewAnimeMal(null);
                     setChainSeasons(null);
                     setChainProgress(null);
+                    setChainError(false);
                     chainAbortRef.current?.abort();
                     setChainLoading(false);
                   }
