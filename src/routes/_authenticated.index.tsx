@@ -149,6 +149,7 @@ function Index() {
   const [chainSeasons, setChainSeasons] = useState<ChainSeason[] | null>(null);
   const [chainLoading, setChainLoading] = useState(false);
   const [chainProgress, setChainProgress] = useState<{ current: number; total: number } | null>(null);
+  const [chainError, setChainError] = useState(false);
   const chainAbortRef = useRef<AbortController | null>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
