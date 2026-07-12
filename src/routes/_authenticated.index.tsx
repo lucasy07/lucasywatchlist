@@ -1364,32 +1364,31 @@ function Index() {
               );
             })}
             {ranked.some((a) => a.tier === null) && (
-              <div className="flex items-stretch border-t border-border/60">
+              <div className="flex min-h-32 items-stretch border-t border-border/60">
                 <div className="flex w-16 shrink-0 items-center justify-center bg-secondary">
                   <span className="font-display text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                     Sem tier
                   </span>
                 </div>
-                <div className="flex flex-1 flex-wrap gap-2 p-2">
+                <div className="flex flex-1 flex-wrap items-center gap-2.5 p-3">
                   {ranked
                     .filter((a) => a.tier === null)
                     .map((anime) => {
                       const img = anime.imageUrl ?? anime.cover;
                       return (
-                        <div key={anime.id} className="w-16" title={anime.name}>
+                        <div key={anime.id} className="w-20" title={anime.name}>
                           {img ? (
                             <img
                               src={img}
                               alt={anime.name}
                               loading="lazy"
-                              className="aspect-[2/3] w-16 rounded-md object-cover"
+                              className="aspect-[2/3] w-20 rounded-lg object-cover ring-1 ring-border/50 transition-transform duration-200 hover:scale-105 hover:ring-primary/50"
                             />
                           ) : (
-                            <div className="flex aspect-[2/3] w-16 items-center justify-center rounded-md bg-secondary text-muted-foreground">
+                            <div className="flex aspect-[2/3] w-20 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
                               <ImageIcon className="h-5 w-5" />
                             </div>
                           )}
-                          <p className="mt-1 line-clamp-2 text-[10px] text-muted-foreground">{anime.name}</p>
                         </div>
                       );
                     })}
