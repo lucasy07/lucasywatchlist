@@ -1336,8 +1336,9 @@ function Index() {
               const items = ranked.filter((a) => a.tier === t);
               return (
                 <div key={t} className="flex min-h-32 items-stretch border-b border-border/60 last:border-b-0">
-                  <div className={`flex w-16 shrink-0 items-center justify-center ${tierBg(t)}`}>
-                    <span className="font-display text-2xl font-bold text-tier-foreground sm:text-3xl">{t}</span>
+                  <div className="relative flex w-16 shrink-0 items-center justify-center bg-card">
+                    <div className={`absolute inset-y-0 left-0 w-1.5 ${tierBg(t)}`} />
+                    <span className={`font-display text-2xl font-bold sm:text-3xl ${tierColor(t)}`}>{t}</span>
                   </div>
                   <div className="flex flex-1 flex-wrap items-center gap-2.5 p-3">
                     {items.map((anime) => {
@@ -1365,7 +1366,8 @@ function Index() {
             })}
             {ranked.some((a) => a.tier === null) && (
               <div className="flex min-h-32 items-stretch border-t border-border/60">
-                <div className="flex w-16 shrink-0 items-center justify-center bg-secondary">
+                <div className="relative flex w-16 shrink-0 items-center justify-center bg-card">
+                  <div className="absolute inset-y-0 left-0 w-1.5 bg-muted-foreground/30" />
                   <span className="font-display text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                     Sem tier
                   </span>
