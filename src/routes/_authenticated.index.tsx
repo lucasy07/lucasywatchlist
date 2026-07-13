@@ -89,6 +89,7 @@ import { useAuth } from "@/auth/AuthProvider";
 import { JikanSearch, type JikanPick } from "@/components/JikanSearch";
 import { TierPicker, tierColor, tierBg } from "@/components/TierPicker";
 import { buildChain, type ChainSeason } from "@/lib/jikan-chain";
+import { runMigrations } from "@/lib/migrations";
 
 
 const TIER_ROWS = (Object.keys(TIER_VALUE) as Tier[]).sort(
