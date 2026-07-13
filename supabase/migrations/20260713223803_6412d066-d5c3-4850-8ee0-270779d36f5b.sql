@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_animes_user_created ON public.animes (user_id, created_at);
