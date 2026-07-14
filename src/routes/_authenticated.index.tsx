@@ -1156,7 +1156,7 @@ function Index() {
           <EmptyState onAdd={() => setAnimeDialogOpen(true)} hasAnimes={animes.length > 0} />
 
         ) : scoreMode === "gosto" ? (
-          <div className="overflow-hidden rounded-xl border border-border/60">
+          <div key={`${scoreMode}-${viewMode}`} className="overflow-hidden rounded-xl border border-border/60">
             {TIER_ROWS.map((t) => {
               const items = ranked.filter((a) => a.tier === t);
               return (
@@ -1166,10 +1166,15 @@ function Index() {
                     <span className={`font-display text-2xl font-bold sm:text-3xl ${tierColor(t)}`}>{t}</span>
                   </div>
                   <div className="flex flex-1 flex-wrap items-center gap-2.5 p-3">
-                    {items.map((anime) => {
+                    {items.map((anime, idx) => {
                       const img = anime.imageUrl ?? anime.cover;
                       return (
-                        <div key={anime.id} className="w-20" title={anime.name}>
+                        <div
+                          key={anime.id}
+                          className="w-20 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none"
+                          style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
+                          title={anime.name}
+                        >
                           {img ? (
                             <img
                               src={img}
@@ -1200,10 +1205,15 @@ function Index() {
                 <div className="flex flex-1 flex-wrap items-center gap-2.5 p-3">
                   {ranked
                     .filter((a) => a.tier === null)
-                    .map((anime) => {
+                    .map((anime, idx) => {
                       const img = anime.imageUrl ?? anime.cover;
                       return (
-                        <div key={anime.id} className="w-20" title={anime.name}>
+                        <div
+                          key={anime.id}
+                          className="w-20 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none"
+                          style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
+                          title={anime.name}
+                        >
                           {img ? (
                             <img
                               src={img}
@@ -1224,7 +1234,7 @@ function Index() {
             )}
           </div>
         ) : viewMode === "grid" ? (
-          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+          <ul key={`${scoreMode}-${viewMode}`} className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
             {ranked.map((anime, idx) => {
               const malAvg = mediaMAL(anime.seasons);
               const primaryValue = malAvg != null ? malAvg.toFixed(2) : "—";
