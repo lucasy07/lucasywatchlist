@@ -1250,7 +1250,101 @@ function Index() {
                     style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
                   >
                   <div className="relative aspect-[2/3] w-full overflow-hidden bg-card-elevated">
-                    ...
+                    {anime.imageUrl || anime.cover ? (
+                      <img
+                        src={anime.imageUrl ?? anime.cover}
+                        alt={anime.name}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-primary/40">
+                        <ImageIcon className="h-10 w-10" />
+                      </div>
+                    )}
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                    <div
+                      className={`font-display absolute left-2 top-2 flex h-7 min-w-7 items-center justify-center rounded-full border px-2 text-xs font-bold backdrop-blur ${
+                        idx === 0
+                          ? "border-primary/60 bg-primary/20 text-primary"
+                          : "border-border/60 bg-background/70 text-foreground/80"
+                      }`}
+                    >
+                      #{idx + 1}
+                    </div>
+                    <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
+                      <div className="flex items-baseline gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
+                        <span className={`font-display text-sm font-bold tabular-nums ${primaryColor}`}>
+                          {primaryValue}
+                        </span>
+                        <span className="text-[9px] text-muted-foreground">/10</span>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
+                      >
+                        <span className={`font-display font-bold ${tierColor(anime.tier)}`}>
+                          {anime.tier ?? "—"}
+                        </span>
+                      </Badge>
+                    </div>
+                    {anime.upcoming?.releaseDate && (
+                      <Link
+                        to="/upcoming"
+                        className="absolute left-2 top-11 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground shadow-lg"
+                      >
+                        <CalendarClock className="h-3 w-3" />
+                        {formatReleaseLabel(anime.upcoming.releaseDate)}
+                      </Link>
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 p-3">
+                      <h3 className="font-display line-clamp-2 text-sm font-semibold leading-tight tracking-tight">
+                        {anime.name}
+                      </h3>
+                      <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                        {anime.seasons.length}{" "}
+                        {anime.seasons.length === 1 ? "temporada" : "temporadas"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-1 p-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => openAddSeason(anime.id)}
+                      className="h-8 flex-1 text-xs"
+                    >
+                      <Plus className="mr-1 h-3.5 w-3.5" /> Temp.
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openEdit(anime.id)}
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                      aria-label="Editar"
+                      title="Editar"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => toggleWatched(anime.id, true)}
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                      aria-label="Marcar como assistido"
+                      title="Marcar como assistido"
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setConfirmDelete({ id: anime.id, name: anime.name })}
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      aria-label="Remover anime"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                   </TiltCard>
