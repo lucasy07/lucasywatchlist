@@ -1348,7 +1348,7 @@ function Index() {
             })}
           </ul>
         ) : (
-          <ul className="grid gap-4">
+          <ul key={`${scoreMode}-${viewMode}`} className="grid gap-4">
             {ranked.map((anime, idx) => {
               const malAvg = mediaMAL(anime.seasons);
               const primaryValue = malAvg != null ? malAvg.toFixed(2) : "—";
@@ -1357,8 +1357,8 @@ function Index() {
               return (
                 <li
                   key={anime.id}
-                  className="group relative overflow-hidden rounded-2xl border border-border/60 transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)]"
-                  style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
+                  className="group relative overflow-hidden rounded-2xl border border-border/60 transition-all animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)]"
+                  style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)", animationDelay: `${Math.min(idx, 12) * 30}ms` }}
                 >
                   <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5">
                     <div
