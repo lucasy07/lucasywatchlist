@@ -90,7 +90,6 @@ import { JikanSearch, type JikanPick } from "@/components/JikanSearch";
 import { TierPicker, tierColor, tierBg } from "@/components/TierPicker";
 import { buildChain, type ChainSeason } from "@/lib/jikan-chain";
 import { runMigrations } from "@/lib/migrations";
-import { TiltCard } from "@/components/TiltCard";
 
 
 const TIER_ROWS = (Object.keys(TIER_VALUE) as Tier[]).sort(
@@ -1243,13 +1242,9 @@ function Index() {
               return (
                 <li
                   key={anime.id}
-                  className="animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none"
-                  style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
+                  className="group relative overflow-hidden rounded-2xl border border-border/60 transition-all animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)]"
+                  style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)", animationDelay: `${Math.min(idx, 12) * 30}ms` }}
                 >
-                  <TiltCard
-                    className="group relative block overflow-hidden rounded-2xl border border-border/60 transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-[var(--shadow-elegant)]"
-                    style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
-                  >
                   <div className="relative aspect-[2/3] w-full overflow-hidden bg-card-elevated">
                     {anime.imageUrl || anime.cover ? (
                       <img
@@ -1348,7 +1343,6 @@ function Index() {
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
-                  </TiltCard>
                 </li>
               );
             })}
