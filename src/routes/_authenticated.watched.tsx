@@ -48,13 +48,13 @@ import {
   updateSeasons,
   updateTier,
   TIER_VALUE,
-} from "@/lib/anime-storage-shim-DELETE";
   uid,
   isExcludedFromAverage,
 } from "@/lib/anime-storage";
 import { TierPicker, tierColor } from "@/components/TierPicker";
 import { useAuth } from "@/auth/AuthProvider";
 import { UpcomingEditDialog } from "@/components/UpcomingEditDialog";
+import { EmptyState } from "@/components/EmptyState";
 
 export const Route = createFileRoute("/_authenticated/watched")({
   codeSplitGroupings: [["component"]],
