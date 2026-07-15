@@ -110,31 +110,26 @@ function UpcomingPage() {
 
       <main className="mx-auto max-w-5xl px-4 pb-20 pt-6 sm:px-6">
         {!hydrated ? null : upcoming.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
-            <div
-              className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
-              style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
-            >
-              <Sparkles className="h-7 w-7 text-primary-foreground" />
-            </div>
-            <h2 className="text-xl font-semibold">Nada agendado</h2>
-            <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-              Adicione uma data de lançamento em algum anime para ver o cronograma
-              aqui.
-            </p>
-            {animesWithoutUpcoming.length > 0 ? (
-              <Button className="mt-6" onClick={() => openEdit(animesWithoutUpcoming[0].id)}>
-                <Plus className="mr-1 h-4 w-4" /> Adicionar lançamento
-              </Button>
-            ) : (
-              <Link
-                to="/"
-                className="mt-6 inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-              >
-                Ir para a lista
-              </Link>
-            )}
-          </div>
+          <EmptyState
+            icon={CalendarClock}
+            title="Nada agendado"
+            description="Adicione uma data de lançamento em algum anime para ver o cronograma aqui."
+            action={
+              animesWithoutUpcoming.length > 0 ? (
+                <Button onClick={() => openEdit(animesWithoutUpcoming[0].id)}>
+                  <Plus className="mr-1 h-4 w-4" /> Adicionar lançamento
+                </Button>
+              ) : (
+                <Link
+                  to="/"
+                  className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                >
+                  Ir para a lista
+                </Link>
+              )
+            }
+          />
+
         ) : (
           <div className="grid gap-6">
             {future.length > 0 && (
