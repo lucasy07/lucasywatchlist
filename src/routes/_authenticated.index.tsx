@@ -1158,18 +1158,34 @@ function Index() {
         {!hydrated ? (
           <p className="py-20 text-center text-sm text-muted-foreground">Carregando...</p>
         ) : ranked.length === 0 && filtersActive ? (
-          <div className="py-16 text-center">
-            <p className="text-sm text-muted-foreground">Nenhum anime com esses filtros.</p>
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="mt-3 inline-flex h-8 items-center rounded-full border border-border/60 bg-card px-3 text-xs font-medium text-muted-foreground hover:text-foreground"
-            >
-              Limpar filtros
-            </button>
-          </div>
+          <EmptyState
+            icon={Filter}
+            title="Nenhum anime com esses filtros."
+            description="Tente afrouxar os filtros para ver mais resultados."
+            action={
+              <Button variant="outline" onClick={clearFilters}>
+                Limpar filtros
+              </Button>
+            }
+          />
+        ) : ranked.length === 0 && animes.length > 0 ? (
+          <EmptyState
+            icon={Search}
+            title="Nenhum resultado"
+            description="Tente buscar por outro nome."
+          />
         ) : ranked.length === 0 ? (
-          <EmptyState onAdd={() => setAnimeDialogOpen(true)} hasAnimes={animes.length > 0} />
+          <EmptyState
+            icon={Sparkles}
+            title="Comece seu ranking"
+            description="Adicione seu primeiro anime e comece a notar as temporadas."
+            action={
+              <Button onClick={() => setAnimeDialogOpen(true)}>
+                <Plus className="mr-1 h-4 w-4" /> Adicionar anime
+              </Button>
+            }
+          />
+
 
         ) : scoreMode === "gosto" ? (
           <div key={`${scoreMode}-${viewMode}`} className="overflow-hidden rounded-xl border border-border/60">
