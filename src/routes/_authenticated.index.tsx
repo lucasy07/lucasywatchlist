@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTilt } from "@/hooks/use-tilt";
 import {
   Plus,
   Search,
@@ -126,6 +127,21 @@ async function fileToBase64(file: File, maxSize = 512): Promise<string> {
     img.src = dataUrl;
   });
 }
+
+function TiltCardInner({ children }: { children: React.ReactNode }) {
+  const tilt = useTilt();
+  return (
+    <div
+      onMouseMove={tilt.onMouseMove}
+      onMouseLeave={tilt.onMouseLeave}
+      className="group relative overflow-hidden rounded-2xl border border-border/60 transition-[border-color,box-shadow] duration-200 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)]"
+      style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)", transformOrigin: "center" }}
+    >
+      {children}
+    </div>
+  );
+}
+
 
 function Index() {
   const { user, signOut } = useAuth();
@@ -1242,9 +1258,10 @@ function Index() {
               return (
                 <li
                   key={anime.id}
-                  className="group relative overflow-hidden rounded-2xl border border-border/60 transition-all animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)]"
-                  style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)", animationDelay: `${Math.min(idx, 12) * 30}ms` }}
+                  className="animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none [transform-style:preserve-3d]"
+                  style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
                 >
+                <TiltCardInner>
                   <div className="relative aspect-[2/3] w-full overflow-hidden bg-card-elevated">
                     {anime.imageUrl || anime.cover ? (
                       <img
@@ -1343,6 +1360,7 @@ function Index() {
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
+                </TiltCardInner>
                 </li>
               );
             })}
