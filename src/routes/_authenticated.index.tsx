@@ -2203,28 +2203,5 @@ function Index() {
   );
 }
 
-function EmptyState({ onAdd, hasAnimes }: { onAdd: () => void; hasAnimes: boolean }) {
-  return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
-      <div
-        className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
-        style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
-      >
-        <Sparkles className="h-7 w-7 text-primary-foreground" />
-      </div>
-      <h2 className="text-xl font-semibold">
-        {hasAnimes ? "Nenhum resultado" : "Comece seu ranking"}
-      </h2>
-      <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-        {hasAnimes
-          ? "Tente buscar por outro nome."
-          : "Adicione seu primeiro anime e comece a notar as temporadas."}
-      </p>
-      {!hasAnimes && (
-        <Button onClick={onAdd} className="mt-6">
-          <Plus className="mr-1 h-4 w-4" /> Adicionar anime
-        </Button>
-      )}
-    </div>
-  );
-}
+
+
