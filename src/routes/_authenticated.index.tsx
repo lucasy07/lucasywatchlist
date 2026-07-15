@@ -127,6 +127,21 @@ async function fileToBase64(file: File, maxSize = 512): Promise<string> {
   });
 }
 
+function TiltCardInner({ children }: { children: React.ReactNode }) {
+  const tilt = useTilt();
+  return (
+    <div
+      onMouseMove={tilt.onMouseMove}
+      onMouseLeave={tilt.onMouseLeave}
+      className="group relative overflow-hidden rounded-2xl border border-border/60 transition-[border-color,box-shadow] duration-200 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)]"
+      style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)", transformOrigin: "center" }}
+    >
+      {children}
+    </div>
+  );
+}
+
+
 function Index() {
   const { user, signOut } = useAuth();
   const [animes, setAnimes] = useState<Anime[]>([]);
