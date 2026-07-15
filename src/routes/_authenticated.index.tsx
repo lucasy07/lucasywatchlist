@@ -1242,9 +1242,10 @@ function Index() {
               return (
                 <li
                   key={anime.id}
-                  className="group relative overflow-hidden rounded-2xl border border-border/60 transition-all animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)]"
-                  style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)", animationDelay: `${Math.min(idx, 12) * 30}ms` }}
+                  className="animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none [transform-style:preserve-3d]"
+                  style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
                 >
+                <TiltCardInner>
                   <div className="relative aspect-[2/3] w-full overflow-hidden bg-card-elevated">
                     {anime.imageUrl || anime.cover ? (
                       <img
