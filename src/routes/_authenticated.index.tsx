@@ -91,6 +91,7 @@ import { JikanSearch, type JikanPick } from "@/components/JikanSearch";
 import { TierPicker, tierColor, tierBg } from "@/components/TierPicker";
 import { buildChain, type ChainSeason } from "@/lib/jikan-chain";
 import { runMigrations } from "@/lib/migrations";
+import { EmptyState } from "@/components/EmptyState";
 
 
 const TIER_ROWS = (Object.keys(TIER_VALUE) as Tier[]).sort(
@@ -1158,18 +1159,34 @@ function Index() {
         {!hydrated ? (
           <p className="py-20 text-center text-sm text-muted-foreground">Carregando...</p>
         ) : ranked.length === 0 && filtersActive ? (
-          <div className="py-16 text-center">
-            <p className="text-sm text-muted-foreground">Nenhum anime com esses filtros.</p>
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="mt-3 inline-flex h-8 items-center rounded-full border border-border/60 bg-card px-3 text-xs font-medium text-muted-foreground hover:text-foreground"
-            >
-              Limpar filtros
-            </button>
-          </div>
+          <EmptyState
+            icon={Filter}
+            title="Nenhum anime com esses filtros."
+            description="Tente afrouxar os filtros para ver mais resultados."
+            action={
+              <Button variant="outline" onClick={clearFilters}>
+                Limpar filtros
+              </Button>
+            }
+          />
+        ) : ranked.length === 0 && animes.length > 0 ? (
+          <EmptyState
+            icon={Search}
+            title="Nenhum resultado"
+            description="Tente buscar por outro nome."
+          />
         ) : ranked.length === 0 ? (
-          <EmptyState onAdd={() => setAnimeDialogOpen(true)} hasAnimes={animes.length > 0} />
+          <EmptyState
+            icon={Sparkles}
+            title="Comece seu ranking"
+            description="Adicione seu primeiro anime e comece a notar as temporadas."
+            action={
+              <Button onClick={() => setAnimeDialogOpen(true)}>
+                <Plus className="mr-1 h-4 w-4" /> Adicionar anime
+              </Button>
+            }
+          />
+
 
         ) : scoreMode === "gosto" ? (
           <div key={`${scoreMode}-${viewMode}`} className="overflow-hidden rounded-xl border border-border/60">
@@ -2187,28 +2204,5 @@ function Index() {
   );
 }
 
-function EmptyState({ onAdd, hasAnimes }: { onAdd: () => void; hasAnimes: boolean }) {
-  return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
-      <div
-        className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
-        style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
-      >
-        <Sparkles className="h-7 w-7 text-primary-foreground" />
-      </div>
-      <h2 className="text-xl font-semibold">
-        {hasAnimes ? "Nenhum resultado" : "Comece seu ranking"}
-      </h2>
-      <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-        {hasAnimes
-          ? "Tente buscar por outro nome."
-          : "Adicione seu primeiro anime e comece a notar as temporadas."}
-      </p>
-      {!hasAnimes && (
-        <Button onClick={onAdd} className="mt-6">
-          <Plus className="mr-1 h-4 w-4" /> Adicionar anime
-        </Button>
-      )}
-    </div>
-  );
-}
+
+

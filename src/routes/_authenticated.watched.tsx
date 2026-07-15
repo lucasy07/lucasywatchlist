@@ -54,6 +54,7 @@ import {
 import { TierPicker, tierColor } from "@/components/TierPicker";
 import { useAuth } from "@/auth/AuthProvider";
 import { UpcomingEditDialog } from "@/components/UpcomingEditDialog";
+import { EmptyState } from "@/components/EmptyState";
 
 export const Route = createFileRoute("/_authenticated/watched")({
   codeSplitGroupings: [["component"]],
@@ -275,24 +276,20 @@ function WatchedPage() {
         {!hydrated ? (
           <p className="py-20 text-center text-sm text-muted-foreground">Carregando...</p>
         ) : watched.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
-            <div
-              className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
-              style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
-            >
-              <Sparkles className="h-7 w-7 text-primary-foreground" />
-            </div>
-            <h2 className="text-xl font-semibold">Nenhum anime concluído</h2>
-            <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-              Marque um anime como assistido na sua lista para vê-lo aqui.
-            </p>
-            <Link
-              to="/"
-              className="mt-6 inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-            >
-              Ir para a lista
-            </Link>
-          </div>
+          <EmptyState
+            icon={CheckCircle2}
+            title="Nenhum anime concluído"
+            description="Marque um anime como assistido na sua lista para vê-lo aqui."
+            action={
+              <Link
+                to="/"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                Ir para a lista
+              </Link>
+            }
+          />
+
         ) : (
           <ul className="grid gap-3">
             {watched.map((anime) => {
