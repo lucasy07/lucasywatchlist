@@ -91,6 +91,7 @@ import { JikanSearch, type JikanPick } from "@/components/JikanSearch";
 import { TierPicker, tierColor, tierBg } from "@/components/TierPicker";
 import { buildChain, type ChainSeason } from "@/lib/jikan-chain";
 import { runMigrations } from "@/lib/migrations";
+import { EmptyState } from "@/components/EmptyState";
 
 
 const TIER_ROWS = (Object.keys(TIER_VALUE) as Tier[]).sort(
