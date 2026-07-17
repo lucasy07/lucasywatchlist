@@ -1157,7 +1157,7 @@ function Index() {
 
 
         {!hydrated ? (
-          <p className="py-20 text-center text-sm text-muted-foreground">Carregando...</p>
+          <RankingSkeleton scoreMode={scoreMode} viewMode={viewMode} />
         ) : ranked.length === 0 && filtersActive ? (
           <EmptyState
             icon={Filter}
