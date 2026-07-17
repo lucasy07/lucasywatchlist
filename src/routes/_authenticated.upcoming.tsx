@@ -110,7 +110,9 @@ function UpcomingPage() {
       </header>
 
       <main className="mx-auto max-w-5xl px-4 pb-20 pt-6 sm:px-6">
-        {!hydrated ? null : upcoming.length === 0 ? (
+        {!hydrated ? (
+          <UpcomingSkeleton />
+        ) : upcoming.length === 0 ? (
           <EmptyState
             icon={CalendarClock}
             title="Nada agendado"
