@@ -2205,5 +2205,109 @@ function Index() {
   );
 }
 
+function RankingSkeleton({
+  scoreMode,
+  viewMode,
+}: {
+  scoreMode: "mal" | "gosto";
+  viewMode: "grid" | "list";
+}) {
+  if (scoreMode === "gosto") {
+    return (
+      <div role="status" aria-busy="true">
+        <span className="sr-only">Carregando…</span>
+        <div className="overflow-hidden rounded-xl border border-border/60">
+          {TIER_ROWS.map((t) => (
+            <div
+              key={t}
+              className="flex min-h-32 items-stretch border-b border-border/60 last:border-b-0"
+            >
+              <div className="relative flex w-16 shrink-0 items-center justify-center bg-card">
+                <div className={`absolute inset-y-0 left-0 w-1.5 ${tierBg(t)}`} />
+                <span className={`font-display text-2xl font-bold sm:text-3xl ${tierColor(t)}`}>
+                  {t}
+                </span>
+              </div>
+              <div className="flex flex-1 flex-wrap items-center gap-2.5 p-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton
+                    key={i}
+                    aria-hidden
+                    className="aspect-[2/3] w-20 rounded-lg"
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (viewMode === "grid") {
+    return (
+      <div role="status" aria-busy="true">
+        <span className="sr-only">Carregando…</span>
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <li key={i}>
+              <div
+                className="overflow-hidden rounded-2xl border border-border/60"
+                style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
+              >
+                <Skeleton aria-hidden className="aspect-[2/3] w-full rounded-none" />
+                <div className="space-y-2 p-3">
+                  <Skeleton aria-hidden className="h-4 w-3/4" />
+                  <Skeleton aria-hidden className="h-3 w-1/2" />
+                </div>
+                <div className="flex gap-1 p-2">
+                  <Skeleton aria-hidden className="h-8 flex-1" />
+                  <Skeleton aria-hidden className="h-8 w-8" />
+                  <Skeleton aria-hidden className="h-8 w-8" />
+                  <Skeleton aria-hidden className="h-8 w-8" />
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
+  return (
+    <div role="status" aria-busy="true">
+      <span className="sr-only">Carregando…</span>
+      <ul className="grid gap-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <li
+            key={i}
+            className="overflow-hidden rounded-2xl border border-border/60"
+            style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
+          >
+            <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5">
+              <Skeleton aria-hidden className="h-10 w-8 sm:h-14 sm:w-10" />
+              <Skeleton
+                aria-hidden
+                className="self-stretch min-h-[120px] w-20 rounded-lg sm:min-h-[168px] sm:w-28"
+              />
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton aria-hidden className="h-5 w-3/4" />
+                <Skeleton aria-hidden className="h-3 w-1/3" />
+              </div>
+              <div className="flex flex-col items-end gap-1.5">
+                <Skeleton aria-hidden className="h-7 w-14" />
+                <Skeleton aria-hidden className="h-3 w-8" />
+                <Skeleton aria-hidden className="h-4 w-8" />
+              </div>
+              <Skeleton aria-hidden className="h-9 w-9 rounded-full" />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+
 
 
