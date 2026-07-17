@@ -274,7 +274,7 @@ function WatchedPage() {
 
       <main className="mx-auto max-w-5xl px-4 pb-20 pt-6 sm:px-6">
         {!hydrated ? (
-          <p className="py-20 text-center text-sm text-muted-foreground">Carregando...</p>
+          <WatchedSkeleton />
         ) : watched.length === 0 ? (
           <EmptyState
             icon={CheckCircle2}
