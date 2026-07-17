@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/auth/AuthProvider";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -18,8 +19,13 @@ function AuthenticatedLayout() {
 
   if (loading || !session) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">
-        <p className="text-sm">Carregando...</p>
+      <div
+        role="status"
+        aria-busy="true"
+        className="flex min-h-screen items-center justify-center bg-background text-muted-foreground"
+      >
+        <Loader2 className="h-6 w-6 animate-spin text-primary motion-reduce:animate-none" />
+        <span className="sr-only">Carregando</span>
       </div>
     );
   }
