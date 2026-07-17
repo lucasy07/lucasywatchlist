@@ -55,6 +55,7 @@ import { TierPicker, tierColor } from "@/components/TierPicker";
 import { useAuth } from "@/auth/AuthProvider";
 import { UpcomingEditDialog } from "@/components/UpcomingEditDialog";
 import { EmptyState } from "@/components/EmptyState";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/watched")({
   codeSplitGroupings: [["component"]],
