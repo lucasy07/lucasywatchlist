@@ -55,6 +55,7 @@ import { TierPicker, tierColor } from "@/components/TierPicker";
 import { useAuth } from "@/auth/AuthProvider";
 import { UpcomingEditDialog } from "@/components/UpcomingEditDialog";
 import { EmptyState } from "@/components/EmptyState";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/watched")({
   codeSplitGroupings: [["component"]],
@@ -274,7 +275,7 @@ function WatchedPage() {
 
       <main className="mx-auto max-w-5xl px-4 pb-20 pt-6 sm:px-6">
         {!hydrated ? (
-          <p className="py-20 text-center text-sm text-muted-foreground">Carregando...</p>
+          <WatchedSkeleton />
         ) : watched.length === 0 ? (
           <EmptyState
             icon={CheckCircle2}
@@ -553,3 +554,28 @@ function WatchedPage() {
     </div>
   );
 }
+
+function WatchedSkeleton() {
+  return (
+    <div role="status" aria-busy="true">
+      <span className="sr-only">Carregando…</span>
+      <ul className="grid gap-3">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <li
+            key={i}
+            className="flex items-center gap-3 rounded-2xl border border-border p-3 sm:gap-4 sm:p-4"
+            style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
+          >
+            <Skeleton aria-hidden className="h-20 w-14 rounded-lg sm:h-24 sm:w-16" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <Skeleton aria-hidden className="h-4 w-3/4" />
+              <Skeleton aria-hidden className="h-3 w-1/3" />
+            </div>
+            <Skeleton aria-hidden className="h-6 w-10" />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
