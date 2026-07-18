@@ -1192,7 +1192,7 @@ function Index() {
         ) : scoreMode === "gosto" ? (
           <div key={`${scoreMode}-${viewMode}`} className="overflow-hidden rounded-xl border border-border/60">
             {TIER_ROWS.map((t) => {
-              const items = ranked.filter((a) => a.tier === t);
+              const items = ranked.filter((a) => a.tier === t && a.watched);
               return (
                 <div key={t} className="flex min-h-32 items-stretch border-b border-border/60 last:border-b-0">
                   <div className="relative flex w-16 shrink-0 items-center justify-center bg-card">
