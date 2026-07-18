@@ -941,7 +941,7 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Toaster theme="dark" position="top-center" />
+      <Toaster theme="dark" position="top-right" offset={{ top: "132px" }} />
 
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur-xl">
