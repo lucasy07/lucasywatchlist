@@ -1192,7 +1192,7 @@ function Index() {
         ) : scoreMode === "gosto" ? (
           <div key={`${scoreMode}-${viewMode}`} className="overflow-hidden rounded-xl border border-border/60">
             {TIER_ROWS.map((t) => {
-              const items = ranked.filter((a) => a.tier === t);
+              const items = ranked.filter((a) => a.tier === t && a.watched);
               return (
                 <div key={t} className="flex min-h-32 items-stretch border-b border-border/60 last:border-b-0">
                   <div className="relative flex w-16 shrink-0 items-center justify-center bg-card">
@@ -1228,7 +1228,7 @@ function Index() {
                 </div>
               );
             })}
-            {ranked.some((a) => a.tier === null) && (
+            {ranked.some((a) => a.tier === null && a.watched) && (
               <div className="flex min-h-32 items-stretch border-t border-border/60">
                 <div className="relative flex w-16 shrink-0 items-center justify-center bg-card">
                   <div className="absolute inset-y-0 left-0 w-1.5 bg-muted-foreground/30" />
@@ -1238,7 +1238,7 @@ function Index() {
                 </div>
                 <div className="flex flex-1 flex-wrap items-center gap-2.5 p-3">
                   {ranked
-                    .filter((a) => a.tier === null)
+                    .filter((a) => a.tier === null && a.watched)
                     .map((anime, idx) => {
                       const img = anime.imageUrl ?? anime.cover;
                       return (
