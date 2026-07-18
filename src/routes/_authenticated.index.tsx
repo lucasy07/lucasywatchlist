@@ -1238,7 +1238,7 @@ function Index() {
                 </div>
                 <div className="flex flex-1 flex-wrap items-center gap-2.5 p-3">
                   {ranked
-                    .filter((a) => a.tier === null)
+                    .filter((a) => a.tier === null && a.watched)
                     .map((anime, idx) => {
                       const img = anime.imageUrl ?? anime.cover;
                       return (
