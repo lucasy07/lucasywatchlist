@@ -1228,7 +1228,7 @@ function Index() {
                 </div>
               );
             })}
-            {ranked.some((a) => a.tier === null) && (
+            {ranked.some((a) => a.tier === null && a.watched) && (
               <div className="flex min-h-32 items-stretch border-t border-border/60">
                 <div className="relative flex w-16 shrink-0 items-center justify-center bg-card">
                   <div className="absolute inset-y-0 left-0 w-1.5 bg-muted-foreground/30" />
