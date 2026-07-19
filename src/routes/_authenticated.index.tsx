@@ -164,7 +164,7 @@ function Index() {
   // Add Anime dialog
   const [animeDialogOpen, setAnimeDialogOpen] = useState(false);
   const [newAnimeName, setNewAnimeName] = useState("");
-  const [newAnimeCover, setNewAnimeCover] = useState<string | undefined>(undefined);
+  
   const [newAnimeMal, setNewAnimeMal] = useState<JikanPick | null>(null);
   const [chainSeasons, setChainSeasons] = useState<ChainSeason[] | null>(null);
   const [selectedChainIds, setSelectedChainIds] = useState<Set<number>>(() => new Set());
@@ -172,7 +172,7 @@ function Index() {
   const [chainProgress, setChainProgress] = useState<{ current: number; total: number } | null>(null);
   const [chainError, setChainError] = useState(false);
   const chainAbortRef = useRef<AbortController | null>(null);
-  const coverInputRef = useRef<HTMLInputElement>(null);
+  
 
 
   // Add Season dialog
@@ -359,7 +359,6 @@ function Index() {
     chainAbortRef.current?.abort();
     chainAbortRef.current = null;
     setNewAnimeName("");
-    setNewAnimeCover(undefined);
     setNewAnimeMal(null);
     setChainSeasons(null);
     setChainLoading(false);
@@ -469,7 +468,7 @@ function Index() {
       // Manual creation (no MAL chain)
       const created = await createAnime({
         name,
-        cover: newAnimeCover ?? pick?.imageUrl ?? undefined,
+        cover: pick?.imageUrl ?? undefined,
         malId: pick?.malId ?? null,
         imageUrl: pick?.imageUrl ?? null,
         malScore: pick?.score ?? null,
