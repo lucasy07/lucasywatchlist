@@ -164,7 +164,7 @@ function Index() {
   // Add Anime dialog
   const [animeDialogOpen, setAnimeDialogOpen] = useState(false);
   const [newAnimeName, setNewAnimeName] = useState("");
-  const [newAnimeCover, setNewAnimeCover] = useState<string | undefined>(undefined);
+  
   const [newAnimeMal, setNewAnimeMal] = useState<JikanPick | null>(null);
   const [chainSeasons, setChainSeasons] = useState<ChainSeason[] | null>(null);
   const [selectedChainIds, setSelectedChainIds] = useState<Set<number>>(() => new Set());
@@ -172,7 +172,7 @@ function Index() {
   const [chainProgress, setChainProgress] = useState<{ current: number; total: number } | null>(null);
   const [chainError, setChainError] = useState(false);
   const chainAbortRef = useRef<AbortController | null>(null);
-  const coverInputRef = useRef<HTMLInputElement>(null);
+  
 
 
   // Add Season dialog
@@ -359,7 +359,6 @@ function Index() {
     chainAbortRef.current?.abort();
     chainAbortRef.current = null;
     setNewAnimeName("");
-    setNewAnimeCover(undefined);
     setNewAnimeMal(null);
     setChainSeasons(null);
     setChainLoading(false);
@@ -469,7 +468,7 @@ function Index() {
       // Manual creation (no MAL chain)
       const created = await createAnime({
         name,
-        cover: newAnimeCover ?? pick?.imageUrl ?? undefined,
+        cover: pick?.imageUrl ?? undefined,
         malId: pick?.malId ?? null,
         imageUrl: pick?.imageUrl ?? null,
         malScore: pick?.score ?? null,
@@ -484,23 +483,6 @@ function Index() {
     }
   }
 
-
-  async function handleCoverPick(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast.error("Selecione uma imagem");
-      return;
-    }
-    try {
-      const b64 = await fileToBase64(file);
-      setNewAnimeCover(b64);
-    } catch {
-      toast.error("Falha ao processar imagem");
-    } finally {
-      if (coverInputRef.current) coverInputRef.current.value = "";
-    }
-  }
 
   function openAddSeason(animeId?: string) {
     if (animes.length === 0) {
@@ -1684,38 +1666,6 @@ function Index() {
             <DialogDescription>Adicione um anime ao seu ranking.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label>Capa (opcional)</Label>
-              <input
-                ref={coverInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleCoverPick}
-                className="hidden"
-              />
-              {newAnimeCover ? (
-                <div className="relative h-32 w-24 overflow-hidden rounded-lg border border-border">
-                  <img src={newAnimeCover} alt="Capa" className="h-full w-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => setNewAnimeCover(undefined)}
-                    className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-background/80 text-foreground hover:bg-destructive hover:text-destructive-foreground"
-                    aria-label="Remover capa"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => coverInputRef.current?.click()}
-                  className="flex h-32 w-24 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border bg-secondary/40 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
-                >
-                  <ImagePlus className="h-5 w-5" />
-                  Adicionar
-                </button>
-              )}
-            </div>
             <div className="grid gap-2">
               <Label htmlFor="anime-name">Nome</Label>
               <JikanSearch
