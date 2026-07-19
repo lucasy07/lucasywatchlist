@@ -2107,13 +2107,15 @@ function Index() {
                   {foundUpcoming.map((u) => (
                     <li
                       key={`${u.parentId}-${u.title}`}
-                      className="rounded-lg border border-border/60 bg-card-elevated p-2"
+                      className="overflow-hidden rounded-lg border border-border/60 bg-card-elevated p-2 min-w-0"
                     >
-                      <p className="truncate text-sm font-medium">{u.title}</p>
-                      <p className="truncate text-[11px] text-muted-foreground">
-                        em {u.parentName} • {formatDateBR(u.releaseDate)} •{" "}
-                        {formatReleaseLabel(u.releaseDate)}
-                      </p>
+                      <div className="min-w-0 flex-1">
+                        <p className="line-clamp-2 text-sm font-medium">{u.title}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">
+                          em {u.parentName} • {formatDateBR(u.releaseDate)} •{" "}
+                          {formatReleaseLabel(u.releaseDate)}
+                        </p>
+                      </div>
                     </li>
                   ))}
                 </ul>
