@@ -981,18 +981,18 @@ function Index() {
             </div>
             <div className="flex items-center rounded-lg border border-border/60 bg-card p-0.5">
               <button
-                onClick={() => setScoreMode("gosto")}
-                className={`flex h-8 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors ${scoreMode === "gosto" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                aria-pressed={scoreMode === "gosto"}
-              >
-                Meu gosto
-              </button>
-              <button
                 onClick={() => setScoreMode("mal")}
                 className={`flex h-8 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors ${scoreMode === "mal" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
                 aria-pressed={scoreMode === "mal"}
               >
                 MAL
+              </button>
+              <button
+                onClick={() => setScoreMode("gosto")}
+                className={`flex h-8 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors ${scoreMode === "gosto" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                aria-pressed={scoreMode === "gosto"}
+              >
+                Meu gosto
               </button>
             </div>
             <button
