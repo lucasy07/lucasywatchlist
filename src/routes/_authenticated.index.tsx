@@ -2076,17 +2076,17 @@ function Index() {
                   {foundAvailable.map((f) => (
                     <li
                       key={`${f.parentId}-${f.malId}`}
-                      className="flex items-center gap-2 rounded-lg border border-border/60 bg-card-elevated p-2"
+                      className="flex items-center gap-2 overflow-hidden rounded-lg border border-border/60 bg-card-elevated p-2 min-w-0"
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">{f.title}</p>
+                        <p className="line-clamp-2 text-sm font-medium">{f.title}</p>
                         <p className="truncate text-[11px] text-muted-foreground">
                           em {f.parentName}
                           {f.type ? ` • ${f.type}` : ""}
                           {f.year ? ` • ${f.year}` : ""}
                         </p>
                       </div>
-                      <Button size="sm" onClick={() => addFoundSeason(f)}>
+                      <Button size="sm" className="shrink-0" onClick={() => addFoundSeason(f)}>
                         <Plus className="mr-1 h-3.5 w-3.5" /> Adicionar
                       </Button>
                     </li>
@@ -2107,13 +2107,15 @@ function Index() {
                   {foundUpcoming.map((u) => (
                     <li
                       key={`${u.parentId}-${u.title}`}
-                      className="rounded-lg border border-border/60 bg-card-elevated p-2"
+                      className="overflow-hidden rounded-lg border border-border/60 bg-card-elevated p-2 min-w-0"
                     >
-                      <p className="truncate text-sm font-medium">{u.title}</p>
-                      <p className="truncate text-[11px] text-muted-foreground">
-                        em {u.parentName} • {formatDateBR(u.releaseDate)} •{" "}
-                        {formatReleaseLabel(u.releaseDate)}
-                      </p>
+                      <div className="min-w-0 flex-1">
+                        <p className="line-clamp-2 text-sm font-medium">{u.title}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">
+                          em {u.parentName} • {formatDateBR(u.releaseDate)} •{" "}
+                          {formatReleaseLabel(u.releaseDate)}
+                        </p>
+                      </div>
                     </li>
                   ))}
                 </ul>
