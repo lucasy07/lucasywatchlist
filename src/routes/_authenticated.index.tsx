@@ -1495,64 +1495,12 @@ function Index() {
                           Nenhuma temporada ainda
                         </p>
                       ) : (
-                        <ul className="grid gap-2">
-                          {anime.seasons.map((s) => (
-                            <li
-                              key={s.id}
-                              className="flex items-center gap-3 rounded-lg bg-secondary/60 px-3 py-2 transition-colors hover:bg-secondary"
-                            >
-                              <Tv className="h-4 w-4 shrink-0 text-muted-foreground" />
-                              <div className="min-w-0 flex-1">
-                                <div className="flex flex-wrap items-center gap-1.5">
-                                  <p className="truncate text-sm">{s.name}</p>
-                                  {s.type && (
-                                    <Badge
-                                      variant="outline"
-                                      title={
-                                        isExcludedFromAverage(s)
-                                          ? `${s.type} — fora da média`
-                                          : s.type
-                                      }
-                                      className={`px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wider ${
-                                        isExcludedFromAverage(s)
-                                          ? "border-border/50 bg-muted/40 text-muted-foreground"
-                                          : "border-border/60 text-foreground/70"
-                                      }`}
-                                    >
-                                      {s.type}
-                                      {isExcludedFromAverage(s) && (
-                                        <span className="ml-1 hidden sm:inline text-[8px] font-normal normal-case tracking-normal opacity-80">
-                                          fora da média
-                                        </span>
-                                      )}
-                                    </Badge>
-                                  )}
-                                </div>
-                                <p className="text-[11px] text-muted-foreground">
-                                  {s.year ?? "Ano —"}
-                                  {typeof s.malScore === "number" && (
-                                    <>
-                                      {" · "}
-                                      <span className="inline-flex items-center gap-0.5">
-                                        <Star className="h-2.5 w-2.5" />
-                                        MAL {s.malScore.toFixed(2)}
-                                      </span>
-                                    </>
-                                  )}
-                                </p>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => deleteSeason(anime.id, s.id)}
-                                className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                                aria-label="Remover temporada"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </li>
-                          ))}
-                        </ul>
+                        <SortableCardSeasons
+                          seasons={anime.seasons}
+                          onReorder={(from, to) => reorderSeasons(anime.id, from, to)}
+                          onDelete={(seasonId) => deleteSeason(anime.id, seasonId)}
+                        />
+
                       )}
                       {anime.upcoming?.releaseDate && (
                         <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
