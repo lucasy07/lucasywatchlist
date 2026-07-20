@@ -599,6 +599,26 @@ function Index() {
     }
   }
 
+  async function reorderSeasons(animeId: string, from: number, to: number) {
+    const target = animes.find((a) => a.id === animeId);
+    if (!target) return;
+    if (from === to) return;
+    const originalSeasons = target.seasons;
+    const newSeasons = arrayMove(originalSeasons, from, to);
+    setAnimes((prev) =>
+      prev.map((a) => (a.id === animeId ? { ...a, seasons: newSeasons } : a)),
+    );
+    try {
+      await updateSeasons(animeId, newSeasons);
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao reordenar temporadas");
+      setAnimes((prev) =>
+        prev.map((a) => (a.id === animeId ? { ...a, seasons: originalSeasons } : a)),
+      );
+    }
+  }
+
   async function deleteSeason(animeId: string, seasonId: string) {
     const target = animes.find((a) => a.id === animeId);
     if (!target) return;
