@@ -52,6 +52,7 @@ import {
   isExcludedFromAverage,
 } from "@/lib/anime-storage";
 import { TierPicker, tierColor } from "@/components/TierPicker";
+import { SortableSeasonList } from "@/components/SortableSeasonList";
 import { useAuth } from "@/auth/AuthProvider";
 import { UpcomingEditDialog } from "@/components/UpcomingEditDialog";
 import { EmptyState } from "@/components/EmptyState";
