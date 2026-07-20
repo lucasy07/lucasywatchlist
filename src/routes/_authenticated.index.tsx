@@ -90,6 +90,8 @@ import { useAuth } from "@/auth/AuthProvider";
 import { JikanSearch, type JikanPick } from "@/components/JikanSearch";
 import { TierPicker, tierColor, tierBg } from "@/components/TierPicker";
 import { SortableSeasonList } from "@/components/SortableSeasonList";
+import { SortableCardSeasons } from "@/components/SortableCardSeasons";
+import { arrayMove } from "@dnd-kit/sortable";
 import { buildChain, type ChainSeason } from "@/lib/jikan-chain";
 import { runMigrations } from "@/lib/migrations";
 import { EmptyState } from "@/components/EmptyState";
