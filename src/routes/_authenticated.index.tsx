@@ -89,6 +89,7 @@ import {
 import { useAuth } from "@/auth/AuthProvider";
 import { JikanSearch, type JikanPick } from "@/components/JikanSearch";
 import { TierPicker, tierColor, tierBg } from "@/components/TierPicker";
+import { SortableSeasonList } from "@/components/SortableSeasonList";
 import { buildChain, type ChainSeason } from "@/lib/jikan-chain";
 import { runMigrations } from "@/lib/migrations";
 import { EmptyState } from "@/components/EmptyState";
@@ -1992,45 +1993,7 @@ function Index() {
                   Nenhuma temporada
                 </p>
               ) : (
-                <ul className="grid gap-2">
-                  {editSeasons.map((s) => (
-                    <li key={s.id} className="flex flex-col gap-2">
-                      <div className="flex items-center gap-2">
-                        <Input
-                          value={s.name}
-                          onChange={(e) => updateEditSeason(s.id, { name: e.target.value })}
-                          placeholder="Nome"
-                          className="flex-1"
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeEditSeason(s.id)}
-                          className="h-9 w-9 text-muted-foreground hover:text-destructive"
-                          aria-label="Remover temporada"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          id={`edit-season-${s.id}-average`}
-                          checked={!isExcludedFromAverage(s)}
-                          onCheckedChange={(checked) =>
-                            updateEditSeason(s.id, { includeInAverage: checked })
-                          }
-                        />
-                        <Label
-                          htmlFor={`edit-season-${s.id}-average`}
-                          className="text-xs text-muted-foreground"
-                        >
-                          Na média
-                        </Label>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                <SortableSeasonList seasons={editSeasons} setSeasons={setEditSeasons} />
               )}
               <Button
                 type="button"
