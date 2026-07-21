@@ -81,6 +81,7 @@ import {
   uid,
   average,
   mediaMAL,
+  mediaPessoal,
   rankColor,
   formatReleaseLabel,
   formatDateBR,
@@ -147,6 +148,15 @@ function TiltCardInner({ children }: { children: React.ReactNode }) {
   );
 }
 
+function formatScore(n: number | null): string {
+  return n !== null && n !== undefined ? n.toFixed(2) : "—";
+}
+
+function scoreColor(n: number | null): string {
+  return n === null || n === undefined ? "text-muted-foreground" : rankColor(n);
+}
+
+
 
 function Index() {
   const { user, signOut } = useAuth();
@@ -206,7 +216,12 @@ function Index() {
   const [editTier, setEditTier] = useState<Tier | null>(null);
   const editCoverInputRef = useRef<HTMLInputElement>(null);
 
+  // Detail dialog
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailAnimeId, setDetailAnimeId] = useState<string>("");
+
   // Check for new seasons
+
   type FoundSeason = {
     parentId: string;
     parentName: string;
@@ -292,7 +307,8 @@ function Index() {
       [...typeFilter].map((t) => t.toLowerCase()),
     );
     const filtered = animes.filter((a) => {
-      if (a.watched) return false;
+      if (scoreMode === "mal" && a.watched) return false;
+      if (scoreMode === "gosto" && !a.watched) return false;
       if (!a.name.toLowerCase().includes(q)) return false;
       if (tierFilter.size > 0 && (a.tier === null || !tierFilter.has(a.tier))) return false;
       if (
@@ -344,6 +360,10 @@ function Index() {
   }
 
   const watchedCount = useMemo(() => animes.filter((a) => a.watched).length, [animes]);
+  const detailAnime = useMemo(
+    () => animes.find((a) => a.id === detailAnimeId),
+    [animes, detailAnimeId],
+  );
 
   async function toggleWatched(id: string, next: boolean) {
     const prev = animes;
@@ -871,7 +891,13 @@ function Index() {
     setEditDialogOpen(true);
   }
 
+  function openDetail(animeId: string) {
+    setDetailAnimeId(animeId);
+    setDetailOpen(true);
+  }
+
   async function handleEditCoverPick(e: React.ChangeEvent<HTMLInputElement>) {
+
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
@@ -1208,11 +1234,13 @@ function Index() {
                     {items.map((anime, idx) => {
                       const img = anime.imageUrl ?? anime.cover;
                       return (
-                        <div
+                        <button
                           key={anime.id}
-                          className="w-20 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none"
+                          type="button"
+                          onClick={() => openDetail(anime.id)}
+                          aria-label={anime.name}
+                          className="w-20 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none appearance-none border-0 bg-transparent p-0 text-left"
                           style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
-                          title={anime.name}
                         >
                           {img ? (
                             <img
@@ -1226,7 +1254,7 @@ function Index() {
                               <ImageIcon className="h-5 w-5" />
                             </div>
                           )}
-                        </div>
+                        </button>
                       );
                     })}
                   </div>
@@ -1247,11 +1275,13 @@ function Index() {
                     .map((anime, idx) => {
                       const img = anime.imageUrl ?? anime.cover;
                       return (
-                        <div
+                        <button
                           key={anime.id}
-                          className="w-20 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none"
+                          type="button"
+                          onClick={() => openDetail(anime.id)}
+                          aria-label={anime.name}
+                          className="w-20 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none appearance-none border-0 bg-transparent p-0 text-left"
                           style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
-                          title={anime.name}
                         >
                           {img ? (
                             <img
@@ -1265,7 +1295,7 @@ function Index() {
                               <ImageIcon className="h-5 w-5" />
                             </div>
                           )}
-                        </div>
+                        </button>
                       );
                     })}
                 </div>
@@ -2086,9 +2116,130 @@ function Index() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Anime detail dialog */}
+      <Dialog
+        open={detailOpen}
+        onOpenChange={(open) => {
+          setDetailOpen(open);
+          if (!open) setDetailAnimeId("");
+        }}
+      >
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-card">
+          <DialogHeader>
+            <DialogTitle>Detalhes do anime</DialogTitle>
+            <DialogDescription>Informações só de leitura</DialogDescription>
+          </DialogHeader>
+          {detailAnime ? (
+            <div className="grid gap-4">
+              <div className="flex gap-4">
+                {detailAnime.imageUrl || detailAnime.cover ? (
+                  <img
+                    src={detailAnime.imageUrl ?? detailAnime.cover}
+                    alt={detailAnime.name}
+                    className="aspect-[2/3] w-28 shrink-0 rounded-lg object-cover ring-1 ring-border/50"
+                  />
+                ) : (
+                  <div className="flex aspect-[2/3] w-28 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
+                    <ImageIcon className="h-8 w-8" />
+                  </div>
+                )}
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                  <h3 className="font-display text-lg font-semibold leading-tight tracking-tight">
+                    {detailAnime.name}
+                  </h3>
+                  <Badge variant="outline" className="w-fit gap-1 border-primary/30 px-2 py-0.5">
+                    <span className={`font-display font-bold ${tierColor(detailAnime.tier)}`}>
+                      {detailAnime.tier ?? "—"}
+                    </span>
+                  </Badge>
+                  <div className="mt-1 flex flex-wrap gap-4">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                        Meu gosto
+                      </span>
+                      <span className={`font-display text-xl font-bold tabular-nums ${scoreColor(mediaPessoal(detailAnime.seasons))}`}>
+                        {formatScore(mediaPessoal(detailAnime.seasons))}
+                        {mediaPessoal(detailAnime.seasons) !== null && (
+                          <span className="ml-0.5 text-[10px] text-muted-foreground">/10</span>
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                        MAL
+                      </span>
+                      <span className={`font-display text-xl font-bold tabular-nums ${scoreColor(mediaMAL(detailAnime.seasons))}`}>
+                        {formatScore(mediaMAL(detailAnime.seasons))}
+                        {mediaMAL(detailAnime.seasons) !== null && (
+                          <span className="ml-0.5 text-[10px] text-muted-foreground">/10</span>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <h4 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Temporadas
+                </h4>
+                {detailAnime.seasons.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Nenhuma temporada</p>
+                ) : (
+                  <ul className="grid gap-2">
+                    {detailAnime.seasons.map((s) => (
+                      <li
+                        key={s.id}
+                        className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-background/30 px-3 py-2"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">{s.name}</p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {[s.type, s.year].filter(Boolean).join(" • ")}
+                          </p>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-3">
+                          <div className="flex flex-col items-end">
+                            <span className="text-[10px] text-muted-foreground">Meu gosto</span>
+                            <span className="font-display text-sm font-bold tabular-nums">
+                              {s.rating !== null && s.rating !== undefined ? s.rating.toFixed(1) : "—"}
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <span className="text-[10px] text-muted-foreground">MAL</span>
+                            <span className="font-display text-sm font-bold tabular-nums">
+                              {s.malScore !== null && s.malScore !== undefined ? s.malScore.toFixed(1) : "—"}
+                            </span>
+                          </div>
+                          {isExcludedFromAverage(s) && (
+                            <span className="text-[10px] text-muted-foreground">fora da média</span>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Carregando...</p>
+          )}
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                setDetailOpen(false);
+                if (detailAnimeId) openEdit(detailAnimeId);
+              }}
+            >
+              <Pencil className="mr-1 h-4 w-4" /> Editar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
 
 function RankingSkeleton({
   scoreMode,
