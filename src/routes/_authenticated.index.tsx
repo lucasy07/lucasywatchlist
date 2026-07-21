@@ -307,7 +307,8 @@ function Index() {
       [...typeFilter].map((t) => t.toLowerCase()),
     );
     const filtered = animes.filter((a) => {
-      if (a.watched) return false;
+      if (scoreMode === "mal" && a.watched) return false;
+      if (scoreMode === "gosto" && !a.watched) return false;
       if (!a.name.toLowerCase().includes(q)) return false;
       if (tierFilter.size > 0 && (a.tier === null || !tierFilter.has(a.tier))) return false;
       if (
