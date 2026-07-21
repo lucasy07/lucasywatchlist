@@ -81,6 +81,7 @@ import {
   uid,
   average,
   mediaMAL,
+  mediaPessoal,
   rankColor,
   formatReleaseLabel,
   formatDateBR,
@@ -147,6 +148,15 @@ function TiltCardInner({ children }: { children: React.ReactNode }) {
   );
 }
 
+function formatScore(n: number | null): string {
+  return n !== null && n !== undefined ? n.toFixed(2) : "—";
+}
+
+function scoreColor(n: number | null): string {
+  return n === null || n === undefined ? "text-muted-foreground" : rankColor(n);
+}
+
+
 
 function Index() {
   const { user, signOut } = useAuth();
@@ -206,7 +216,12 @@ function Index() {
   const [editTier, setEditTier] = useState<Tier | null>(null);
   const editCoverInputRef = useRef<HTMLInputElement>(null);
 
+  // Detail dialog
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailAnimeId, setDetailAnimeId] = useState<string>("");
+
   // Check for new seasons
+
   type FoundSeason = {
     parentId: string;
     parentName: string;
@@ -344,6 +359,10 @@ function Index() {
   }
 
   const watchedCount = useMemo(() => animes.filter((a) => a.watched).length, [animes]);
+  const detailAnime = useMemo(
+    () => animes.find((a) => a.id === detailAnimeId),
+    [animes, detailAnimeId],
+  );
 
   async function toggleWatched(id: string, next: boolean) {
     const prev = animes;
@@ -871,7 +890,13 @@ function Index() {
     setEditDialogOpen(true);
   }
 
+  function openDetail(animeId: string) {
+    setDetailAnimeId(animeId);
+    setDetailOpen(true);
+  }
+
   async function handleEditCoverPick(e: React.ChangeEvent<HTMLInputElement>) {
+
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
