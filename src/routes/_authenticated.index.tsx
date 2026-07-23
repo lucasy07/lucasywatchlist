@@ -1427,6 +1427,17 @@ function Index() {
                     <Button
                       variant="ghost"
                       size="icon"
+                      onClick={() => checkNewSeasonsForAnime(anime.id)}
+                      disabled={checking || checkingId !== null}
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                      aria-label="Verificar novas temporadas"
+                      title="Verificar novas temporadas"
+                    >
+                      <RefreshCw className={`h-3.5 w-3.5 ${checkingId === anime.id ? "animate-spin" : ""}`} />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => toggleWatched(anime.id, true)}
                       className="h-8 w-8 text-muted-foreground hover:text-primary"
                       aria-label="Marcar como assistido"
