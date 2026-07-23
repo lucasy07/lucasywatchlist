@@ -233,6 +233,7 @@ function Index() {
     year: number | null;
   };
   const [checking, setChecking] = useState(false);
+  const [checkingId, setCheckingId] = useState<string | null>(null);
   const [checkProgress, setCheckProgress] = useState<{ current: number; total: number } | null>(null);
   const [checkDialogOpen, setCheckDialogOpen] = useState(false);
   const [foundAvailable, setFoundAvailable] = useState<FoundSeason[]>([]);
@@ -689,13 +690,7 @@ function Index() {
     });
   }
 
-  async function checkNewSeasons() {
-    if (checking) return;
-    const targets = animes.filter((a) => typeof a.malId === "number" && a.malId !== null);
-    if (targets.length === 0) {
-      toast.error("Nenhum anime com vínculo ao MAL");
-      return;
-    }
+  async function scanTargets(targets: Anime[], onProgress?: (current: number, total: number) => void) {
     const existing = new Set<number>();
     for (const a of animes) {
       if (a.malId) existing.add(a.malId);
@@ -703,91 +698,127 @@ function Index() {
     }
     const available: FoundSeason[] = [];
     const upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }> = [];
-    setChecking(true);
-    setCheckProgress({ current: 0, total: targets.length });
-    try {
-      for (let i = 0; i < targets.length; i++) {
-        const a = targets[i];
-        setCheckProgress({ current: i + 1, total: targets.length });
-        try {
-          const chain = await buildChain(a.malId!);
-          for (const s of chain) {
-            if (existing.has(s.malId)) continue;
-            existing.add(s.malId);
-            const notAired =
-              typeof s.status === "string" && s.status.toLowerCase().includes("not yet");
-            if (notAired) {
-              const iso = s.airedFrom
-                ? s.airedFrom.slice(0, 10)
-                : s.year
-                  ? `${s.year}-01-01`
-                  : null;
-              if (!iso) continue;
-              // Read latest upcoming from state via functional update pattern
-              let shouldSave = false;
-              const current = a.upcoming;
-              const currentSource = current?.source ?? "manual";
-              if (!current) {
-                shouldSave = true;
-              } else if (currentSource === "manual") {
-                // Respect user-defined upcoming; never overwrite.
-                shouldSave = false;
-              } else {
-                const cur = new Date(current.releaseDate).getTime();
-                const nu = new Date(iso).getTime();
-                if (Number.isFinite(nu) && Number.isFinite(cur) && nu < cur) shouldSave = true;
-              }
-              if (shouldSave) {
-                const upcoming: UpcomingSeason = {
+    for (let i = 0; i < targets.length; i++) {
+      const a = targets[i];
+      onProgress?.(i + 1, targets.length);
+      try {
+        const chain = await buildChain(a.malId!);
+        for (const s of chain) {
+          if (existing.has(s.malId)) continue;
+          existing.add(s.malId);
+          const notAired =
+            typeof s.status === "string" && s.status.toLowerCase().includes("not yet");
+          if (notAired) {
+            const iso = s.airedFrom
+              ? s.airedFrom.slice(0, 10)
+              : s.year
+                ? `${s.year}-01-01`
+                : null;
+            if (!iso) continue;
+            let shouldSave = false;
+            const current = a.upcoming;
+            const currentSource = current?.source ?? "manual";
+            if (!current) {
+              shouldSave = true;
+            } else if (currentSource === "manual") {
+              shouldSave = false;
+            } else {
+              const cur = new Date(current.releaseDate).getTime();
+              const nu = new Date(iso).getTime();
+              if (Number.isFinite(nu) && Number.isFinite(cur) && nu < cur) shouldSave = true;
+            }
+            if (shouldSave) {
+              const upcoming: UpcomingSeason = {
+                title: s.title,
+                releaseDate: iso,
+                source: "auto",
+                malId: s.malId,
+              };
+              try {
+                await updateUpcoming(a.id, upcoming);
+                setAnimes((prev) => prev.map((x) => (x.id === a.id ? { ...x, upcoming } : x)));
+                a.upcoming = upcoming;
+                upcomingSaved.push({
+                  parentId: a.id,
+                  parentName: a.name,
                   title: s.title,
                   releaseDate: iso,
-                  source: "auto",
-                  malId: s.malId,
-                };
-                try {
-                  await updateUpcoming(a.id, upcoming);
-                  setAnimes((prev) => prev.map((x) => (x.id === a.id ? { ...x, upcoming } : x)));
-                  a.upcoming = upcoming;
-                  upcomingSaved.push({
-                    parentId: a.id,
-                    parentName: a.name,
-                    title: s.title,
-                    releaseDate: iso,
-                  });
-                } catch (err) {
-                  console.error(err);
-                }
+                });
+              } catch (err) {
+                console.error(err);
               }
-            } else {
-              available.push({
-                parentId: a.id,
-                parentName: a.name,
-                malId: s.malId,
-                title: s.title,
-                malScore: s.malScore,
-                imageUrl: s.imageUrl,
-                type: s.type,
-                year: s.year,
-              });
             }
+          } else {
+            available.push({
+              parentId: a.id,
+              parentName: a.name,
+              malId: s.malId,
+              title: s.title,
+              malScore: s.malScore,
+              imageUrl: s.imageUrl,
+              type: s.type,
+              year: s.year,
+            });
           }
-        } catch (err) {
-          console.error("check chain failed for", a.name, err);
-          // skip and continue
         }
+      } catch (err) {
+        console.error("check chain failed for", a.name, err);
       }
+    }
+    return { available, upcomingSaved };
+  }
+
+  async function checkNewSeasons() {
+    if (checking || checkingId) return;
+    const targets = animes.filter((a) => typeof a.malId === "number" && a.malId !== null);
+    if (targets.length === 0) {
+      toast.error("Nenhum anime com vínculo ao MAL");
+      return;
+    }
+    setChecking(true);
+    setCheckProgress({ current: 0, total: targets.length });
+    let result: { available: FoundSeason[]; upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }> };
+    try {
+      result = await scanTargets(targets, (current, total) =>
+        setCheckProgress({ current, total }),
+      );
     } finally {
       setChecking(false);
       setCheckProgress(null);
     }
-    if (available.length === 0 && upcomingSaved.length === 0) {
+    if (result.available.length === 0 && result.upcomingSaved.length === 0) {
       toast("Nenhuma temporada nova encontrada");
       return;
     }
-    setFoundAvailable(available);
-    setFoundUpcoming(upcomingSaved);
+    setFoundAvailable(result.available);
+    setFoundUpcoming(result.upcomingSaved);
     setCheckDialogOpen(true);
   }
+
+  async function checkNewSeasonsForAnime(animeId: string) {
+    if (checking || checkingId) return;
+    const anime = animes.find((a) => a.id === animeId);
+    if (!anime) return;
+    if (typeof anime.malId !== "number" || anime.malId === null) {
+      toast.error("Sem vínculo ao MAL");
+      return;
+    }
+    setCheckingId(animeId);
+    let result: { available: FoundSeason[]; upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }> };
+    try {
+      result = await scanTargets([anime]);
+    } finally {
+      setCheckingId(null);
+    }
+    if (result.available.length === 0 && result.upcomingSaved.length === 0) {
+      toast("Nenhuma temporada nova encontrada");
+      return;
+    }
+    setFoundAvailable(result.available);
+    setFoundUpcoming(result.upcomingSaved);
+    setCheckDialogOpen(true);
+  }
+
 
   async function addFoundSeason(found: FoundSeason) {
     const target = animes.find((a) => a.id === found.parentId);
@@ -1396,6 +1427,17 @@ function Index() {
                     <Button
                       variant="ghost"
                       size="icon"
+                      onClick={() => checkNewSeasonsForAnime(anime.id)}
+                      disabled={checking || checkingId !== null}
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                      aria-label="Verificar novas temporadas"
+                      title="Verificar novas temporadas"
+                    >
+                      <RefreshCw className={`h-3.5 w-3.5 ${checkingId === anime.id ? "animate-spin" : ""}`} />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => toggleWatched(anime.id, true)}
                       className="h-8 w-8 text-muted-foreground hover:text-primary"
                       aria-label="Marcar como assistido"
@@ -1588,6 +1630,17 @@ function Index() {
                           className="flex-1"
                         >
                           <Check className="mr-1 h-4 w-4" /> Assistido
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => checkNewSeasonsForAnime(anime.id)}
+                          disabled={checking || checkingId !== null}
+                          className="text-muted-foreground hover:text-primary"
+                          aria-label="Verificar novas temporadas"
+                          title="Verificar novas temporadas"
+                        >
+                          <RefreshCw className={`h-4 w-4 ${checkingId === anime.id ? "animate-spin" : ""}`} />
                         </Button>
                         <Button
                           variant="ghost"
@@ -2225,6 +2278,14 @@ function Index() {
             <p className="text-sm text-muted-foreground">Carregando...</p>
           )}
           <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => detailAnimeId && checkNewSeasonsForAnime(detailAnimeId)}
+              disabled={checking || checkingId !== null || !detailAnime?.malId}
+            >
+              <RefreshCw className={`mr-1 h-4 w-4 ${detailAnimeId && checkingId === detailAnimeId ? "animate-spin" : ""}`} />
+              Verificar novas temporadas
+            </Button>
             <Button
               onClick={() => {
                 setDetailOpen(false);
