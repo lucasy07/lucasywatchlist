@@ -233,6 +233,7 @@ function Index() {
     year: number | null;
   };
   const [checking, setChecking] = useState(false);
+  const [checkingId, setCheckingId] = useState<string | null>(null);
   const [checkProgress, setCheckProgress] = useState<{ current: number; total: number } | null>(null);
   const [checkDialogOpen, setCheckDialogOpen] = useState(false);
   const [foundAvailable, setFoundAvailable] = useState<FoundSeason[]>([]);
