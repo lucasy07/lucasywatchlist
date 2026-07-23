@@ -2282,14 +2282,16 @@ function Index() {
             <p className="text-sm text-muted-foreground">Carregando...</p>
           )}
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => detailAnimeId && checkNewSeasonsForAnime(detailAnimeId)}
-              disabled={checking || checkingId !== null || !detailAnime?.malId}
-            >
-              <RefreshCw className={`mr-1 h-4 w-4 ${detailAnimeId && checkingId === detailAnimeId ? "animate-spin" : ""}`} />
-              Verificar novas temporadas
-            </Button>
+            {scoreMode !== "gosto" && (
+              <Button
+                variant="outline"
+                onClick={() => detailAnimeId && checkNewSeasonsForAnime(detailAnimeId)}
+                disabled={checking || checkingId !== null || !detailAnime?.malId}
+              >
+                <RefreshCw className={`mr-1 h-4 w-4 ${detailAnimeId && checkingId === detailAnimeId ? "animate-spin" : ""}`} />
+                Verificar novas temporadas
+              </Button>
+            )}
             <Button
               onClick={() => {
                 setDetailOpen(false);
