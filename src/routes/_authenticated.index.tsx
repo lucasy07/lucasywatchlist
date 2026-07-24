@@ -1385,6 +1385,8 @@ function Index() {
               </div>
             )}
           </div>
+          </div>
+          )
         ) : viewMode === "grid" ? (
           <ul key={`${scoreMode}-${viewMode}`} className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
             {ranked.map((anime, idx) => {
