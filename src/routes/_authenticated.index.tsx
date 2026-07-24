@@ -1214,6 +1214,31 @@ function Index() {
           >
             Sem dados
           </button>
+          <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Assistidos
+          </div>
+          {([
+            { v: "todos", label: "Todos" },
+            { v: "nao", label: "Não assistidos" },
+            { v: "sim", label: `Assistidos${watchedCount > 0 ? ` (${watchedCount})` : ""}` },
+          ] as const).map((opt) => {
+            const active = watchedFilter === opt.v;
+            return (
+              <button
+                key={opt.v}
+                type="button"
+                onClick={() => setWatchedFilter(opt.v)}
+                aria-pressed={active}
+                className={`h-7 rounded-full border px-2.5 text-xs font-medium transition-colors ${
+                  active
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
           {filtersActive && (
             <button
               type="button"
