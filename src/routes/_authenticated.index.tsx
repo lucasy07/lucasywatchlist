@@ -1108,14 +1108,6 @@ function Index() {
               <CalendarClock className="h-4 w-4 text-primary" />
               <span className="hidden sm:inline">Em breve</span>
             </Link>
-            <Link
-              to="/watched"
-              className="flex h-9 items-center gap-1.5 rounded-lg border border-border/60 bg-card px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/60 hover:text-primary"
-              aria-label="Animes já assistidos"
-            >
-              <CheckCircle2 className="h-4 w-4 text-primary" />
-              <span className="hidden sm:inline">Assistidos{watchedCount > 0 ? ` (${watchedCount})` : ""}</span>
-            </Link>
             <button
               onClick={() => signOut()}
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-card text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive"
