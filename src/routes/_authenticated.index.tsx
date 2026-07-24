@@ -1293,7 +1293,18 @@ function Index() {
 
 
         ) : scoreMode === "gosto" ? (
-          <div key={`${scoreMode}-${viewMode}`} className="overflow-hidden rounded-xl border border-border/60">
+          watchedCount === 0 ? (
+            <EmptyState
+              icon={Sparkles}
+              title="Nenhum anime assistido"
+              description="Marque animes como assistidos para vê-los na sua tierlist."
+            />
+          ) : (
+          <div key={`${scoreMode}-${viewMode}`} className="space-y-2">
+            <p className="text-xs text-muted-foreground">
+              A tierlist mostra apenas animes marcados como assistidos.
+            </p>
+            <div className="overflow-hidden rounded-xl border border-border/60">
             {TIER_ROWS.map((t) => {
               const items = ranked.filter((a) => a.tier === t && a.watched);
               return (
