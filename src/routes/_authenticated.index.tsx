@@ -319,8 +319,10 @@ function Index() {
       [...typeFilter].map((t) => t.toLowerCase()),
     );
     const filtered = animes.filter((a) => {
-      if (watchedFilter === "nao" && a.watched) return false;
-      if (watchedFilter === "sim" && !a.watched) return false;
+      if (scoreMode !== "gosto") {
+        if (watchedFilter === "nao" && a.watched) return false;
+        if (watchedFilter === "sim" && !a.watched) return false;
+      }
       if (!a.name.toLowerCase().includes(q)) return false;
       if (tierFilter.size > 0 && (a.tier === null || !tierFilter.has(a.tier))) return false;
       if (
@@ -349,7 +351,7 @@ function Index() {
     });
   }, [animes, search, scoreMode, tierFilter, typeFilter, semDadosFilter, watchedFilter]);
 
-  const watchedFilterActive = watchedFilter !== "nao";
+  const watchedFilterActive = scoreMode !== "gosto" && watchedFilter !== "nao";
   const filtersActive = tierFilter.size > 0 || typeFilter.size > 0 || semDadosFilter || watchedFilterActive;
   const filtersActiveCount =
     tierFilter.size + typeFilter.size + (semDadosFilter ? 1 : 0) + (watchedFilterActive ? 1 : 0);
@@ -1214,31 +1216,35 @@ function Index() {
           >
             Sem dados
           </button>
-          <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-            Assistidos
-          </div>
-          {([
-            { v: "todos", label: "Todos" },
-            { v: "nao", label: "Não assistidos" },
-            { v: "sim", label: `Assistidos${watchedCount > 0 ? ` (${watchedCount})` : ""}` },
-          ] as const).map((opt) => {
-            const active = watchedFilter === opt.v;
-            return (
-              <button
-                key={opt.v}
-                type="button"
-                onClick={() => setWatchedFilter(opt.v)}
-                aria-pressed={active}
-                className={`h-7 rounded-full border px-2.5 text-xs font-medium transition-colors ${
-                  active
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {opt.label}
-              </button>
-            );
-          })}
+          {scoreMode !== "gosto" && (
+            <>
+              <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Assistidos
+              </div>
+              {([
+                { v: "todos", label: "Todos" },
+                { v: "nao", label: "Não assistidos" },
+                { v: "sim", label: `Assistidos${watchedCount > 0 ? ` (${watchedCount})` : ""}` },
+              ] as const).map((opt) => {
+                const active = watchedFilter === opt.v;
+                return (
+                  <button
+                    key={opt.v}
+                    type="button"
+                    onClick={() => setWatchedFilter(opt.v)}
+                    aria-pressed={active}
+                    className={`h-7 rounded-full border px-2.5 text-xs font-medium transition-colors ${
+                      active
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </>
+          )}
           {filtersActive && (
             <button
               type="button"
@@ -1287,7 +1293,18 @@ function Index() {
 
 
         ) : scoreMode === "gosto" ? (
-          <div key={`${scoreMode}-${viewMode}`} className="overflow-hidden rounded-xl border border-border/60">
+          watchedCount === 0 ? (
+            <EmptyState
+              icon={Sparkles}
+              title="Nenhum anime assistido"
+              description="Marque animes como assistidos para vê-los na sua tierlist."
+            />
+          ) : (
+          <div key={`${scoreMode}-${viewMode}`} className="space-y-2">
+            <p className="text-xs text-muted-foreground">
+              A tierlist mostra apenas animes marcados como assistidos.
+            </p>
+            <div className="overflow-hidden rounded-xl border border-border/60">
             {TIER_ROWS.map((t) => {
               const items = ranked.filter((a) => a.tier === t && a.watched);
               return (
@@ -1368,6 +1385,8 @@ function Index() {
               </div>
             )}
           </div>
+          </div>
+          )
         ) : viewMode === "grid" ? (
           <ul key={`${scoreMode}-${viewMode}`} className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
             {ranked.map((anime, idx) => {
