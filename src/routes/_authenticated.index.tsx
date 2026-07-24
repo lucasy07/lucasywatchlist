@@ -18,7 +18,7 @@ import {
   CalendarClock,
   LogOut,
   Check,
-  CheckCircle2,
+  
   Pencil,
   Image as ImageIcon,
   RefreshCw,
@@ -169,6 +169,7 @@ function Index() {
   const [tierFilter, setTierFilter] = useState<Set<Tier>>(() => new Set());
   const [typeFilter, setTypeFilter] = useState<Set<string>>(() => new Set());
   const [semDadosFilter, setSemDadosFilter] = useState(false);
+  const [watchedFilter, setWatchedFilter] = useState<"todos" | "nao" | "sim">("nao");
   const [showFilters, setShowFilters] = useState(false);
   
   
@@ -268,6 +269,11 @@ function Index() {
     const savedScoreMode =
       typeof window !== "undefined" ? localStorage.getItem("anime-ranker:v1:scoreMode") : null;
     if (savedScoreMode === "mal" || savedScoreMode === "gosto") setScoreMode(savedScoreMode);
+    const savedWatchedFilter =
+      typeof window !== "undefined" ? localStorage.getItem("anime-ranker:v1:watchedFilter") : null;
+    if (savedWatchedFilter === "todos" || savedWatchedFilter === "nao" || savedWatchedFilter === "sim") {
+      setWatchedFilter(savedWatchedFilter);
+    }
     return () => {
       cancelled = true;
     };
@@ -282,6 +288,11 @@ function Index() {
     if (!hydrated) return;
     localStorage.setItem("anime-ranker:v1:scoreMode", scoreMode);
   }, [scoreMode, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    localStorage.setItem("anime-ranker:v1:watchedFilter", watchedFilter);
+  }, [watchedFilter, hydrated]);
 
 
 
@@ -308,8 +319,8 @@ function Index() {
       [...typeFilter].map((t) => t.toLowerCase()),
     );
     const filtered = animes.filter((a) => {
-      if (scoreMode === "mal" && a.watched) return false;
-      if (scoreMode === "gosto" && !a.watched) return false;
+      if (watchedFilter === "nao" && a.watched) return false;
+      if (watchedFilter === "sim" && !a.watched) return false;
       if (!a.name.toLowerCase().includes(q)) return false;
       if (tierFilter.size > 0 && (a.tier === null || !tierFilter.has(a.tier))) return false;
       if (
@@ -336,14 +347,17 @@ function Index() {
       if (mb === null) return -1;
       return mb - ma;
     });
-  }, [animes, search, scoreMode, tierFilter, typeFilter, semDadosFilter]);
+  }, [animes, search, scoreMode, tierFilter, typeFilter, semDadosFilter, watchedFilter]);
 
-  const filtersActive = tierFilter.size > 0 || typeFilter.size > 0 || semDadosFilter;
-  const filtersActiveCount = tierFilter.size + typeFilter.size + (semDadosFilter ? 1 : 0);
+  const watchedFilterActive = watchedFilter !== "nao";
+  const filtersActive = tierFilter.size > 0 || typeFilter.size > 0 || semDadosFilter || watchedFilterActive;
+  const filtersActiveCount =
+    tierFilter.size + typeFilter.size + (semDadosFilter ? 1 : 0) + (watchedFilterActive ? 1 : 0);
   function clearFilters() {
     setTierFilter(new Set());
     setTypeFilter(new Set());
     setSemDadosFilter(false);
+    setWatchedFilter("nao");
   }
   function toggleTier(t: Tier) {
     setTierFilter((prev) => {
@@ -1094,14 +1108,6 @@ function Index() {
               <CalendarClock className="h-4 w-4 text-primary" />
               <span className="hidden sm:inline">Em breve</span>
             </Link>
-            <Link
-              to="/watched"
-              className="flex h-9 items-center gap-1.5 rounded-lg border border-border/60 bg-card px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/60 hover:text-primary"
-              aria-label="Animes já assistidos"
-            >
-              <CheckCircle2 className="h-4 w-4 text-primary" />
-              <span className="hidden sm:inline">Assistidos{watchedCount > 0 ? ` (${watchedCount})` : ""}</span>
-            </Link>
             <button
               onClick={() => signOut()}
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-card text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive"
@@ -1208,6 +1214,31 @@ function Index() {
           >
             Sem dados
           </button>
+          <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Assistidos
+          </div>
+          {([
+            { v: "todos", label: "Todos" },
+            { v: "nao", label: "Não assistidos" },
+            { v: "sim", label: `Assistidos${watchedCount > 0 ? ` (${watchedCount})` : ""}` },
+          ] as const).map((opt) => {
+            const active = watchedFilter === opt.v;
+            return (
+              <button
+                key={opt.v}
+                type="button"
+                onClick={() => setWatchedFilter(opt.v)}
+                aria-pressed={active}
+                className={`h-7 rounded-full border px-2.5 text-xs font-medium transition-colors ${
+                  active
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
           {filtersActive && (
             <button
               type="button"
