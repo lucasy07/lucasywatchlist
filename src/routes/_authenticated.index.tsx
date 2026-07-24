@@ -319,8 +319,10 @@ function Index() {
       [...typeFilter].map((t) => t.toLowerCase()),
     );
     const filtered = animes.filter((a) => {
-      if (watchedFilter === "nao" && a.watched) return false;
-      if (watchedFilter === "sim" && !a.watched) return false;
+      if (scoreMode !== "gosto") {
+        if (watchedFilter === "nao" && a.watched) return false;
+        if (watchedFilter === "sim" && !a.watched) return false;
+      }
       if (!a.name.toLowerCase().includes(q)) return false;
       if (tierFilter.size > 0 && (a.tier === null || !tierFilter.has(a.tier))) return false;
       if (
@@ -349,7 +351,7 @@ function Index() {
     });
   }, [animes, search, scoreMode, tierFilter, typeFilter, semDadosFilter, watchedFilter]);
 
-  const watchedFilterActive = watchedFilter !== "nao";
+  const watchedFilterActive = scoreMode !== "gosto" && watchedFilter !== "nao";
   const filtersActive = tierFilter.size > 0 || typeFilter.size > 0 || semDadosFilter || watchedFilterActive;
   const filtersActiveCount =
     tierFilter.size + typeFilter.size + (semDadosFilter ? 1 : 0) + (watchedFilterActive ? 1 : 0);
