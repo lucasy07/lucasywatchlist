@@ -18,7 +18,7 @@ import {
   CalendarClock,
   LogOut,
   Check,
-  CheckCircle2,
+  
   Pencil,
   Image as ImageIcon,
   RefreshCw,
@@ -169,6 +169,7 @@ function Index() {
   const [tierFilter, setTierFilter] = useState<Set<Tier>>(() => new Set());
   const [typeFilter, setTypeFilter] = useState<Set<string>>(() => new Set());
   const [semDadosFilter, setSemDadosFilter] = useState(false);
+  const [watchedFilter, setWatchedFilter] = useState<"todos" | "nao" | "sim">("nao");
   const [showFilters, setShowFilters] = useState(false);
   
   
@@ -268,6 +269,11 @@ function Index() {
     const savedScoreMode =
       typeof window !== "undefined" ? localStorage.getItem("anime-ranker:v1:scoreMode") : null;
     if (savedScoreMode === "mal" || savedScoreMode === "gosto") setScoreMode(savedScoreMode);
+    const savedWatchedFilter =
+      typeof window !== "undefined" ? localStorage.getItem("anime-ranker:v1:watchedFilter") : null;
+    if (savedWatchedFilter === "todos" || savedWatchedFilter === "nao" || savedWatchedFilter === "sim") {
+      setWatchedFilter(savedWatchedFilter);
+    }
     return () => {
       cancelled = true;
     };
@@ -282,6 +288,11 @@ function Index() {
     if (!hydrated) return;
     localStorage.setItem("anime-ranker:v1:scoreMode", scoreMode);
   }, [scoreMode, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    localStorage.setItem("anime-ranker:v1:watchedFilter", watchedFilter);
+  }, [watchedFilter, hydrated]);
 
 
 
@@ -308,8 +319,8 @@ function Index() {
       [...typeFilter].map((t) => t.toLowerCase()),
     );
     const filtered = animes.filter((a) => {
-      if (scoreMode === "mal" && a.watched) return false;
-      if (scoreMode === "gosto" && !a.watched) return false;
+      if (watchedFilter === "nao" && a.watched) return false;
+      if (watchedFilter === "sim" && !a.watched) return false;
       if (!a.name.toLowerCase().includes(q)) return false;
       if (tierFilter.size > 0 && (a.tier === null || !tierFilter.has(a.tier))) return false;
       if (
@@ -336,14 +347,17 @@ function Index() {
       if (mb === null) return -1;
       return mb - ma;
     });
-  }, [animes, search, scoreMode, tierFilter, typeFilter, semDadosFilter]);
+  }, [animes, search, scoreMode, tierFilter, typeFilter, semDadosFilter, watchedFilter]);
 
-  const filtersActive = tierFilter.size > 0 || typeFilter.size > 0 || semDadosFilter;
-  const filtersActiveCount = tierFilter.size + typeFilter.size + (semDadosFilter ? 1 : 0);
+  const watchedFilterActive = watchedFilter !== "nao";
+  const filtersActive = tierFilter.size > 0 || typeFilter.size > 0 || semDadosFilter || watchedFilterActive;
+  const filtersActiveCount =
+    tierFilter.size + typeFilter.size + (semDadosFilter ? 1 : 0) + (watchedFilterActive ? 1 : 0);
   function clearFilters() {
     setTierFilter(new Set());
     setTypeFilter(new Set());
     setSemDadosFilter(false);
+    setWatchedFilter("nao");
   }
   function toggleTier(t: Tier) {
     setTierFilter((prev) => {
