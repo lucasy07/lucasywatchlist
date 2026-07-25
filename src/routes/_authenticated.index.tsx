@@ -1301,9 +1301,6 @@ function Index() {
             />
           ) : (
           <div key={`${scoreMode}-${viewMode}`} className="space-y-2">
-            <p className="text-xs text-muted-foreground">
-              A tierlist mostra apenas animes marcados como assistidos.
-            </p>
             <div className="overflow-hidden rounded-xl border border-border/60">
             {TIER_ROWS.map((t) => {
               const items = ranked.filter((a) => a.tier === t && a.watched);
