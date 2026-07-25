@@ -2235,7 +2235,7 @@ function Index() {
         <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-card">
           <DialogHeader>
             <DialogTitle>Detalhes do anime</DialogTitle>
-            <DialogDescription>Informações só de leitura</DialogDescription>
+            
           </DialogHeader>
           {detailAnime ? (
             <div className="grid gap-4">
