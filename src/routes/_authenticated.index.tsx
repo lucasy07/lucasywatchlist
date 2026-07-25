@@ -1035,7 +1035,7 @@ function Index() {
               <h1 className="font-display text-lg font-bold tracking-tight sm:text-xl">
                 Anime <span className="text-gold-gradient">Watchlist</span>
               </h1>
-              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Sua coleção pessoal</p>
+              
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
