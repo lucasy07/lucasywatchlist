@@ -2298,7 +2298,7 @@ function Index() {
                           <div className="flex flex-col items-end">
                             <span className="text-[10px] text-muted-foreground">MAL</span>
                             <span className="font-display text-sm font-bold tabular-nums">
-                              {s.malScore !== null && s.malScore !== undefined ? s.malScore.toFixed(1) : "—"}
+                              {s.malScore !== null && s.malScore !== undefined ? s.malScore.toFixed(2) : "—"}
                             </span>
                           </div>
                           {isExcludedFromAverage(s) && (
