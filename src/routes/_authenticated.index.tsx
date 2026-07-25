@@ -2305,13 +2305,7 @@ function Index() {
                             {[s.type, s.year].filter(Boolean).join(" • ")}
                           </p>
                         </div>
-                        <div className="flex shrink-0 items-center gap-3">
-                          <div className="flex flex-col items-end">
-                            <span className="text-[10px] text-muted-foreground">Meu gosto</span>
-                            <span className="font-display text-sm font-bold tabular-nums">
-                              {s.rating !== null && s.rating !== undefined ? s.rating.toFixed(1) : "—"}
-                            </span>
-                          </div>
+                        <div className="flex shrink-0 items-center">
                           <div className="flex flex-col items-end">
                             <span className="text-[10px] text-muted-foreground">MAL</span>
                             <span className="font-display text-sm font-bold tabular-nums">
