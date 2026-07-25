@@ -2263,17 +2263,6 @@ function Index() {
                   <div className="mt-1 flex flex-wrap gap-4">
                     <div className="flex flex-col">
                       <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                        Meu gosto
-                      </span>
-                      <span className={`font-display text-xl font-bold tabular-nums ${scoreColor(mediaPessoal(detailAnime.seasons))}`}>
-                        {formatScore(mediaPessoal(detailAnime.seasons))}
-                        {mediaPessoal(detailAnime.seasons) !== null && (
-                          <span className="ml-0.5 text-[10px] text-muted-foreground">/10</span>
-                        )}
-                      </span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                         MAL
                       </span>
                       <span className={`font-display text-xl font-bold tabular-nums ${scoreColor(mediaMAL(detailAnime.seasons))}`}>
@@ -2309,7 +2298,7 @@ function Index() {
                           <div className="flex flex-col items-end">
                             <span className="text-[10px] text-muted-foreground">MAL</span>
                             <span className="font-display text-sm font-bold tabular-nums">
-                              {s.malScore !== null && s.malScore !== undefined ? s.malScore.toFixed(1) : "—"}
+                              {s.malScore !== null && s.malScore !== undefined ? s.malScore.toFixed(2) : "—"}
                             </span>
                           </div>
                           {isExcludedFromAverage(s) && (
