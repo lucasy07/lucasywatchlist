@@ -614,7 +614,7 @@ function Index() {
     setEditSeasonSearchOpen(false);
   }
 
-  }
+
 
   async function addSeason() {
     if (!seasonAnimeId) {
