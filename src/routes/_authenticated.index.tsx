@@ -216,6 +216,10 @@ function Index() {
   const [editSeasons, setEditSeasons] = useState<Season[]>([]);
   const [editTier, setEditTier] = useState<Tier | null>(null);
   const editCoverInputRef = useRef<HTMLInputElement>(null);
+  const [editSeasonSearchOpen, setEditSeasonSearchOpen] = useState(false);
+  const [editSeasonSearch, setEditSeasonSearch] = useState("");
+  const [editSeasonLoading, setEditSeasonLoading] = useState(false);
+
 
   // Detail dialog
   const [detailOpen, setDetailOpen] = useState(false);
@@ -569,6 +573,48 @@ function Index() {
       setSeasonDetailsLoading(false);
     }
   }
+
+  async function pickEditSeasonEntry(pick: JikanPick) {
+
+    if (editSeasons.some((s) => s.malId === pick.malId)) {
+      toast.error("Essa entrada já está no anime");
+      return;
+    }
+    setEditSeasonLoading(true);
+    let details: { type: string | null; year: number | null } = { type: null, year: null };
+    try {
+      const res = await fetch(`https://api.jikan.moe/v4/anime/${pick.malId}`);
+      if (res.ok) {
+        const json = await res.json();
+        const data = json?.data;
+        const t: string | null = data?.type ?? null;
+        const y: number | null =
+          data?.year ??
+          (data?.aired?.from ? new Date(data.aired.from).getFullYear() : null);
+        details = { type: t, year: Number.isFinite(y as number) ? (y as number) : null };
+      }
+    } catch {
+      details = { type: null, year: null };
+    } finally {
+      setEditSeasonLoading(false);
+    }
+    setEditSeasons((prev) => [
+      ...prev,
+      {
+        id: uid(),
+        name: pick.title,
+        rating: null,
+        malId: pick.malId,
+        malScore: pick.score ?? null,
+        year: details.year ?? null,
+        type: details.type ?? null,
+      },
+    ]);
+    setEditSeasonSearch("");
+    setEditSeasonSearchOpen(false);
+  }
+
+
 
   async function addSeason() {
     if (!seasonAnimeId) {
@@ -2099,16 +2145,31 @@ function Index() {
               ) : (
                 <SortableSeasonList seasons={editSeasons} setSeasons={setEditSeasons} />
               )}
+              {editSeasonSearchOpen && (
+                <div className="relative z-50">
+                  <JikanSearch
+                    id="edit-season-search"
+                    value={editSeasonSearch}
+                    onChange={setEditSeasonSearch}
+                    onPick={(pick) => {
+                      void pickEditSeasonEntry(pick);
+                    }}
+                    placeholder="Buscar temporada, OVA, filme..."
+                  />
+                  {editSeasonLoading && (
+                    <p className="mt-1 text-xs text-muted-foreground">Buscando detalhes...</p>
+                  )}
+                </div>
+              )}
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() =>
-                  setEditSeasons((prev) => [...prev, { id: uid(), name: "", rating: null }])
-                }
+                onClick={() => setEditSeasonSearchOpen((v) => !v)}
               >
                 <Plus className="mr-1 h-4 w-4" /> Temporada
               </Button>
+
             </div>
           </div>
           <DialogFooter>
