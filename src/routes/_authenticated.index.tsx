@@ -571,9 +571,11 @@ function Index() {
       setSeasonDetails({ malId: pick.malId, type: null, year: null });
     } finally {
       setSeasonDetailsLoading(false);
+    }
   }
 
   async function pickEditSeasonEntry(pick: JikanPick) {
+
     if (editSeasons.some((s) => s.malId === pick.malId)) {
       toast.error("Essa entrada já está no anime");
       return;
