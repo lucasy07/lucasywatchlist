@@ -2229,7 +2229,7 @@ function Index() {
           if (!open) setDetailAnimeId("");
         }}
       >
-        <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-card">
+        <DialogContent className="max-h-[90vh] max-w-[calc(100vw-2rem)] overflow-y-auto overflow-x-hidden border-border bg-card">
           <DialogHeader>
             <DialogTitle>Detalhes do anime</DialogTitle>
             
@@ -2249,7 +2249,7 @@ function Index() {
                   </div>
                 )}
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
-                  <h3 className="font-display text-lg font-semibold leading-tight tracking-tight">
+                  <h3 className="font-display text-base font-semibold leading-tight tracking-tight break-words sm:text-lg">
                     {detailAnime.name}
                   </h3>
                   <Badge variant="outline" className="w-fit gap-1 border-primary/30 px-2 py-0.5">
@@ -2283,10 +2283,12 @@ function Index() {
                     {detailAnime.seasons.map((s) => (
                       <li
                         key={s.id}
-                        className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-background/30 px-3 py-2"
+                        className="flex items-start justify-between gap-3 rounded-lg border border-border/60 bg-background/30 px-3 py-2"
                       >
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium">{s.name}</p>
+                          <p className="line-clamp-2 break-words text-sm font-medium" title={s.name}>
+                            {s.name}
+                          </p>
                           <p className="text-[11px] text-muted-foreground">
                             {[s.type, s.year].filter(Boolean).join(" • ")}
                           </p>
