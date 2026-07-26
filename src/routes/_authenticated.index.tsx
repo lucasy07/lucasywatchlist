@@ -14,9 +14,7 @@ import {
   X,
   LayoutGrid,
   List as ListIcon,
-  Clapperboard,
   CalendarClock,
-  LogOut,
   Check,
   
   Pencil,
@@ -54,7 +52,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Toaster } from "@/components/ui/sonner";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
@@ -159,7 +156,7 @@ function scoreColor(n: number | null): string {
 
 
 function Index() {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const [animes, setAnimes] = useState<Anime[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [search, setSearch] = useState("");
@@ -1065,26 +1062,10 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Toaster theme="dark" position="top-right" offset={{ top: "140px" }} mobileOffset={{ top: "184px" }} />
-
-      {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <div
-              className="flex h-10 w-10 items-center justify-center rounded-xl ring-1 ring-primary/30"
-              style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
-            >
-              <Clapperboard className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <div className="leading-tight">
-              <h1 className="font-display text-lg font-bold tracking-tight sm:text-xl">
-                Anime <span className="text-gold-gradient">Watchlist</span>
-              </h1>
-              
-            </div>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3">
+      {/* List */}
+      <main className="mx-auto max-w-5xl px-4 pb-32 pt-4 sm:px-6">
+        <div className="mb-4">
+          <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
             <div className="flex items-center rounded-lg border border-border/60 bg-card p-0.5">
               <button
                 onClick={() => setViewMode("list")}
@@ -1148,26 +1129,8 @@ function Index() {
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Animes</p>
               <p className="font-display text-lg font-semibold">{animes.length}</p>
             </div>
-            <Link
-              to="/upcoming"
-              className="flex h-9 items-center gap-1.5 rounded-lg border border-border/60 bg-card px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/60 hover:text-primary"
-              aria-label="Próximas temporadas"
-            >
-              <CalendarClock className="h-4 w-4 text-primary" />
-              <span className="hidden sm:inline">Em breve</span>
-            </Link>
-            <button
-              onClick={() => signOut()}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-card text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive"
-              aria-label="Sair"
-              title={user?.email ?? "Sair"}
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
           </div>
-        </div>
-        <div className="mx-auto max-w-5xl px-4 pb-4 sm:px-6">
-          <div className="relative">
+          <div className="relative mt-3">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
@@ -1177,11 +1140,7 @@ function Index() {
             />
           </div>
         </div>
-      </header>
 
-
-      {/* List */}
-      <main className="mx-auto max-w-5xl px-4 pb-32 pt-6 sm:px-6">
         <div
           className={`mb-4 flex items-center gap-3 ${scoreMode === "gosto" ? "justify-end" : "justify-between"}`}
         >
