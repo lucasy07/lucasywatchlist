@@ -14,9 +14,7 @@ import {
   X,
   LayoutGrid,
   List as ListIcon,
-  Clapperboard,
   CalendarClock,
-  LogOut,
   Check,
   
   Pencil,
@@ -54,7 +52,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Toaster } from "@/components/ui/sonner";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
@@ -159,7 +156,7 @@ function scoreColor(n: number | null): string {
 
 
 function Index() {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const [animes, setAnimes] = useState<Anime[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [search, setSearch] = useState("");
