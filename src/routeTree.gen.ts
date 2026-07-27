@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated.index'
-import { Route as AuthenticatedUpcomingRouteImport } from './routes/_authenticated.upcoming'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -28,40 +27,27 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedUpcomingRoute = AuthenticatedUpcomingRouteImport.update({
-  id: '/upcoming',
-  path: '/upcoming',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
-  '/upcoming': typeof AuthenticatedUpcomingRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
-  '/upcoming': typeof AuthenticatedUpcomingRoute
   '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_authenticated/upcoming': typeof AuthenticatedUpcomingRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/upcoming'
+  fullPaths: '/' | '/auth'
   fileRoutesByTo: FileRoutesByTo
-  to: '/auth' | '/upcoming' | '/'
-  id:
-    | '__root__'
-    | '/_authenticated'
-    | '/auth'
-    | '/_authenticated/upcoming'
-    | '/_authenticated/'
+  to: '/auth' | '/'
+  id: '__root__' | '/_authenticated' | '/auth' | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -92,23 +78,14 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/upcoming': {
-      id: '/_authenticated/upcoming'
-      path: '/upcoming'
-      fullPath: '/upcoming'
-      preLoaderRoute: typeof AuthenticatedUpcomingRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
   }
 }
 
 interface AuthenticatedRouteChildren {
-  AuthenticatedUpcomingRoute: typeof AuthenticatedUpcomingRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedUpcomingRoute: AuthenticatedUpcomingRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 
