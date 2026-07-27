@@ -2001,64 +2001,6 @@ function Index() {
         </DialogContent>
       </Dialog>
 
-      {/* Upcoming Season Dialog */}
-      <Dialog open={upcomingDialogOpen} onOpenChange={setUpcomingDialogOpen}>
-        <DialogContent className="border-border bg-card">
-          <DialogHeader>
-            <DialogTitle>Próxima temporada</DialogTitle>
-            <DialogDescription>
-              Marque o título e a data de lançamento para destacar este anime.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label>Anime</Label>
-              <Select value={upcomingAnimeId} onValueChange={setUpcomingAnimeId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  {animes.map((a) => (
-                    <SelectItem key={a.id} value={a.id}>
-                      {a.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="upcoming-title">Título da temporada</Label>
-              <Input
-                id="upcoming-title"
-                value={upcomingTitle}
-                onChange={(e) => setUpcomingTitle(e.target.value)}
-                placeholder="Ex: Temporada 2"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="upcoming-date">Data de lançamento</Label>
-              <Input
-                id="upcoming-date"
-                type="date"
-                value={upcomingDate}
-                onChange={(e) => setUpcomingDate(e.target.value)}
-              />
-              {upcomingDate && (
-                <p className="text-xs text-muted-foreground">
-                  {formatReleaseLabel(upcomingDate)} •{" "}
-                  {formatDateBR(upcomingDate)}
-                </p>
-              )}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setUpcomingDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={saveUpcoming}>Salvar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Edit Anime Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
