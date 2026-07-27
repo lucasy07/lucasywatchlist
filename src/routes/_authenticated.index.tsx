@@ -1696,15 +1696,6 @@ function Index() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => openUpcoming(anime.id)}
-                          className="flex-1"
-                        >
-                          <CalendarClock className="mr-1 h-4 w-4" />
-                          {anime.upcoming ? "Lançamento" : "Em breve"}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
                           onClick={() => openEdit(anime.id)}
                           className="flex-1"
                         >
