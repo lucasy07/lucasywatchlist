@@ -2350,20 +2350,26 @@ function Index() {
                           <p className="line-clamp-2 break-words text-sm font-medium" title={s.name}>
                             {s.name}
                           </p>
-                          <p className="text-[11px] text-muted-foreground">
-                            {[s.type, s.year].filter(Boolean).join(" • ")}
-                          </p>
-                        </div>
-                        <div className="flex shrink-0 items-center">
-                          <div className="flex flex-col items-end">
-                            <span className="text-[10px] text-muted-foreground">MAL</span>
-                            <span className="font-display text-sm font-bold tabular-nums">
-                              {s.malScore !== null && s.malScore !== undefined ? s.malScore.toFixed(2) : "—"}
-                            </span>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <p className="text-[11px] text-muted-foreground">
+                              {[s.type, s.year].filter(Boolean).join(" • ")}
+                            </p>
+                            {isExcludedFromAverage(s) && (
+                              <Badge
+                                variant="outline"
+                                title="Não entra no cálculo da média"
+                                className="border-border/50 bg-muted/40 text-muted-foreground px-1.5 py-0 text-[9px] font-normal tracking-normal"
+                              >
+                                fora da média
+                              </Badge>
+                            )}
                           </div>
-                          {isExcludedFromAverage(s) && (
-                            <span className="text-[10px] text-muted-foreground">fora da média</span>
-                          )}
+                        </div>
+                        <div className="flex shrink-0 flex-col items-end">
+                          <span className="text-[10px] text-muted-foreground">MAL</span>
+                          <span className="font-display text-sm font-bold tabular-nums">
+                            {s.malScore !== null && s.malScore !== undefined ? s.malScore.toFixed(2) : "—"}
+                          </span>
                         </div>
                       </li>
                     ))}
