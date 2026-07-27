@@ -922,43 +922,6 @@ function Index() {
     setExpanded((e) => ({ ...e, [id]: !e[id] }));
   }
 
-  function openUpcoming(animeId?: string) {
-    if (animes.length === 0) {
-      toast.error("Adicione um anime primeiro");
-      return;
-    }
-    const id = animeId ?? animes[0].id;
-    setUpcomingAnimeId(id);
-    const existing = animes.find((a) => a.id === id)?.upcoming;
-    setUpcomingTitle(existing?.title ?? "");
-    setUpcomingDate(existing?.releaseDate ?? "");
-    setUpcomingDialogOpen(true);
-  }
-
-  async function saveUpcoming() {
-    if (!upcomingAnimeId) return;
-    const title = upcomingTitle.trim();
-    if (!title) {
-      toast.error("Informe o título da próxima temporada");
-      return;
-    }
-    if (!upcomingDate) {
-      toast.error("Informe a data de lançamento");
-      return;
-    }
-    const upcoming: UpcomingSeason = { title, releaseDate: upcomingDate, source: "manual" };
-    setAnimes((prev) =>
-      prev.map((a) => (a.id === upcomingAnimeId ? { ...a, upcoming } : a)),
-    );
-    setUpcomingDialogOpen(false);
-    toast.success("Próxima temporada salva");
-    try {
-      await updateUpcoming(upcomingAnimeId, upcoming);
-    } catch (err) {
-      console.error(err);
-      toast.error("Falha ao salvar lançamento");
-    }
-  }
 
   async function clearUpcoming(animeId: string) {
     setAnimes((prev) =>
