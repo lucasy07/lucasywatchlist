@@ -199,11 +199,6 @@ function Index() {
   
   
 
-  // Upcoming season dialog
-  const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
-  const [upcomingAnimeId, setUpcomingAnimeId] = useState<string>("");
-  const [upcomingTitle, setUpcomingTitle] = useState("");
-  const [upcomingDate, setUpcomingDate] = useState("");
 
   // FAB menu
   const [fabOpen, setFabOpen] = useState(false);
@@ -922,43 +917,6 @@ function Index() {
     setExpanded((e) => ({ ...e, [id]: !e[id] }));
   }
 
-  function openUpcoming(animeId?: string) {
-    if (animes.length === 0) {
-      toast.error("Adicione um anime primeiro");
-      return;
-    }
-    const id = animeId ?? animes[0].id;
-    setUpcomingAnimeId(id);
-    const existing = animes.find((a) => a.id === id)?.upcoming;
-    setUpcomingTitle(existing?.title ?? "");
-    setUpcomingDate(existing?.releaseDate ?? "");
-    setUpcomingDialogOpen(true);
-  }
-
-  async function saveUpcoming() {
-    if (!upcomingAnimeId) return;
-    const title = upcomingTitle.trim();
-    if (!title) {
-      toast.error("Informe o título da próxima temporada");
-      return;
-    }
-    if (!upcomingDate) {
-      toast.error("Informe a data de lançamento");
-      return;
-    }
-    const upcoming: UpcomingSeason = { title, releaseDate: upcomingDate, source: "manual" };
-    setAnimes((prev) =>
-      prev.map((a) => (a.id === upcomingAnimeId ? { ...a, upcoming } : a)),
-    );
-    setUpcomingDialogOpen(false);
-    toast.success("Próxima temporada salva");
-    try {
-      await updateUpcoming(upcomingAnimeId, upcoming);
-    } catch (err) {
-      console.error(err);
-      toast.error("Falha ao salvar lançamento");
-    }
-  }
 
   async function clearUpcoming(animeId: string) {
     setAnimes((prev) =>
@@ -1696,15 +1654,6 @@ function Index() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => openUpcoming(anime.id)}
-                          className="flex-1"
-                        >
-                          <CalendarClock className="mr-1 h-4 w-4" />
-                          {anime.upcoming ? "Lançamento" : "Em breve"}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
                           onClick={() => openEdit(anime.id)}
                           className="flex-1"
                         >
@@ -1751,15 +1700,6 @@ function Index() {
       <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
         {fabOpen && (
           <>
-            <button
-              onClick={() => {
-                setFabOpen(false);
-                openUpcoming();
-              }}
-              className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-medium shadow-lg transition-transform hover:scale-105"
-            >
-              <CalendarClock className="h-4 w-4 text-primary" /> Em breve
-            </button>
             <button
               onClick={() => {
                 setFabOpen(false);
@@ -2001,64 +1941,6 @@ function Index() {
         </DialogContent>
       </Dialog>
 
-      {/* Upcoming Season Dialog */}
-      <Dialog open={upcomingDialogOpen} onOpenChange={setUpcomingDialogOpen}>
-        <DialogContent className="border-border bg-card">
-          <DialogHeader>
-            <DialogTitle>Próxima temporada</DialogTitle>
-            <DialogDescription>
-              Marque o título e a data de lançamento para destacar este anime.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label>Anime</Label>
-              <Select value={upcomingAnimeId} onValueChange={setUpcomingAnimeId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  {animes.map((a) => (
-                    <SelectItem key={a.id} value={a.id}>
-                      {a.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="upcoming-title">Título da temporada</Label>
-              <Input
-                id="upcoming-title"
-                value={upcomingTitle}
-                onChange={(e) => setUpcomingTitle(e.target.value)}
-                placeholder="Ex: Temporada 2"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="upcoming-date">Data de lançamento</Label>
-              <Input
-                id="upcoming-date"
-                type="date"
-                value={upcomingDate}
-                onChange={(e) => setUpcomingDate(e.target.value)}
-              />
-              {upcomingDate && (
-                <p className="text-xs text-muted-foreground">
-                  {formatReleaseLabel(upcomingDate)} •{" "}
-                  {formatDateBR(upcomingDate)}
-                </p>
-              )}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setUpcomingDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={saveUpcoming}>Salvar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Edit Anime Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
