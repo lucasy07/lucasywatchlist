@@ -1148,14 +1148,6 @@ function Index() {
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Animes</p>
               <p className="font-display text-lg font-semibold">{animes.length}</p>
             </div>
-            <Link
-              to="/upcoming"
-              className="flex h-9 items-center gap-1.5 rounded-lg border border-border/60 bg-card px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/60 hover:text-primary"
-              aria-label="Próximas temporadas"
-            >
-              <CalendarClock className="h-4 w-4 text-primary" />
-              <span className="hidden sm:inline">Em breve</span>
-            </Link>
             <button
               onClick={() => signOut()}
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-card text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive"
@@ -1483,13 +1475,12 @@ function Index() {
                       </Badge>
                     </div>
                     {anime.upcoming?.releaseDate && (
-                      <Link
-                        to="/upcoming"
+                      <span
                         className="absolute left-2 top-11 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground shadow-lg"
                       >
                         <CalendarClock className="h-3 w-3" />
                         {formatReleaseLabel(anime.upcoming.releaseDate)}
-                      </Link>
+                      </span>
                     )}
                     <div className="absolute inset-x-0 bottom-0 p-3">
                       <h3 className="font-display line-clamp-2 text-sm font-semibold leading-tight tracking-tight">
@@ -1607,13 +1598,12 @@ function Index() {
                         {anime.seasons.length === 1 ? "temporada" : "temporadas"}
                       </p>
                       {anime.upcoming?.releaseDate && (
-                        <Link
-                          to="/upcoming"
+                        <span
                           className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary"
                         >
                           <CalendarClock className="h-3 w-3" />
                           {formatReleaseLabel(anime.upcoming.releaseDate)}
-                        </Link>
+                        </span>
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-1">
@@ -2224,7 +2214,7 @@ function Index() {
             </section>
             <section className="grid gap-2">
               <h3 className="font-display text-xs uppercase tracking-widest text-muted-foreground">
-                Em breve (salvas em Upcoming)
+                Em breve (marcadas nos cards)
               </h3>
               {foundUpcoming.length === 0 ? (
                 <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
