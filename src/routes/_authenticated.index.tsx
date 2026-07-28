@@ -15,7 +15,6 @@ import {
   X,
   LayoutGrid,
   List as ListIcon,
-  Clapperboard,
   CalendarClock,
   LogOut,
   Check,
