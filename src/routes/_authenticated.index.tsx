@@ -211,9 +211,6 @@ function Index() {
   const [editSeasons, setEditSeasons] = useState<Season[]>([]);
   const [editTier, setEditTier] = useState<Tier | null>(null);
   const editCoverInputRef = useRef<HTMLInputElement>(null);
-  const [editSeasonSearchOpen, setEditSeasonSearchOpen] = useState(false);
-  const [editSeasonSearch, setEditSeasonSearch] = useState("");
-  const [editSeasonLoading, setEditSeasonLoading] = useState(false);
 
 
   // Detail dialog
