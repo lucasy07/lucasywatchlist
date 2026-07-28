@@ -1975,30 +1975,6 @@ function Index() {
               ) : (
                 <SortableSeasonList seasons={editSeasons} setSeasons={setEditSeasons} />
               )}
-              {editSeasonSearchOpen && (
-                <div className="relative z-50">
-                  <JikanSearch
-                    id="edit-season-search"
-                    value={editSeasonSearch}
-                    onChange={setEditSeasonSearch}
-                    onPick={(pick) => {
-                      void pickEditSeasonEntry(pick);
-                    }}
-                    placeholder="Buscar temporada, OVA, filme..."
-                  />
-                  {editSeasonLoading && (
-                    <p className="mt-1 text-xs text-muted-foreground">Buscando detalhes...</p>
-                  )}
-                </div>
-              )}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setEditSeasonSearchOpen((v) => !v)}
-              >
-                <Plus className="mr-1 h-4 w-4" /> Temporada
-              </Button>
 
             </div>
           </div>
