@@ -33,27 +33,30 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Anime Watchlist — Sua lista pessoal de animes" },
+      { title: "Umi Watchlist — Sua lista pessoal de animes" },
       {
         name: "description",
         content:
-          "Crie, avalie e organize sua watchlist de animes por temporada. Tema dark moderno com persistência local.",
+          "Organize sua watchlist de animes: acompanhe temporadas, veja o ranking pela nota do MAL e classifique seus favoritos em tiers.",
       },
-      { name: "author", content: "Anime Watchlist" },
-      { property: "og:title", content: "Anime Watchlist — Sua lista pessoal de animes" },
+      { name: "author", content: "Umi Watchlist" },
+      { property: "og:title", content: "Umi Watchlist — Sua lista pessoal de animes" },
       {
         property: "og:description",
-        content: "Sua watchlist pessoal de animes por média das temporadas.",
+        content:
+          "Organize sua watchlist de animes: acompanhe temporadas, veja o ranking pela nota do MAL e classifique seus favoritos em tiers.",
       },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Anime Watchlist — Sua lista pessoal de animes" },
-      { name: "description", content: "Anime Watchlist lets you track and rank anime series, managing seasons, scores, and future releases." },
-      { property: "og:description", content: "Anime Watchlist lets you track and rank anime series, managing seasons, scores, and future releases." },
-      { name: "twitter:description", content: "Anime Watchlist lets you track and rank anime series, managing seasons, scores, and future releases." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/5a3d6cfe-942d-4fef-abb8-a88540903e3d" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/5a3d6cfe-942d-4fef-abb8-a88540903e3d" },
+      { name: "twitter:title", content: "Umi Watchlist — Sua lista pessoal de animes" },
+      {
+        name: "twitter:description",
+        content:
+          "Organize sua watchlist de animes: acompanhe temporadas, veja o ranking pela nota do MAL e classifique seus favoritos em tiers.",
+      },
+      { property: "og:image", content: "https://umiwatchlist.lovable.app/umi-og.png" },
+      { name: "twitter:image", content: "https://umiwatchlist.lovable.app/umi-og.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -66,6 +69,8 @@ export const Route = createRootRoute({
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "icon", type: "image/png", href: "/umi-mark.png" },
+      { rel: "apple-touch-icon", href: "/umi-mark.png" },
     ],
   }),
   shellComponent: RootShell,
