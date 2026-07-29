@@ -138,8 +138,8 @@
   font-feature-settings: "ss01", "cv11";
 }
 
-@utility text-gold-gradient {
-  background: var(--gradient-gold-text);
+@utility text-accent-gradient {
+  background: var(--gradient-accent-text);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
