@@ -67,12 +67,12 @@
   --card-foreground: #D9DCE0;
   --popover: #242733;
   --popover-foreground: #D9DCE0;
-  --tier-s: oklch(0.90 0.21 145);
-  --tier-a: oklch(0.93 0.18 128);
-  --tier-b: oklch(0.97 0.16 108);
-  --tier-c: oklch(0.88 0.10 82);
-  --tier-d: oklch(0.80 0.13 55);
-  --tier-e: oklch(0.72 0.17 22);
+  --tier-s: oklch(0.86 0.13 220);
+  --tier-a: oklch(0.82 0.14 252);
+  --tier-b: oklch(0.78 0.16 285);
+  --tier-c: oklch(0.74 0.18 312);
+  --tier-d: oklch(0.70 0.19 336);
+  --tier-e: oklch(0.66 0.20 358);
   --tier-foreground: oklch(0.25 0 0);
   --primary: #E0446A;
   --primary-foreground: #1C1E28;
