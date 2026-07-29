@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import umiMark from "@/assets/umi-mark.png";
 import { useTilt } from "@/hooks/use-tilt";
 import {
   Plus,
@@ -14,11 +15,10 @@ import {
   X,
   LayoutGrid,
   List as ListIcon,
-  Clapperboard,
   CalendarClock,
   LogOut,
   Check,
-  
+
   Pencil,
   Image as ImageIcon,
   RefreshCw,
@@ -987,16 +987,16 @@ function Index() {
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <div
-              className="flex h-10 w-10 items-center justify-center rounded-xl ring-1 ring-primary/30"
-              style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
-            >
-              <Clapperboard className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img
+              src={umiMark}
+              alt="Umi Watchlist"
+              className="h-10 w-10 object-contain sm:h-11 sm:w-11"
+            />
             <div className="leading-tight">
               <h1 className="font-display text-lg font-bold tracking-tight sm:text-xl">
-                Anime <span className="text-gold-gradient">Watchlist</span>
+                Umi <span className="text-gold-gradient">Watchlist</span>
               </h1>
+              
               
             </div>
           </div>
