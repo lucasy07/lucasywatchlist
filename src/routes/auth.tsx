@@ -12,7 +12,7 @@ import umiMark from "@/assets/umi-mark.png";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Entrar — Anime Watchlist" },
+      { title: "Entrar — Umi Watchlist" },
       { name: "description", content: "Entre ou crie sua conta para sincronizar seus animes." },
     ],
   }),
@@ -73,14 +73,13 @@ function AuthPage() {
         style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
       >
         <div className="mb-6 flex flex-col items-center gap-3 text-center">
-          <div
-            className="flex h-12 w-12 items-center justify-center rounded-xl"
-            style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
-          >
-            <Clapperboard className="h-6 w-6 text-primary-foreground" />
-          </div>
+          <img
+            src={umiMark}
+            alt="Umi Watchlist"
+            className="h-16 w-16 object-contain"
+          />
           <div>
-            <h1 className="text-xl font-bold">Anime Watchlist</h1>
+            <h1 className="text-xl font-bold">Umi Watchlist</h1>
             <p className="text-xs text-muted-foreground">
               {mode === "signin" ? "Entre na sua conta" : "Crie sua conta"}
             </p>
