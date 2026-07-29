@@ -994,7 +994,7 @@ function Index() {
             />
             <div className="leading-tight">
               <h1 className="font-display text-lg font-bold tracking-tight sm:text-xl">
-                Umi <span className="text-gold-gradient">Watchlist</span>
+                Umi <span className="text-accent-gradient">Watchlist</span>
               </h1>
               
               
