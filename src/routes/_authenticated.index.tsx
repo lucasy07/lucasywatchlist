@@ -2242,7 +2242,7 @@ function RankingSkeleton({
               key={t}
               className="flex min-h-32 items-stretch border-b border-border/60 last:border-b-0"
             >
-              <div className="relative flex w-16 shrink-0 items-center justify-center bg-card">
+              <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
                 <div className={`absolute inset-y-0 left-0 w-1.5 ${tierBg(t)}`} />
                 <span className={`font-display text-2xl font-bold sm:text-3xl ${tierColor(t)}`}>
                   {t}
