@@ -1309,7 +1309,7 @@ function Index() {
             })}
             {ranked.some((a) => a.tier === null && a.watched) && (
               <div className="flex min-h-32 items-stretch border-t border-border/60">
-                <div className="relative flex w-16 shrink-0 items-center justify-center bg-card">
+                <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
                   <div className="absolute inset-y-0 left-0 w-1.5 bg-muted-foreground/30" />
                   <span className="font-display text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                     Sem tier
