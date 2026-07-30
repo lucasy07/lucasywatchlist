@@ -1001,10 +1001,11 @@ function Index() {
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
+            {scoreMode !== "gosto" && (
             <div className="flex items-center rounded-lg border border-border/60 bg-card p-0.5">
               <button
                 onClick={() => setViewMode("list")}
-                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${viewMode === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                className={`focus-ring flex h-11 w-11 sm:h-8 sm:w-8 items-center justify-center rounded-md transition-colors ${viewMode === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
                 aria-label="Visualização em lista"
                 aria-pressed={viewMode === "list"}
               >
@@ -1012,24 +1013,25 @@ function Index() {
               </button>
               <button
                 onClick={() => setViewMode("grid")}
-                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                className={`focus-ring flex h-11 w-11 sm:h-8 sm:w-8 items-center justify-center rounded-md transition-colors ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
                 aria-label="Visualização em grade"
                 aria-pressed={viewMode === "grid"}
               >
                 <LayoutGrid className="h-4 w-4" />
               </button>
             </div>
+            )}
             <div className="flex items-center rounded-lg border border-border/60 bg-card p-0.5">
               <button
                 onClick={() => setScoreMode("mal")}
-                className={`flex h-8 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors ${scoreMode === "mal" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                className={`focus-ring flex h-11 sm:h-8 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors ${scoreMode === "mal" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
                 aria-pressed={scoreMode === "mal"}
               >
                 MAL
               </button>
               <button
                 onClick={() => setScoreMode("gosto")}
-                className={`flex h-8 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors ${scoreMode === "gosto" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                className={`focus-ring flex h-11 sm:h-8 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors ${scoreMode === "gosto" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
                 aria-pressed={scoreMode === "gosto"}
               >
                 Meu gosto
@@ -1040,7 +1042,7 @@ function Index() {
               onClick={() => setShowFilters((v) => !v)}
               aria-expanded={showFilters}
               aria-label="Filtros"
-              className={`flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition-colors ${
+              className={`focus-ring flex h-11 sm:h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition-colors ${
                 showFilters || filtersActive
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border/60 bg-card text-foreground hover:border-primary/60 hover:text-primary"
@@ -1066,7 +1068,7 @@ function Index() {
             </div>
             <button
               onClick={() => signOut()}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-card text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive"
+              className="focus-ring flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center rounded-lg border border-border/60 bg-card text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive"
               aria-label="Sair"
               title={user?.email ?? "Sair"}
             >
@@ -1127,7 +1129,7 @@ function Index() {
                 type="button"
                 onClick={() => toggleTier(t)}
                 aria-pressed={active}
-                className={`h-7 rounded-full border px-2.5 text-xs font-semibold transition-colors ${
+                className={`focus-ring h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-semibold transition-colors ${
                   active
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
@@ -1148,7 +1150,7 @@ function Index() {
                 type="button"
                 onClick={() => toggleType(t)}
                 aria-pressed={active}
-                className={`h-7 rounded-full border px-2.5 text-xs font-medium transition-colors ${
+                className={`focus-ring h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
                   active
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
@@ -1162,7 +1164,7 @@ function Index() {
             type="button"
             onClick={() => setSemDadosFilter((v) => !v)}
             aria-pressed={semDadosFilter}
-            className={`ml-2 h-7 rounded-full border px-2.5 text-xs font-medium transition-colors ${
+            className={`focus-ring ml-2 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
               semDadosFilter
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
@@ -1273,7 +1275,7 @@ function Index() {
                           type="button"
                           onClick={() => openDetail(anime.id)}
                           aria-label={anime.name}
-                          className="w-20 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none appearance-none border-0 bg-transparent p-0 text-left"
+                          className="focus-ring w-20 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none appearance-none border-0 bg-transparent p-0 text-left"
                           style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
                         >
                           {img ? (
@@ -1314,7 +1316,7 @@ function Index() {
                           type="button"
                           onClick={() => openDetail(anime.id)}
                           aria-label={anime.name}
-                          className="w-20 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none appearance-none border-0 bg-transparent p-0 text-left"
+                          className="focus-ring w-20 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none appearance-none border-0 bg-transparent p-0 text-left"
                           style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
                         >
                           {img ? (
@@ -1663,7 +1665,7 @@ function Index() {
                 setFabOpen(false);
                 openAddSeason();
               }}
-              className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-medium shadow-lg transition-transform hover:scale-105"
+              className="focus-ring flex min-h-11 items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-medium shadow-lg transition-transform hover:scale-105"
             >
               <Tv className="h-4 w-4 text-primary" /> Temporada
             </button>
@@ -1672,7 +1674,7 @@ function Index() {
                 setFabOpen(false);
                 setAnimeDialogOpen(true);
               }}
-              className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-medium shadow-lg transition-transform hover:scale-105"
+              className="focus-ring flex min-h-11 items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-medium shadow-lg transition-transform hover:scale-105"
             >
               <Sparkles className="h-4 w-4 text-primary" /> Anime
             </button>
@@ -1680,7 +1682,7 @@ function Index() {
         )}
         <button
           onClick={() => setFabOpen((v) => !v)}
-          className="flex h-14 w-14 items-center justify-center rounded-full text-primary-foreground ring-1 ring-primary/40 transition-transform hover:scale-110 active:scale-95"
+          className="focus-ring flex h-14 w-14 items-center justify-center rounded-full text-primary-foreground ring-1 ring-primary/40 transition-transform hover:scale-110 active:scale-95"
           style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-elegant)" }}
           aria-label="Adicionar"
         >

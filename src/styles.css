@@ -129,6 +129,13 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    touch-action: manipulation;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  a[href] {
+    cursor: pointer;
   }
 }
 
@@ -136,6 +143,13 @@
   font-family: var(--font-display);
   letter-spacing: -0.022em;
   font-feature-settings: "ss01", "cv11";
+}
+
+@utility focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
 }
 
 @utility text-accent-gradient {

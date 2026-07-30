@@ -40,7 +40,7 @@ export function TierPicker({
             onClick={() => onChange(active ? null : t)}
             aria-pressed={active}
             aria-label={`Tier ${t}`}
-            className={`font-display h-9 w-9 rounded-md text-sm font-bold transition-colors ${
+            className={`focus-ring font-display h-11 w-11 sm:h-9 sm:w-9 rounded-md text-sm font-bold transition-colors ${
               active
                 ? "bg-primary text-primary-foreground ring-1 ring-primary/60"
                 : `bg-secondary ${tierColor(t)} hover:bg-secondary/70`
@@ -54,7 +54,7 @@ export function TierPicker({
         <button
           type="button"
           onClick={() => onChange(null)}
-          className="ml-1 text-[11px] text-muted-foreground underline-offset-2 hover:text-destructive hover:underline"
+          className="focus-ring ml-1 min-h-11 px-2 sm:min-h-0 text-[11px] text-muted-foreground underline-offset-2 hover:text-destructive hover:underline"
         >
           limpar
         </button>
