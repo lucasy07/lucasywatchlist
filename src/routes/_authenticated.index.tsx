@@ -1260,46 +1260,56 @@ function Index() {
             <div className="overflow-hidden rounded-xl border border-border/60">
             {TIER_ROWS.map((t) => {
               const items = ranked.filter((a) => a.tier === t && a.watched);
+              const hasItems = items.length > 0;
               return (
-                <div key={t} className="flex min-h-32 items-stretch border-b border-border/60 last:border-b-0">
-                  <div className="relative flex w-16 shrink-0 items-center justify-center bg-card">
+                <div key={t} className={`flex items-stretch border-b border-border/60 last:border-b-0 ${hasItems ? "min-h-32" : "min-h-14"}`}>
+                  <div className="relative flex w-12 sm:w-16 shrink-0 flex-col items-center justify-center gap-0.5 bg-card">
                     <div className={`absolute inset-y-0 left-0 w-1.5 ${tierBg(t)}`} />
                     <span className={`font-display text-2xl font-bold sm:text-3xl ${tierColor(t)}`}>{t}</span>
+                    {hasItems && (
+                      <span className="text-[10px] font-medium tabular-nums text-muted-foreground">
+                        {items.length}
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-1 flex-wrap items-center gap-2.5 p-3">
-                    {items.map((anime, idx) => {
-                      const img = anime.imageUrl ?? anime.cover;
-                      return (
-                        <button
-                          key={anime.id}
-                          type="button"
-                          onClick={() => openDetail(anime.id)}
-                          aria-label={anime.name}
-                          className="focus-ring w-20 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none appearance-none border-0 bg-transparent p-0 text-left"
-                          style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
-                        >
-                          {img ? (
-                            <img
-                              src={img}
-                              alt={anime.name}
-                              loading="lazy"
-                              className="aspect-[2/3] w-20 rounded-lg object-cover ring-1 ring-border/50 transition-transform duration-200 hover:scale-105 hover:ring-primary/50"
-                            />
-                          ) : (
-                            <div className="flex aspect-[2/3] w-20 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
-                              <ImageIcon className="h-5 w-5" />
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
+                    {hasItems ? (
+                      items.map((anime, idx) => {
+                        const img = anime.imageUrl ?? anime.cover;
+                        return (
+                          <button
+                            key={anime.id}
+                            type="button"
+                            onClick={() => openDetail(anime.id)}
+                            aria-label={anime.name}
+                            className="focus-ring w-20 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none appearance-none border-0 bg-transparent p-0 text-left"
+                            style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
+                          >
+                            {img ? (
+                              <img
+                                src={img}
+                                alt={anime.name}
+                                loading="lazy"
+                                className="aspect-[2/3] w-20 rounded-lg object-cover ring-1 ring-border/50 transition-transform duration-200 hover:scale-105 hover:ring-primary/50"
+                              />
+                            ) : (
+                              <div className="flex aspect-[2/3] w-20 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
+                                <ImageIcon className="h-5 w-5" />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Nenhum anime neste tier</span>
+                    )}
                   </div>
                 </div>
               );
             })}
             {ranked.some((a) => a.tier === null && a.watched) && (
               <div className="flex min-h-32 items-stretch border-t border-border/60">
-                <div className="relative flex w-16 shrink-0 items-center justify-center bg-card">
+                <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
                   <div className="absolute inset-y-0 left-0 w-1.5 bg-muted-foreground/30" />
                   <span className="font-display text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                     Sem tier
@@ -2232,7 +2242,7 @@ function RankingSkeleton({
               key={t}
               className="flex min-h-32 items-stretch border-b border-border/60 last:border-b-0"
             >
-              <div className="relative flex w-16 shrink-0 items-center justify-center bg-card">
+              <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
                 <div className={`absolute inset-y-0 left-0 w-1.5 ${tierBg(t)}`} />
                 <span className={`font-display text-2xl font-bold sm:text-3xl ${tierColor(t)}`}>
                   {t}
