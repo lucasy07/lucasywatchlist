@@ -1110,7 +1110,9 @@ function Index() {
             </Button>
           )}
           <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
-            {ranked.length} {ranked.length === 1 ? "anime" : "animes"}
+            {filtersActive || search.trim() !== ""
+              ? `${ranked.length} de ${animes.length} animes`
+              : `${ranked.length} ${ranked.length === 1 ? "anime" : "animes"}`}
           </p>
         </div>
 
