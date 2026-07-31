@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import umiMark from "@/assets/umi-mark.png";
+import umiLogo from "@/assets/umi-logo.png";
 import { useTilt } from "@/hooks/use-tilt";
 import {
   Plus,

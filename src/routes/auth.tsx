@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/auth/AuthProvider";
-import umiMark from "@/assets/umi-mark.png";
+import umiLogo from "@/assets/umi-logo.png";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
