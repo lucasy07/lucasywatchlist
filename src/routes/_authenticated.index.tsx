@@ -1093,16 +1093,20 @@ function Index() {
         >
           {scoreMode !== "gosto" && (
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={checkNewSeasons}
               disabled={checking || animes.length === 0}
               className="h-8 gap-1.5 text-xs"
+              aria-label="Verificar novas temporadas"
+              title="Verificar novas temporadas"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${checking ? "animate-spin" : ""}`} />
-              {checking && checkProgress
-                ? `Verificando ${checkProgress.current}/${checkProgress.total}`
-                : "Verificar novas temporadas"}
+              {checking && checkProgress ? (
+                `Verificando ${checkProgress.current}/${checkProgress.total}`
+              ) : (
+                <span className="hidden sm:inline">Verificar novas temporadas</span>
+              )}
             </Button>
           )}
           <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
