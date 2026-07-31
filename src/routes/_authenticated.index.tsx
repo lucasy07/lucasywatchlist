@@ -1207,7 +1207,7 @@ function Index() {
             <button
               type="button"
               onClick={clearFilters}
-              className="ml-auto h-7 rounded-full border border-border/60 bg-card px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:text-destructive"
+              className="focus-ring ml-auto h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border border-border/60 bg-card text-xs font-medium text-muted-foreground transition-colors hover:text-destructive"
             >
               Limpar
             </button>
