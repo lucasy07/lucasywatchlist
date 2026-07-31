@@ -1062,10 +1062,6 @@ function Index() {
                 </span>
               )}
             </button>
-            <div className="hidden text-right sm:block">
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Animes</p>
-              <p className="font-display text-lg font-semibold">{animes.length}</p>
-            </div>
             <button
               onClick={() => signOut()}
               className="focus-ring flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center rounded-lg border border-border/60 bg-card text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive"
@@ -1097,20 +1093,26 @@ function Index() {
         >
           {scoreMode !== "gosto" && (
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={checkNewSeasons}
               disabled={checking || animes.length === 0}
               className="h-8 gap-1.5 text-xs"
+              aria-label="Verificar novas temporadas"
+              title="Verificar novas temporadas"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${checking ? "animate-spin" : ""}`} />
-              {checking && checkProgress
-                ? `Verificando ${checkProgress.current}/${checkProgress.total}`
-                : "Verificar novas temporadas"}
+              {checking && checkProgress ? (
+                `Verificando ${checkProgress.current}/${checkProgress.total}`
+              ) : (
+                <span className="hidden sm:inline">Verificar novas temporadas</span>
+              )}
             </Button>
           )}
           <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
-            {ranked.length} {ranked.length === 1 ? "anime" : "animes"}
+            {filtersActive || search.trim() !== ""
+              ? `${ranked.length} de ${animes.length} animes`
+              : `${ranked.length} ${ranked.length === 1 ? "anime" : "animes"}`}
           </p>
         </div>
 
@@ -1189,7 +1191,7 @@ function Index() {
                     type="button"
                     onClick={() => setWatchedFilter(opt.v)}
                     aria-pressed={active}
-                    className={`h-7 rounded-full border px-2.5 text-xs font-medium transition-colors ${
+                    className={`focus-ring h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
                       active
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
@@ -1205,7 +1207,7 @@ function Index() {
             <button
               type="button"
               onClick={clearFilters}
-              className="ml-auto h-7 rounded-full border border-border/60 bg-card px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:text-destructive"
+              className="focus-ring ml-auto h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border border-border/60 bg-card text-xs font-medium text-muted-foreground transition-colors hover:text-destructive"
             >
               Limpar
             </button>
