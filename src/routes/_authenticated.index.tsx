@@ -1191,7 +1191,7 @@ function Index() {
                     type="button"
                     onClick={() => setWatchedFilter(opt.v)}
                     aria-pressed={active}
-                    className={`h-7 rounded-full border px-2.5 text-xs font-medium transition-colors ${
+                    className={`focus-ring h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
                       active
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
