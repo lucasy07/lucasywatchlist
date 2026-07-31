@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/auth/AuthProvider";
-import umiLogo from "@/assets/umi-logo.png";
+import umiMark from "@/assets/umi-mark.png";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -73,14 +73,13 @@ function AuthPage() {
         style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
       >
         <div className="mb-6 flex flex-col items-center gap-3 text-center">
-          <div className="flex items-center justify-center">
-            <img
-              src={umiLogo}
-              alt="Umi Watchlist"
-              className="h-16 w-auto object-contain"
-            />
-          </div>
+          <img
+            src={umiMark}
+            alt="Umi Watchlist"
+            className="h-16 w-16 object-contain"
+          />
           <div>
+            <h1 className="text-xl font-bold">Umi Watchlist</h1>
             <p className="text-xs text-muted-foreground">
               {mode === "signin" ? "Entre na sua conta" : "Crie sua conta"}
             </p>
