@@ -1062,10 +1062,6 @@ function Index() {
                 </span>
               )}
             </button>
-            <div className="hidden text-right sm:block">
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Animes</p>
-              <p className="font-display text-lg font-semibold">{animes.length}</p>
-            </div>
             <button
               onClick={() => signOut()}
               className="focus-ring flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center rounded-lg border border-border/60 bg-card text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive"
