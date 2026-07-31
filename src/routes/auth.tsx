@@ -73,13 +73,14 @@ function AuthPage() {
         style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
       >
         <div className="mb-6 flex flex-col items-center gap-3 text-center">
-          <img
-            src={umiMark}
-            alt="Umi Watchlist"
-            className="h-16 w-16 object-contain"
-          />
+          <div className="flex items-center justify-center">
+            <img
+              src={umiLogo}
+              alt="Umi Watchlist"
+              className="h-16 w-auto object-contain"
+            />
+          </div>
           <div>
-            <h1 className="text-xl font-bold">Umi Watchlist</h1>
             <p className="text-xs text-muted-foreground">
               {mode === "signin" ? "Entre na sua conta" : "Crie sua conta"}
             </p>
