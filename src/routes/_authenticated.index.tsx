@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import umiMark from "@/assets/umi-mark.png";
+import umiLogo from "@/assets/umi-logo.png";
 import { useTilt } from "@/hooks/use-tilt";
 import {
   Plus,
@@ -986,20 +986,13 @@ function Index() {
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <div className="flex items-center gap-3">
+          <h1 className="min-w-0 shrink-0">
             <img
-              src={umiMark}
+              src={umiLogo}
               alt="Umi Watchlist"
-              className="h-10 w-10 object-contain sm:h-11 sm:w-11"
+              className="h-8 w-auto object-contain sm:h-9"
             />
-            <div className="leading-tight">
-              <h1 className="font-display text-lg font-bold tracking-tight sm:text-xl">
-                Umi <span className="text-accent-gradient">Watchlist</span>
-              </h1>
-              
-              
-            </div>
-          </div>
+          </h1>
           <div className="flex items-center gap-2 sm:gap-3">
             {scoreMode !== "gosto" && (
             <div className="flex items-center rounded-lg border border-border/60 bg-card p-0.5">
