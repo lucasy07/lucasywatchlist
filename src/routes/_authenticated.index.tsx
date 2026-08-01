@@ -985,12 +985,12 @@ function Index() {
 
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6 sm:py-4">
           <h1 className="min-w-0 shrink-0">
             <img
               src={umiLogo}
               alt="Umi Watchlist"
-              className="h-8 w-auto object-contain sm:h-9"
+              className="h-12 w-auto object-contain sm:h-16"
             />
           </h1>
           <div className="flex items-center gap-2 sm:gap-3">
