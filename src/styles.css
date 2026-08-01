@@ -53,8 +53,8 @@
   --color-tier-d: var(--tier-d);
   --color-tier-e: var(--tier-e);
   --color-tier-foreground: var(--tier-foreground);
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Zen Kaku Gothic New", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "M PLUS Rounded 1c", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Umi — paleta baseada em Asanagi Umi */
@@ -141,8 +141,7 @@
 
 @utility font-display {
   font-family: var(--font-display);
-  letter-spacing: -0.022em;
-  font-feature-settings: "ss01", "cv11";
+  letter-spacing: -0.008em;
 }
 
 @utility focus-ring {
