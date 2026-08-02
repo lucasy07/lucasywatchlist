@@ -14,7 +14,7 @@ export function BrandLockup({ size = "md", className }: BrandLockupProps) {
       aria-hidden="true"
       className={cn(
         "w-auto object-contain",
-        size === "sm" ? "h-7 sm:h-9" : "h-9 sm:h-11",
+        size === "sm" ? "h-7 sm:h-9" : "h-12 sm:h-14",
         className,
       )}
     />
