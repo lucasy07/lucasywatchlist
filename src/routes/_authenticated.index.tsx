@@ -988,7 +988,7 @@ function Index() {
         <div className="mx-auto flex h-16 sm:h-24 max-w-5xl items-center justify-between gap-4 px-4 sm:px-6">
           <h1 className="h-full min-w-0 shrink-0 py-1">
             <span className="sr-only">Umi Watchlist</span>
-            <BrandLockup size="fill" className="h-full max-w-[45%] sm:max-w-none" />
+            <BrandLockup size="fill" className="h-full max-w-[38%] sm:max-w-none" />
           </h1>
           <div className="flex items-center gap-2 sm:gap-3">
             {scoreMode !== "gosto" && (

@@ -76,7 +76,7 @@ function AuthPage() {
           <img
             src={umiLockup}
             alt="Umi Watchlist"
-            className="h-auto w-48 object-contain sm:w-56"
+            className="h-auto w-40 object-contain sm:w-48"
           />
           <p className="text-xs text-muted-foreground">
             {mode === "signin" ? "Entre na sua conta" : "Crie sua conta"}
