@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import umiLockup from "@/assets/umi-lockup.png";
 
 interface BrandLockupProps {
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "fill";
   className?: string;
 }
 
@@ -14,7 +14,7 @@ export function BrandLockup({ size = "md", className }: BrandLockupProps) {
       aria-hidden="true"
       className={cn(
         "w-auto object-contain",
-        size === "sm" ? "h-7 sm:h-9" : "h-16 sm:h-20",
+        size === "sm" ? "h-7 sm:h-9" : size === "fill" ? "h-full" : "h-16 sm:h-20",
         className,
       )}
     />
