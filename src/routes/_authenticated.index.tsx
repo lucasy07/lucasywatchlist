@@ -981,14 +981,14 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Toaster theme="dark" position="top-right" offset={{ top: "180px" }} mobileOffset={{ top: "204px" }} />
+      <Toaster theme="dark" position="top-right" offset={{ top: "96px" }} mobileOffset={{ top: "80px" }} />
 
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 sm:h-20 max-w-5xl items-center justify-between gap-4 px-4 sm:px-6">
+        <div className="mx-auto flex h-[72px] sm:h-[88px] max-w-5xl items-center justify-between gap-4 px-4 sm:px-6">
           <h1 className="min-w-0 shrink-0">
             <span className="sr-only">Umi Watchlist</span>
-            <BrandLockup size="sm" className="h-9 sm:h-12" />
+            <BrandLockup size="sm" className="h-11 sm:h-16" />
           </h1>
           <div className="flex items-center gap-2 sm:gap-3">
             {scoreMode !== "gosto" && (
