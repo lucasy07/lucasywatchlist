@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,13 +19,35 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function translateAuthError(raw: string): string {
+  const m = raw.toLowerCase();
+  if (m.includes("invalid login credentials") || m.includes("invalid credentials")) {
+    return "E-mail ou senha incorretos.";
+  }
+  if (m.includes("already registered") || m.includes("already been registered") || m.includes("user already")) {
+    return "Esse e-mail já tem conta. Tente entrar.";
+  }
+  if (m.includes("email not confirmed") || m.includes("not confirmed")) {
+    return "Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.";
+  }
+  if (m.includes("rate limit") || m.includes("too many") || m.includes("for security purposes")) {
+    return "Muitas tentativas. Aguarde alguns instantes.";
+  }
+  return "Não foi possível concluir. Tente novamente em instantes.";
+}
+
 function AuthPage() {
   const navigate = useNavigate();
   const { session, loading } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && session) {
@@ -33,24 +55,47 @@ function AuthPage() {
     }
   }, [loading, session, navigate]);
 
+  function switchMode(next: "signin" | "signup") {
+    setMode(next);
+    setConfirmPassword("");
+    setErrors({});
+  }
+
+  function validate() {
+    const next: typeof errors = {};
+    if (!email.trim()) next.email = "Informe seu e-mail.";
+    else if (!EMAIL_RE.test(email.trim())) next.email = "Formato de e-mail inválido.";
+    if (!password) next.password = "Informe sua senha.";
+    else if (password.length < 6) next.password = "A senha deve ter pelo menos 6 caracteres.";
+    if (mode === "signup" && password !== confirmPassword) {
+      next.confirmPassword = "As senhas não coincidem.";
+    }
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!email || !password) {
-      toast.error("Preencha e-mail e senha");
-      return;
-    }
+    if (!validate()) return;
     setSubmitting(true);
     try {
       if (mode === "signup") {
         const redirectTo = `${window.location.origin}/`;
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: { emailRedirectTo: redirectTo },
         });
         if (error) throw error;
-        toast.success("Conta criada! Você já pode entrar.");
-        setMode("signin");
+        if (data.session) {
+          toast.success("Bem-vindo!");
+          navigate({ to: "/" });
+        } else {
+          setPendingEmail(email);
+          setPassword("");
+          setConfirmPassword("");
+          switchMode("signin");
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -58,8 +103,8 @@ function AuthPage() {
         navigate({ to: "/" });
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Erro ao autenticar";
-      toast.error(message);
+      const raw = err instanceof Error ? err.message : "";
+      toast.error(translateAuthError(raw));
     } finally {
       setSubmitting(false);
     }
@@ -78,12 +123,24 @@ function AuthPage() {
             alt="Umi Watchlist"
             className="h-auto w-40 object-contain sm:w-48"
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground" aria-live="polite">
             {mode === "signin" ? "Entre na sua conta" : "Crie sua conta"}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="grid gap-4">
+        {pendingEmail && (
+          <div
+            className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground"
+            role="status"
+            aria-live="polite"
+          >
+            Enviamos um e-mail de confirmação para{" "}
+            <span className="font-semibold text-foreground">{pendingEmail}</span>. Confira sua caixa
+            de entrada e também a pasta de spam antes de entrar.
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="grid gap-4" noValidate>
           <div className="grid gap-2">
             <Label htmlFor="email">E-mail</Label>
             <Input
@@ -93,7 +150,15 @@ function AuthPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="voce@exemplo.com"
+              aria-invalid={!!errors.email}
+              aria-describedby={errors.email ? "email-error" : undefined}
+              className="focus-visible:ring-2 focus-visible:ring-ring"
             />
+            {errors.email && (
+              <p id="email-error" className="text-xs text-destructive">
+                {errors.email}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Senha</Label>
@@ -104,10 +169,43 @@ function AuthPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              minLength={6}
+              aria-invalid={!!errors.password}
+              aria-describedby={errors.password ? "password-error" : undefined}
+              className="focus-visible:ring-2 focus-visible:ring-ring"
             />
+            {errors.password && (
+              <p id="password-error" className="text-xs text-destructive">
+                {errors.password}
+              </p>
+            )}
           </div>
-          <Button type="submit" disabled={submitting} className="mt-2">
+          {mode === "signup" && (
+            <div className="grid gap-2">
+              <Label htmlFor="confirm-password">Confirmar senha</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                aria-invalid={!!errors.confirmPassword}
+                aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
+                className="focus-visible:ring-2 focus-visible:ring-ring"
+              />
+              {errors.confirmPassword && (
+                <p id="confirm-password-error" className="text-xs text-destructive">
+                  {errors.confirmPassword}
+                </p>
+              )}
+            </div>
+          )}
+          <Button
+            type="submit"
+            disabled={submitting}
+            aria-busy={submitting}
+            className="mt-2 focus-visible:ring-2 focus-visible:ring-ring"
+          >
             {submitting ? "Aguarde..." : mode === "signin" ? "Entrar" : "Criar conta"}
           </Button>
         </form>
@@ -118,8 +216,8 @@ function AuthPage() {
               Não tem conta?{" "}
               <button
                 type="button"
-                onClick={() => setMode("signup")}
-                className="font-semibold text-primary hover:underline"
+                onClick={() => switchMode("signup")}
+                className="rounded-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 Criar conta
               </button>
@@ -129,18 +227,13 @@ function AuthPage() {
               Já tem conta?{" "}
               <button
                 type="button"
-                onClick={() => setMode("signin")}
-                className="font-semibold text-primary hover:underline"
+                onClick={() => switchMode("signin")}
+                className="rounded-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 Entrar
               </button>
             </>
           )}
-        </div>
-        <div className="mt-2 text-center text-[11px] text-muted-foreground">
-          <Link to="/" className="hover:text-foreground">
-            Voltar
-          </Link>
         </div>
       </div>
     </div>
