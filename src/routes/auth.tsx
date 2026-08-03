@@ -8,6 +8,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/auth/AuthProvider";
 import umiLockup from "@/assets/umi-lockup.png";
+import loginArt900 from "@/assets/login-art-900.webp";
+import loginArt450 from "@/assets/login-art-450.webp";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -20,6 +22,13 @@ export const Route = createFileRoute("/auth")({
 });
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const ART_SRCSET = `${loginArt450} 450w, ${loginArt900} 900w`;
+
+const FIELD_CLASS =
+  "h-11 rounded-none border-0 border-b border-border bg-transparent px-0 shadow-none focus-visible:border-primary focus-visible:ring-0 aria-[invalid=true]:border-destructive motion-safe:transition-colors";
+
+const LABEL_CLASS = "text-[0.68rem] uppercase tracking-wide text-muted-foreground";
 
 function translateAuthError(raw: string): string {
   const m = raw.toLowerCase();
@@ -36,6 +45,40 @@ function translateAuthError(raw: string): string {
     return "Muitas tentativas. Aguarde alguns instantes.";
   }
   return "Não foi possível concluir. Tente novamente em instantes.";
+}
+
+/** Curva S vertical: divisória entre formulário e ilustração (desktop). */
+function VerticalWave() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-y-0 left-0 z-10 h-full w-[140px]"
+      viewBox="0 0 140 1000"
+      preserveAspectRatio="none"
+    >
+      <path
+        fill="var(--card)"
+        d="M0,0 L60,0 C60,180 130,260 130,420 C130,580 20,620 20,760 C20,880 70,940 70,1000 L0,1000 Z"
+      />
+    </svg>
+  );
+}
+
+/** Onda horizontal: base da faixa de ilustração (mobile). */
+function HorizontalWave() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-10 w-full"
+      viewBox="0 0 1000 80"
+      preserveAspectRatio="none"
+    >
+      <path
+        fill="var(--card)"
+        d="M0,44 C180,4 330,74 520,52 C700,32 850,64 1000,30 L1000,80 L0,80 Z"
+      />
+    </svg>
+  );
 }
 
 function AuthPage() {
@@ -110,131 +153,239 @@ function AuthPage() {
     }
   }
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 text-foreground">
-      <Toaster theme="dark" position="top-center" />
-      <div
-        className="w-full max-w-sm rounded-2xl border border-border p-6 sm:p-8"
-        style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
-      >
-        <div className="mb-6 flex flex-col items-center gap-3 text-center">
-          <img
-            src={umiLockup}
-            alt="Umi Watchlist"
-            className="h-auto w-40 object-contain sm:w-48"
-          />
-          <p className="text-xs text-muted-foreground" aria-live="polite">
-            {mode === "signin" ? "Entre na sua conta" : "Crie sua conta"}
-          </p>
-        </div>
+  const formPanel = (
+    <div className="relative z-30 flex w-full flex-col justify-center gap-5 px-5 py-7 sm:px-8 lg:px-10 lg:py-12">
+      <div className="flex flex-col items-start gap-2">
+        <img src={umiLockup} alt="Umi Watchlist" className="h-auto w-28 object-contain sm:w-32" />
+        <h1 className="font-display text-2xl text-foreground">
+          {mode === "signin" ? "Entrar" : "Criar conta"}
+        </h1>
+        <p className="text-xs text-muted-foreground" aria-live="polite">
+          {mode === "signin" ? "Entre na sua conta" : "Crie sua conta"}
+        </p>
+      </div>
 
-        {pendingEmail && (
-          <div
-            className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground"
-            role="status"
-            aria-live="polite"
-          >
-            Enviamos um e-mail de confirmação para{" "}
-            <span className="font-semibold text-foreground">{pendingEmail}</span>. Confira sua caixa
-            de entrada e também a pasta de spam antes de entrar.
+      {pendingEmail && (
+        <div
+          className="rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground"
+          role="status"
+          aria-live="polite"
+        >
+          Enviamos um e-mail de confirmação para{" "}
+          <span className="font-semibold text-foreground">{pendingEmail}</span>. Confira sua caixa de
+          entrada e também a pasta de spam antes de entrar.
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="grid gap-4" noValidate>
+        <div className="grid gap-1.5">
+          <Label htmlFor="email" className={LABEL_CLASS}>
+            E-mail
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="voce@exemplo.com"
+            aria-invalid={!!errors.email}
+            aria-describedby={errors.email ? "email-error" : undefined}
+            className={`${FIELD_CLASS} focus-ring`}
+          />
+          {errors.email && (
+            <p id="email-error" className="text-xs text-destructive">
+              {errors.email}
+            </p>
+          )}
+        </div>
+        <div className="grid gap-1.5">
+          <Label htmlFor="password" className={LABEL_CLASS}>
+            Senha
+          </Label>
+          <Input
+            id="password"
+            type="password"
+            autoComplete={mode === "signup" ? "new-password" : "current-password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            aria-invalid={!!errors.password}
+            aria-describedby={errors.password ? "password-error" : undefined}
+            className={`${FIELD_CLASS} focus-ring`}
+          />
+          {errors.password && (
+            <p id="password-error" className="text-xs text-destructive">
+              {errors.password}
+            </p>
+          )}
+        </div>
+        {mode === "signup" && (
+          <div className="grid gap-1.5">
+            <Label htmlFor="confirm-password" className={LABEL_CLASS}>
+              Confirmar senha
+            </Label>
+            <Input
+              id="confirm-password"
+              type="password"
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="••••••••"
+              aria-invalid={!!errors.confirmPassword}
+              aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
+              className={`${FIELD_CLASS} focus-ring`}
+            />
+            {errors.confirmPassword && (
+              <p id="confirm-password-error" className="text-xs text-destructive">
+                {errors.confirmPassword}
+              </p>
+            )}
           </div>
         )}
+        <Button
+          type="submit"
+          disabled={submitting}
+          aria-busy={submitting}
+          className="focus-ring mt-2 w-full bg-primary text-primary-foreground motion-safe:transition-shadow hover:[box-shadow:var(--shadow-glow)]"
+        >
+          {submitting ? "Aguarde..." : mode === "signin" ? "Entrar" : "Criar conta"}
+        </Button>
+      </form>
 
-        <form onSubmit={handleSubmit} className="grid gap-4" noValidate>
-          <div className="grid gap-2">
-            <Label htmlFor="email">E-mail</Label>
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="voce@exemplo.com"
-              aria-invalid={!!errors.email}
-              aria-describedby={errors.email ? "email-error" : undefined}
-              className="focus-visible:ring-2 focus-visible:ring-ring"
-            />
-            {errors.email && (
-              <p id="email-error" className="text-xs text-destructive">
-                {errors.email}
-              </p>
-            )}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Senha</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              aria-invalid={!!errors.password}
-              aria-describedby={errors.password ? "password-error" : undefined}
-              className="focus-visible:ring-2 focus-visible:ring-ring"
-            />
-            {errors.password && (
-              <p id="password-error" className="text-xs text-destructive">
-                {errors.password}
-              </p>
-            )}
-          </div>
-          {mode === "signup" && (
-            <div className="grid gap-2">
-              <Label htmlFor="confirm-password">Confirmar senha</Label>
-              <Input
-                id="confirm-password"
-                type="password"
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                aria-invalid={!!errors.confirmPassword}
-                aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
-                className="focus-visible:ring-2 focus-visible:ring-ring"
-              />
-              {errors.confirmPassword && (
-                <p id="confirm-password-error" className="text-xs text-destructive">
-                  {errors.confirmPassword}
-                </p>
-              )}
-            </div>
-          )}
-          <Button
-            type="submit"
-            disabled={submitting}
-            aria-busy={submitting}
-            className="mt-2 focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            {submitting ? "Aguarde..." : mode === "signin" ? "Entrar" : "Criar conta"}
-          </Button>
-        </form>
+      <div className="text-xs text-muted-foreground">
+        {mode === "signin" ? (
+          <>
+            Não tem conta?{" "}
+            <button
+              type="button"
+              onClick={() => switchMode("signup")}
+              className="focus-ring rounded-sm font-semibold text-primary hover:underline"
+            >
+              Criar conta
+            </button>
+          </>
+        ) : (
+          <>
+            Já tem conta?{" "}
+            <button
+              type="button"
+              onClick={() => switchMode("signin")}
+              className="focus-ring rounded-sm font-semibold text-primary hover:underline"
+            >
+              Entrar
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
 
-        <div className="mt-4 text-center text-xs text-muted-foreground">
-          {mode === "signin" ? (
-            <>
-              Não tem conta?{" "}
-              <button
-                type="button"
-                onClick={() => switchMode("signup")}
-                className="rounded-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                Criar conta
-              </button>
-            </>
-          ) : (
-            <>
-              Já tem conta?{" "}
-              <button
-                type="button"
-                onClick={() => switchMode("signin")}
-                className="rounded-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                Entrar
-              </button>
-            </>
-          )}
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8 text-foreground">
+      <Toaster theme="dark" position="top-center" />
+
+      <div
+        className="relative w-full max-w-[420px] overflow-hidden rounded-[1.75rem] border border-border lg:max-w-[1000px] lg:rounded-[2rem]"
+        style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-elegant)" }}
+      >
+        {/* ——— Mobile: faixa de ilustração no topo ——— */}
+        <div className="relative h-44 w-full overflow-hidden lg:hidden">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(60% 70% at 60% 30%, color-mix(in oklab, var(--primary) 22%, transparent), transparent 70%)",
+            }}
+          />
+          <img
+            src={loginArt450}
+            srcSet={ART_SRCSET}
+            sizes="420px"
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            fetchPriority="high"
+            decoding="async"
+            className="absolute inset-0 h-full w-full select-none object-cover"
+            style={{
+              objectPosition: "60% 12%",
+              maskImage:
+                "radial-gradient(120% 110% at 55% 40%, var(--foreground) 55%, transparent 100%)",
+              WebkitMaskImage:
+                "radial-gradient(120% 110% at 55% 40%, var(--foreground) 55%, transparent 100%)",
+            }}
+          />
+          <HorizontalWave />
         </div>
+
+        {/* ——— Desktop: ilustração à direita + onda vertical ——— */}
+        <div className="hidden lg:block">
+          <div aria-hidden="true" className="absolute inset-y-0 right-0 w-[60%] overflow-hidden">
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "radial-gradient(55% 60% at 55% 55%, color-mix(in oklab, var(--primary) 24%, transparent), transparent 72%)",
+              }}
+            />
+            <img
+              src={loginArt900}
+              srcSet={ART_SRCSET}
+              sizes="600px"
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              decoding="async"
+              className="absolute inset-0 h-full w-full select-none object-cover"
+              style={{
+                objectPosition: "70% 100%",
+                maskImage:
+                  "radial-gradient(105% 100% at 55% 55%, var(--foreground) 60%, transparent 100%)",
+                WebkitMaskImage:
+                  "radial-gradient(105% 100% at 55% 55%, var(--foreground) 60%, transparent 100%)",
+              }}
+            />
+          </div>
+
+          {/* onda: sobreposta à borda esquerda da ilustração */}
+          <div aria-hidden="true" className="absolute inset-y-0 left-[40%] z-10 w-[14%] -translate-x-1/2">
+            <VerticalWave />
+          </div>
+
+          {/* cabeça e ombro cruzam a divisória */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-y-0 right-0 z-20 w-[60%] overflow-hidden"
+            style={{
+              maskImage: "linear-gradient(to bottom, var(--foreground) 0%, var(--foreground) 46%, transparent 62%)",
+              WebkitMaskImage:
+                "linear-gradient(to bottom, var(--foreground) 0%, var(--foreground) 46%, transparent 62%)",
+            }}
+          >
+            <img
+              src={loginArt900}
+              srcSet={ART_SRCSET}
+              sizes="600px"
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              decoding="async"
+              className="absolute inset-0 h-full w-full select-none object-cover"
+              style={{
+                objectPosition: "70% 100%",
+                maskImage:
+                  "radial-gradient(105% 100% at 55% 55%, var(--foreground) 60%, transparent 100%)",
+                WebkitMaskImage:
+                  "radial-gradient(105% 100% at 55% 55%, var(--foreground) 60%, transparent 100%)",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* ——— Formulário ——— */}
+        <div className="relative z-30 lg:aspect-[16/10] lg:w-[40%]">{formPanel}</div>
       </div>
     </div>
   );
