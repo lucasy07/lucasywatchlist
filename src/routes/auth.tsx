@@ -338,9 +338,9 @@ function AuthPage() {
               aria-hidden="true"
               draggable={false}
               decoding="async"
-              className="absolute inset-0 h-full w-full select-none object-cover"
+              className="absolute inset-0 h-full w-full select-none object-contain"
               style={{
-                objectPosition: "70% 100%",
+                objectPosition: "78% 100%",
                 maskImage:
                   "radial-gradient(105% 100% at 55% 55%, var(--foreground) 60%, transparent 100%)",
                 WebkitMaskImage:
@@ -350,7 +350,7 @@ function AuthPage() {
           </div>
 
           {/* onda: sobreposta à borda esquerda da ilustração */}
-          <div aria-hidden="true" className="absolute inset-y-0 left-[40%] z-10 w-[14%] -translate-x-1/2">
+          <div aria-hidden="true" className="absolute inset-y-0 left-[40%] z-10 w-[22%] -translate-x-1/2">
             <VerticalWave />
           </div>
 
@@ -372,9 +372,9 @@ function AuthPage() {
               aria-hidden="true"
               draggable={false}
               decoding="async"
-              className="absolute inset-0 h-full w-full select-none object-cover"
+              className="absolute inset-0 h-full w-full select-none object-contain"
               style={{
-                objectPosition: "70% 100%",
+                objectPosition: "78% 100%",
                 maskImage:
                   "radial-gradient(105% 100% at 55% 55%, var(--foreground) 60%, transparent 100%)",
                 WebkitMaskImage:
