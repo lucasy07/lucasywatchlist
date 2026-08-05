@@ -228,16 +228,16 @@ function AuthPage() {
 
       {/* Scrollable layer — covers full viewport, contains the form */}
       <div className="relative z-10 flex h-full w-full overflow-y-auto">
-        <main className="flex min-h-full w-full flex-col items-center justify-center px-6 py-12 lg:w-[45%] lg:py-0">
+        <main className="auth-main flex min-h-full w-full flex-col items-center justify-center px-6 py-12 lg:w-[45%] lg:py-0">
           <div className="w-full max-w-[368px] animate-in fade-in slide-in-from-left-6 duration-500 motion-reduce:animate-none">
             <img
               src={umiLockup}
               alt=""
               aria-hidden="true"
-              className="mb-8 h-auto w-36 object-contain lg:mb-10"
+              className="auth-lockup h-auto object-contain lg:w-48"
             />
 
-            <h1 className="font-display text-2xl uppercase tracking-[0.25em]" aria-live="polite">
+            <h1 className="auth-title font-display uppercase tracking-[0.25em]" aria-live="polite">
               {mode === "signin" ? "Entrar" : "Criar conta"}
             </h1>
 
@@ -253,7 +253,7 @@ function AuthPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="mt-8 grid gap-6" noValidate>
+            <form onSubmit={handleSubmit} className="auth-form grid" noValidate>
               <div className="grid gap-2">
                 <Label
                   htmlFor="email"
