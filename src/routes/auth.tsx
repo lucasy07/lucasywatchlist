@@ -113,19 +113,93 @@ function AuthPage() {
   }
 
   return (
-    <div className="relative h-dvh w-full overflow-hidden bg-background text-foreground lg:h-screen">
+    <div className="auth-page relative h-dvh w-full overflow-hidden bg-background text-foreground lg:h-screen">
       <Toaster theme="dark" position="top-center" />
 
-      {/* Mobile background art */}
-      <img
-        src={loginArt.url}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        loading="eager"
-        fetchPriority="high"
-        className="pointer-events-none absolute inset-0 z-0 h-full w-full select-none object-cover object-top opacity-[0.11] animate-in fade-in duration-1000 motion-reduce:animate-none lg:hidden"
-      />
+      <style>{`
+        .auth-page {
+          --auth-content-padding-y: 48px;
+          --auth-lockup-height: auto;
+          --auth-lockup-width: 144px;
+          --auth-lockup-mb: 32px;
+          --auth-form-mt: 32px;
+          --auth-form-gap: 24px;
+          --auth-h1-size: 24px;
+        }
+        @media (max-height: 720px) {
+          .auth-page {
+            --auth-content-padding-y: 36px;
+            --auth-lockup-height: 112px;
+            --auth-lockup-width: 128px;
+            --auth-lockup-mb: 24px;
+            --auth-form-mt: 24px;
+            --auth-form-gap: 20px;
+            --auth-h1-size: 20px;
+          }
+        }
+        @media (max-height: 600px) {
+          .auth-page {
+            --auth-content-padding-y: 24px;
+            --auth-lockup-height: 96px;
+            --auth-lockup-width: 112px;
+            --auth-lockup-mb: 16px;
+            --auth-form-mt: 16px;
+            --auth-form-gap: 16px;
+            --auth-h1-size: 18px;
+          }
+        }
+        .auth-page .auth-main {
+          padding-top: var(--auth-content-padding-y);
+          padding-bottom: var(--auth-content-padding-y);
+        }
+        .auth-page .auth-lockup {
+          height: var(--auth-lockup-height);
+          width: var(--auth-lockup-width);
+          margin-bottom: var(--auth-lockup-mb);
+        }
+        .auth-page .auth-title {
+          font-size: var(--auth-h1-size);
+        }
+        .auth-page .auth-form {
+          margin-top: var(--auth-form-mt);
+          gap: var(--auth-form-gap);
+        }
+        @media (min-width: 1024px) {
+          .auth-page .auth-main {
+            padding-top: 0;
+            padding-bottom: 0;
+          }
+          .auth-page .auth-lockup {
+            height: auto;
+            width: 192px;
+            margin-bottom: 40px;
+          }
+          .auth-page .auth-title {
+            font-size: 24px;
+          }
+          .auth-page .auth-form {
+            margin-top: 32px;
+            gap: 24px;
+          }
+        }
+      `}</style>
+
+      {/* Mobile background art strip */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[52%] select-none lg:hidden">
+        <img
+          src={loginArt.url}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          loading="eager"
+          fetchPriority="high"
+          className="h-full w-full object-cover object-[26%_50%] opacity-[0.46] animate-in fade-in duration-1000 motion-reduce:animate-none"
+        />
+        <div
+          className="absolute inset-0 animate-in fade-in duration-1000 motion-reduce:animate-none"
+          style={{ background: "var(--gradient-scrim-mobile)" }}
+        />
+      </div>
 
       {/* Desktop art layer — fixed, non-scrollable */}
       <div className="pointer-events-none absolute inset-y-0 right-0 z-0 hidden w-[55%] lg:block">
@@ -154,16 +228,16 @@ function AuthPage() {
 
       {/* Scrollable layer — covers full viewport, contains the form */}
       <div className="relative z-10 flex h-full w-full overflow-y-auto">
-        <main className="flex min-h-full w-full flex-col items-center justify-center px-6 py-12 lg:w-[45%] lg:py-0">
+        <main className="auth-main flex min-h-full w-full flex-col items-center justify-center px-6 py-12 lg:w-[45%] lg:py-0">
           <div className="w-full max-w-[368px] animate-in fade-in slide-in-from-left-6 duration-500 motion-reduce:animate-none">
             <img
               src={umiLockup}
               alt=""
               aria-hidden="true"
-              className="mb-8 h-auto w-36 object-contain lg:mb-10"
+              className="auth-lockup h-auto object-contain lg:w-48"
             />
 
-            <h1 className="font-display text-2xl uppercase tracking-[0.25em]" aria-live="polite">
+            <h1 className="auth-title font-display uppercase tracking-[0.25em]" aria-live="polite">
               {mode === "signin" ? "Entrar" : "Criar conta"}
             </h1>
 
@@ -179,7 +253,7 @@ function AuthPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="mt-8 grid gap-6" noValidate>
+            <form onSubmit={handleSubmit} className="auth-form grid" noValidate>
               <div className="grid gap-2">
                 <Label
                   htmlFor="email"
