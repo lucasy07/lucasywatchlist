@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/auth/AuthProvider";
 import umiLockup from "@/assets/umi-lockup.png";
 import loginArt from "@/assets/login-art-900.webp.asset.json";
+import loginArtDesktop from "@/assets/login-art-umi-1600.webp.asset.json";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -126,170 +127,170 @@ function AuthPage() {
         className="pointer-events-none absolute inset-0 z-0 h-full w-full select-none object-cover object-top opacity-[0.11] animate-in fade-in duration-1000 motion-reduce:animate-none lg:hidden"
       />
 
-      {/* Desktop diagonal panel */}
-      <div
-        className="pointer-events-none absolute inset-y-0 left-0 z-10 hidden w-[46%] lg:block"
-        style={{
-          background: "var(--gradient-card)",
-          boxShadow: "var(--shadow-card)",
-          clipPath: "polygon(0 0, 100% 0, calc(100% - 110px) 100%, 0 100%)",
-        }}
-      />
+      {/* Desktop art layer — fixed, non-scrollable */}
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-0 hidden w-[55%] lg:block">
+        <img
+          src={loginArtDesktop.url}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          loading="eager"
+          fetchPriority="high"
+          className="h-full w-full select-none object-cover object-[25%_25%] animate-in fade-in duration-1000 motion-reduce:animate-none"
+        />
+        {/* Scrim overlay */}
+        <div
+          className="absolute inset-0 animate-in fade-in duration-1000 motion-reduce:animate-none"
+          style={{ background: "var(--gradient-scrim)" }}
+        />
+        {/* Dither layer */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.038] mix-blend-overlay"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          }}
+        />
+      </div>
 
-      {/* Desktop art overflowing the diagonal */}
-      <img
-        src={loginArt.url}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        loading="eager"
-        fetchPriority="high"
-        className="pointer-events-none absolute bottom-0 right-0 z-20 hidden h-[88vh] w-auto max-w-[550px] select-none object-contain animate-in fade-in duration-1000 motion-reduce:animate-none lg:block"
-      />
+      {/* Scrollable layer — covers full viewport, contains the form */}
+      <div className="relative z-10 flex h-full w-full overflow-y-auto">
+        <main className="flex min-h-full w-full flex-col items-center justify-center px-6 py-12 lg:w-[45%] lg:py-0">
+          <div className="w-full max-w-[368px] animate-in fade-in slide-in-from-left-6 duration-500 motion-reduce:animate-none">
+            <img
+              src={umiLockup}
+              alt=""
+              aria-hidden="true"
+              className="mb-8 h-auto w-36 object-contain lg:mb-10"
+            />
 
-      {/* Logo */}
-      <img
-        src={umiLockup}
-        alt="Umi Watchlist"
-        className="pointer-events-none absolute right-4 top-4 z-30 hidden h-12 w-auto select-none object-contain lg:block"
-      />
+            <h1 className="font-display text-2xl uppercase tracking-[0.25em]" aria-live="polite">
+              {mode === "signin" ? "Entrar" : "Criar conta"}
+            </h1>
 
-      {/* Form */}
-      <div className="relative z-30 flex h-full items-center px-6 lg:w-[46%] lg:px-[max(4rem,8%)]">
-        <div className="mx-auto w-full max-w-[360px] animate-in fade-in slide-in-from-left-6 duration-500 motion-reduce:animate-none">
-          <img
-            src={umiLockup}
-            alt="Umi Watchlist"
-            className="mb-8 h-auto w-36 object-contain lg:hidden"
-          />
-
-          <h1 className="font-display text-2xl uppercase tracking-[0.25em]" aria-live="polite">
-            {mode === "signin" ? "Entrar" : "Criar conta"}
-          </h1>
-
-          {pendingEmail && (
-            <div
-              className="mt-6 rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground"
-              role="status"
-              aria-live="polite"
-            >
-              Enviamos um e-mail de confirmação para{" "}
-              <span className="font-semibold text-foreground">{pendingEmail}</span>. Confira sua caixa
-              de entrada e também a pasta de spam antes de entrar.
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="mt-8 grid gap-6" noValidate>
-            <div className="grid gap-2">
-              <Label
-                htmlFor="email"
-                className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground"
+            {pendingEmail && (
+              <div
+                className="mt-6 rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground"
+                role="status"
+                aria-live="polite"
               >
-                E-mail
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                aria-invalid={!!errors.email}
-                aria-describedby={errors.email ? "email-error" : undefined}
-                className="rounded-none border-0 border-b border-border bg-transparent px-0 shadow-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring"
-              />
-              {errors.email && (
-                <p id="email-error" className="text-xs text-destructive">
-                  {errors.email}
-                </p>
-              )}
-            </div>
-
-            <div className="grid gap-2">
-              <Label
-                htmlFor="password"
-                className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground"
-              >
-                Senha
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                aria-invalid={!!errors.password}
-                aria-describedby={errors.password ? "password-error" : undefined}
-                className="rounded-none border-0 border-b border-border bg-transparent px-0 shadow-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring"
-              />
-              {errors.password && (
-                <p id="password-error" className="text-xs text-destructive">
-                  {errors.password}
-                </p>
-              )}
-            </div>
-
-            {mode === "signup" && (
-              <div className="grid gap-2">
-                <Label
-                  htmlFor="confirm-password"
-                  className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground"
-                >
-                  Confirmar senha
-                </Label>
-                <Input
-                  id="confirm-password"
-                  type="password"
-                  autoComplete="new-password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  aria-invalid={!!errors.confirmPassword}
-                  aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
-                  className="rounded-none border-0 border-b border-border bg-transparent px-0 shadow-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring"
-                />
-                {errors.confirmPassword && (
-                  <p id="confirm-password-error" className="text-xs text-destructive">
-                    {errors.confirmPassword}
-                  </p>
-                )}
+                Enviamos um e-mail de confirmação para{" "}
+                <span className="font-semibold text-foreground">{pendingEmail}</span>. Confira sua caixa
+                de entrada e também a pasta de spam antes de entrar.
               </div>
             )}
 
-            <Button
-              type="submit"
-              disabled={submitting}
-              aria-busy={submitting}
-              className="mt-2 w-full bg-primary uppercase tracking-[0.15em] focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              {submitting ? "Aguarde..." : mode === "signin" ? "Entrar" : "Criar conta"}
-            </Button>
-          </form>
+            <form onSubmit={handleSubmit} className="mt-8 grid gap-6" noValidate>
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="email"
+                  className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground"
+                >
+                  E-mail
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? "email-error" : undefined}
+                  className="rounded-none border-0 border-b border-border bg-transparent px-0 shadow-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring"
+                />
+                {errors.email && (
+                  <p id="email-error" className="text-xs text-destructive">
+                    {errors.email}
+                  </p>
+                )}
+              </div>
 
-          <div className="mt-6 text-xs text-muted-foreground">
-            {mode === "signin" ? (
-              <>
-                Não tem conta?{" "}
-                <button
-                  type="button"
-                  onClick={() => switchMode("signup")}
-                  className="rounded-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="password"
+                  className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground"
                 >
-                  Criar conta
-                </button>
-              </>
-            ) : (
-              <>
-                Já tem conta?{" "}
-                <button
-                  type="button"
-                  onClick={() => switchMode("signin")}
-                  className="rounded-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  Entrar
-                </button>
-              </>
-            )}
+                  Senha
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  aria-invalid={!!errors.password}
+                  aria-describedby={errors.password ? "password-error" : undefined}
+                  className="rounded-none border-0 border-b border-border bg-transparent px-0 shadow-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring"
+                />
+                {errors.password && (
+                  <p id="password-error" className="text-xs text-destructive">
+                    {errors.password}
+                  </p>
+                )}
+              </div>
+
+              {mode === "signup" && (
+                <div className="grid gap-2">
+                  <Label
+                    htmlFor="confirm-password"
+                    className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground"
+                  >
+                    Confirmar senha
+                  </Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    autoComplete="new-password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    aria-invalid={!!errors.confirmPassword}
+                    aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
+                    className="rounded-none border-0 border-b border-border bg-transparent px-0 shadow-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                  {errors.confirmPassword && (
+                    <p id="confirm-password-error" className="text-xs text-destructive">
+                      {errors.confirmPassword}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                disabled={submitting}
+                aria-busy={submitting}
+                className="mt-2 w-full bg-primary uppercase tracking-[0.15em] focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {submitting ? "Aguarde..." : mode === "signin" ? "Entrar" : "Criar conta"}
+              </Button>
+            </form>
+
+            <div className="mt-6 text-xs text-muted-foreground">
+              {mode === "signin" ? (
+                <>
+                  Não tem conta?{" "}
+                  <button
+                    type="button"
+                    onClick={() => switchMode("signup")}
+                    className="rounded-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    Criar conta
+                  </button>
+                </>
+              ) : (
+                <>
+                  Já tem conta?{" "}
+                  <button
+                    type="button"
+                    onClick={() => switchMode("signin")}
+                    className="rounded-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    Entrar
+                  </button>
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );
