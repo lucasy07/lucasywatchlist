@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/auth/AuthProvider";
 import umiLockup from "@/assets/umi-lockup.png";
 import loginArt from "@/assets/login-art-900.webp.asset.json";
+import loginArtDesktop from "@/assets/login-art-umi-1600.webp.asset.json";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
