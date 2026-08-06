@@ -44,13 +44,14 @@ function translateAuthError(raw: string): string {
 function AuthPage() {
   const navigate = useNavigate();
   const { session, loading } = useAuth();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "reset">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [resetSentEmail, setResetSentEmail] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -64,12 +65,13 @@ function AuthPage() {
     setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
   }
 
-  function switchMode(next: "signin" | "signup") {
+  function switchMode(next: "signin" | "signup" | "reset") {
     setMode(next);
     setConfirmPassword("");
     setErrors({});
     setServerError(null);
     setShowPassword(false);
+    setResetSentEmail(null);
   }
 
 
@@ -77,10 +79,12 @@ function AuthPage() {
     const next: typeof errors = {};
     if (!email.trim()) next.email = "Informe seu e-mail.";
     else if (!EMAIL_RE.test(email.trim())) next.email = "Formato de e-mail inválido.";
-    if (!password) next.password = "Informe sua senha.";
-    else if (password.length < 6) next.password = "A senha deve ter pelo menos 6 caracteres.";
-    if (mode === "signup" && password !== confirmPassword) {
-      next.confirmPassword = "As senhas não coincidem.";
+    if (mode !== "reset") {
+      if (!password) next.password = "Informe sua senha.";
+      else if (password.length < 6) next.password = "A senha deve ter pelo menos 6 caracteres.";
+      if (mode === "signup" && password !== confirmPassword) {
+        next.confirmPassword = "As senhas não coincidem.";
+      }
     }
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -92,7 +96,13 @@ function AuthPage() {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      if (mode === "signup") {
+      if (mode === "reset") {
+        const redirectTo = `${window.location.origin}/`;
+        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+        if (error) throw error;
+        setResetSentEmail(email);
+        setPendingEmail(null);
+      } else if (mode === "signup") {
         const redirectTo = `${window.location.origin}/`;
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -251,7 +261,7 @@ function AuthPage() {
             />
 
             <h1 className="auth-title font-display uppercase tracking-[0.25em]" aria-live="polite">
-              {mode === "signin" ? "Login" : "Criar conta"}
+              {mode === "signin" ? "Login" : mode === "signup" ? "Criar conta" : "Recuperar senha"}
             </h1>
 
             {pendingEmail && (
@@ -266,15 +276,39 @@ function AuthPage() {
               </div>
             )}
 
+            {resetSentEmail && (
+              <div
+                className="mt-6 rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground"
+                role="status"
+                aria-live="polite"
+              >
+                Se houver uma conta associada a{" "}
+                <span className="font-semibold text-foreground">{resetSentEmail}</span>, enviamos um
+                link para redefinir a senha. Confira sua caixa de entrada e também a pasta de spam.
+              </div>
+            )}
+
             {serverError && (
               <div
                 role="alert"
                 className="mt-6 flex items-start gap-2 rounded-lg border border-destructive bg-card p-3 text-xs text-foreground"
               >
                 <AlertCircle aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-destructive" />
-                <span>{serverError}</span>
+                <span>
+                  {serverError}{" "}
+                  {mode !== "reset" && (
+                    <button
+                      type="button"
+                      onClick={() => switchMode("reset")}
+                      className="font-semibold text-primary-on-dark underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      redefina sua senha
+                    </button>
+                  )}
+                </span>
               </div>
             )}
+
 
             <form onSubmit={handleSubmit} className="auth-form grid" noValidate>
               <div className="grid gap-2">
@@ -305,6 +339,13 @@ function AuthPage() {
                 )}
               </div>
 
+              {mode === "reset" && (
+                <p className="text-xs text-muted-foreground">
+                  Enviaremos um link por e-mail para você criar uma nova senha.
+                </p>
+              )}
+
+              {mode !== "reset" && (
               <div className="grid gap-2">
                 <Label
                   htmlFor="password"
@@ -346,6 +387,8 @@ function AuthPage() {
                   </p>
                 )}
               </div>
+              )}
+
 
               {mode === "signup" && (
                 <div className="grid gap-2">
@@ -376,13 +419,31 @@ function AuthPage() {
                 </div>
               )}
 
+              {mode === "signin" && (
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => switchMode("reset")}
+                    className="inline-flex h-11 min-h-11 items-center rounded-sm px-1 text-xs font-semibold text-primary-on-dark hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    Esqueci minha senha
+                  </button>
+                </div>
+              )}
+
               <Button
                 type="submit"
                 disabled={submitting}
                 aria-busy={submitting}
                 className="mt-2 h-12 min-h-12 w-full bg-primary uppercase tracking-[0.15em] focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {submitting ? "Aguarde..." : mode === "signin" ? "Login" : "Criar conta"}
+                {submitting
+                  ? "Aguarde..."
+                  : mode === "signin"
+                    ? "Login"
+                    : mode === "signup"
+                      ? "Criar conta"
+                      : "Enviar link"}
               </Button>
             </form>
 
@@ -400,7 +461,7 @@ function AuthPage() {
                 </>
               ) : (
                 <>
-                  <span>Já tem conta?</span>
+                  <span>{mode === "reset" ? "Lembrou a senha?" : "Já tem conta?"}</span>
                   <button
                     type="button"
                     onClick={() => switchMode("signin")}
