@@ -117,7 +117,9 @@ function AuthPage() {
       }
     } catch (err) {
       const raw = err instanceof Error ? err.message : "";
-      toast.error(translateAuthError(raw));
+      const message = translateAuthError(raw);
+      setServerError(message);
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
