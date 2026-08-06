@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
+import { AlertCircle, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,6 +51,8 @@ function AuthPage() {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (!loading && session) {
@@ -57,11 +60,18 @@ function AuthPage() {
     }
   }, [loading, session, navigate]);
 
+  function clearFieldError(field: "email" | "password" | "confirmPassword") {
+    setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
+  }
+
   function switchMode(next: "signin" | "signup") {
     setMode(next);
     setConfirmPassword("");
     setErrors({});
+    setServerError(null);
+    setShowPassword(false);
   }
+
 
   function validate() {
     const next: typeof errors = {};
@@ -78,6 +88,7 @@ function AuthPage() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    setServerError(null);
     if (!validate()) return;
     setSubmitting(true);
     try {
@@ -106,7 +117,9 @@ function AuthPage() {
       }
     } catch (err) {
       const raw = err instanceof Error ? err.message : "";
-      toast.error(translateAuthError(raw));
+      const message = translateAuthError(raw);
+      setServerError(message);
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
@@ -238,7 +251,7 @@ function AuthPage() {
             />
 
             <h1 className="auth-title font-display uppercase tracking-[0.25em]" aria-live="polite">
-              {mode === "signin" ? "Entrar" : "Criar conta"}
+              {mode === "signin" ? "Login" : "Criar conta"}
             </h1>
 
             {pendingEmail && (
@@ -253,26 +266,40 @@ function AuthPage() {
               </div>
             )}
 
+            {serverError && (
+              <div
+                role="alert"
+                className="mt-6 flex items-start gap-2 rounded-lg border border-destructive bg-card p-3 text-xs text-foreground"
+              >
+                <AlertCircle aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-destructive" />
+                <span>{serverError}</span>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="auth-form grid" noValidate>
               <div className="grid gap-2">
                 <Label
                   htmlFor="email"
-                  className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground"
+                  className="text-xs uppercase tracking-[0.14em] text-muted-foreground"
                 >
                   E-mail
                 </Label>
                 <Input
                   id="email"
                   type="email"
+                  autoFocus
                   autoComplete="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    clearFieldError("email");
+                  }}
                   aria-invalid={!!errors.email}
                   aria-describedby={errors.email ? "email-error" : undefined}
-                  className="rounded-none border-0 border-b border-border bg-transparent px-0 shadow-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring"
+                  className="h-11 min-h-11 rounded-none border-0 border-b-[1.5px] border-border-interactive bg-transparent px-0 shadow-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring"
                 />
                 {errors.email && (
-                  <p id="email-error" className="text-xs text-destructive">
+                  <p id="email-error" role="alert" className="text-xs text-destructive">
                     {errors.email}
                   </p>
                 )}
@@ -281,22 +308,40 @@ function AuthPage() {
               <div className="grid gap-2">
                 <Label
                   htmlFor="password"
-                  className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground"
+                  className="text-xs uppercase tracking-[0.14em] text-muted-foreground"
                 >
                   Senha
                 </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  aria-invalid={!!errors.password}
-                  aria-describedby={errors.password ? "password-error" : undefined}
-                  className="rounded-none border-0 border-b border-border bg-transparent px-0 shadow-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring"
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      clearFieldError("password");
+                    }}
+                    aria-invalid={!!errors.password}
+                    aria-describedby={errors.password ? "password-error" : undefined}
+                    className="h-11 min-h-11 rounded-none border-0 border-b-[1.5px] border-border-interactive bg-transparent pl-0 pr-12 shadow-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-pressed={showPassword}
+                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    className="absolute right-0 top-0 flex size-11 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {showPassword ? (
+                      <EyeOff aria-hidden="true" className="size-4" />
+                    ) : (
+                      <Eye aria-hidden="true" className="size-4" />
+                    )}
+                  </button>
+                </div>
                 {errors.password && (
-                  <p id="password-error" className="text-xs text-destructive">
+                  <p id="password-error" role="alert" className="text-xs text-destructive">
                     {errors.password}
                   </p>
                 )}
@@ -306,22 +351,25 @@ function AuthPage() {
                 <div className="grid gap-2">
                   <Label
                     htmlFor="confirm-password"
-                    className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground"
+                    className="text-xs uppercase tracking-[0.14em] text-muted-foreground"
                   >
                     Confirmar senha
                   </Label>
                   <Input
                     id="confirm-password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     autoComplete="new-password"
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      clearFieldError("confirmPassword");
+                    }}
                     aria-invalid={!!errors.confirmPassword}
                     aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
-                    className="rounded-none border-0 border-b border-border bg-transparent px-0 shadow-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring"
+                    className="h-11 min-h-11 rounded-none border-0 border-b-[1.5px] border-border-interactive bg-transparent px-0 shadow-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring"
                   />
                   {errors.confirmPassword && (
-                    <p id="confirm-password-error" className="text-xs text-destructive">
+                    <p id="confirm-password-error" role="alert" className="text-xs text-destructive">
                       {errors.confirmPassword}
                     </p>
                   )}
@@ -332,37 +380,38 @@ function AuthPage() {
                 type="submit"
                 disabled={submitting}
                 aria-busy={submitting}
-                className="mt-2 w-full bg-primary uppercase tracking-[0.15em] focus-visible:ring-2 focus-visible:ring-ring"
+                className="mt-2 h-12 min-h-12 w-full bg-primary uppercase tracking-[0.15em] focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {submitting ? "Aguarde..." : mode === "signin" ? "Entrar" : "Criar conta"}
+                {submitting ? "Aguarde..." : mode === "signin" ? "Login" : "Criar conta"}
               </Button>
             </form>
 
-            <div className="mt-6 text-xs text-muted-foreground">
+            <div className="mt-2 flex flex-wrap items-center gap-x-1 text-xs text-muted-foreground">
               {mode === "signin" ? (
                 <>
-                  Não tem conta?{" "}
+                  <span>Não tem conta?</span>
                   <button
                     type="button"
                     onClick={() => switchMode("signup")}
-                    className="rounded-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="inline-flex h-11 min-h-11 items-center rounded-sm px-1 font-semibold text-primary-on-dark hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     Criar conta
                   </button>
                 </>
               ) : (
                 <>
-                  Já tem conta?{" "}
+                  <span>Já tem conta?</span>
                   <button
                     type="button"
                     onClick={() => switchMode("signin")}
-                    className="rounded-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="inline-flex h-11 min-h-11 items-center rounded-sm px-1 font-semibold text-primary-on-dark hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    Entrar
+                    Fazer login
                   </button>
                 </>
               )}
             </div>
+
           </div>
         </main>
       </div>
