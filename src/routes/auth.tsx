@@ -387,6 +387,8 @@ function AuthPage() {
                   </p>
                 )}
               </div>
+              )}
+
 
               {mode === "signup" && (
                 <div className="grid gap-2">
