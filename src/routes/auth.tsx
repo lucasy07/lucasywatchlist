@@ -51,6 +51,8 @@ function AuthPage() {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (!loading && session) {
@@ -58,11 +60,18 @@ function AuthPage() {
     }
   }, [loading, session, navigate]);
 
+  function clearFieldError(field: "email" | "password" | "confirmPassword") {
+    setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
+  }
+
   function switchMode(next: "signin" | "signup") {
     setMode(next);
     setConfirmPassword("");
     setErrors({});
+    setServerError(null);
+    setShowPassword(false);
   }
+
 
   function validate() {
     const next: typeof errors = {};
