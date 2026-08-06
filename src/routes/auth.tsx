@@ -88,6 +88,7 @@ function AuthPage() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    setServerError(null);
     if (!validate()) return;
     setSubmitting(true);
     try {
