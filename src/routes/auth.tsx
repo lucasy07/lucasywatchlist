@@ -339,6 +339,13 @@ function AuthPage() {
                 )}
               </div>
 
+              {mode === "reset" && (
+                <p className="text-xs text-muted-foreground">
+                  Enviaremos um link por e-mail para você criar uma nova senha.
+                </p>
+              )}
+
+              {mode !== "reset" && (
               <div className="grid gap-2">
                 <Label
                   htmlFor="password"
