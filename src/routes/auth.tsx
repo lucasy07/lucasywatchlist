@@ -261,7 +261,7 @@ function AuthPage() {
             />
 
             <h1 className="auth-title font-display uppercase tracking-[0.25em]" aria-live="polite">
-              {mode === "signin" ? "Login" : "Criar conta"}
+              {mode === "signin" ? "Login" : mode === "signup" ? "Criar conta" : "Recuperar senha"}
             </h1>
 
             {pendingEmail && (
@@ -276,15 +276,39 @@ function AuthPage() {
               </div>
             )}
 
+            {resetSentEmail && (
+              <div
+                className="mt-6 rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground"
+                role="status"
+                aria-live="polite"
+              >
+                Se houver uma conta associada a{" "}
+                <span className="font-semibold text-foreground">{resetSentEmail}</span>, enviamos um
+                link para redefinir a senha. Confira sua caixa de entrada e também a pasta de spam.
+              </div>
+            )}
+
             {serverError && (
               <div
                 role="alert"
                 className="mt-6 flex items-start gap-2 rounded-lg border border-destructive bg-card p-3 text-xs text-foreground"
               >
                 <AlertCircle aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-destructive" />
-                <span>{serverError}</span>
+                <span>
+                  {serverError}{" "}
+                  {mode !== "reset" && (
+                    <button
+                      type="button"
+                      onClick={() => switchMode("reset")}
+                      className="font-semibold text-primary-on-dark underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      redefina sua senha
+                    </button>
+                  )}
+                </span>
               </div>
             )}
+
 
             <form onSubmit={handleSubmit} className="auth-form grid" noValidate>
               <div className="grid gap-2">
