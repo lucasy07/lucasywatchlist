@@ -96,7 +96,13 @@ function AuthPage() {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      if (mode === "signup") {
+      if (mode === "reset") {
+        const redirectTo = `${window.location.origin}/`;
+        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+        if (error) throw error;
+        setResetSentEmail(email);
+        setPendingEmail(null);
+      } else if (mode === "signup") {
         const redirectTo = `${window.location.origin}/`;
         const { data, error } = await supabase.auth.signUp({
           email,
