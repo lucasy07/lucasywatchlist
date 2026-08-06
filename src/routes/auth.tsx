@@ -461,7 +461,7 @@ function AuthPage() {
                 </>
               ) : (
                 <>
-                  <span>Já tem conta?</span>
+                  <span>{mode === "reset" ? "Lembrou a senha?" : "Já tem conta?"}</span>
                   <button
                     type="button"
                     onClick={() => switchMode("signin")}
