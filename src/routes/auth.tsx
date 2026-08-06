@@ -44,13 +44,14 @@ function translateAuthError(raw: string): string {
 function AuthPage() {
   const navigate = useNavigate();
   const { session, loading } = useAuth();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "reset">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [resetSentEmail, setResetSentEmail] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -64,12 +65,13 @@ function AuthPage() {
     setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
   }
 
-  function switchMode(next: "signin" | "signup") {
+  function switchMode(next: "signin" | "signup" | "reset") {
     setMode(next);
     setConfirmPassword("");
     setErrors({});
     setServerError(null);
     setShowPassword(false);
+    setResetSentEmail(null);
   }
 
 
@@ -77,10 +79,12 @@ function AuthPage() {
     const next: typeof errors = {};
     if (!email.trim()) next.email = "Informe seu e-mail.";
     else if (!EMAIL_RE.test(email.trim())) next.email = "Formato de e-mail inválido.";
-    if (!password) next.password = "Informe sua senha.";
-    else if (password.length < 6) next.password = "A senha deve ter pelo menos 6 caracteres.";
-    if (mode === "signup" && password !== confirmPassword) {
-      next.confirmPassword = "As senhas não coincidem.";
+    if (mode !== "reset") {
+      if (!password) next.password = "Informe sua senha.";
+      else if (password.length < 6) next.password = "A senha deve ter pelo menos 6 caracteres.";
+      if (mode === "signup" && password !== confirmPassword) {
+        next.confirmPassword = "As senhas não coincidem.";
+      }
     }
     setErrors(next);
     return Object.keys(next).length === 0;
