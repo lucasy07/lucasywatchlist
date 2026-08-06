@@ -419,13 +419,31 @@ function AuthPage() {
                 </div>
               )}
 
+              {mode === "signin" && (
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => switchMode("reset")}
+                    className="inline-flex h-11 min-h-11 items-center rounded-sm px-1 text-xs font-semibold text-primary-on-dark hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    Esqueci minha senha
+                  </button>
+                </div>
+              )}
+
               <Button
                 type="submit"
                 disabled={submitting}
                 aria-busy={submitting}
                 className="mt-2 h-12 min-h-12 w-full bg-primary uppercase tracking-[0.15em] focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {submitting ? "Aguarde..." : mode === "signin" ? "Login" : "Criar conta"}
+                {submitting
+                  ? "Aguarde..."
+                  : mode === "signin"
+                    ? "Login"
+                    : mode === "signup"
+                      ? "Criar conta"
+                      : "Enviar link"}
               </Button>
             </form>
 
