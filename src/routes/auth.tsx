@@ -347,7 +347,7 @@ function AuthPage() {
                   }}
                   aria-invalid={!!errors.email}
                   aria-describedby={errors.email ? "email-error" : undefined}
-                  className="h-11 min-h-11 rounded-none border-0 border-b-[1.5px] border-border-interactive bg-transparent px-0 shadow-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring"
+                  className="h-11 min-h-11 rounded-none border-0 border-b-[1.5px] border-border-interactive bg-transparent px-0 shadow-none transition-colors focus-visible:border-b-2 focus-visible:border-b-primary focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 aria-invalid:border-b-destructive focus-visible:aria-invalid:border-b-destructive"
                 />
                 {errors.email && (
                   <p id="email-error" role="alert" className="text-xs text-destructive">
@@ -382,7 +382,7 @@ function AuthPage() {
                     }}
                     aria-invalid={!!errors.password}
                     aria-describedby={errors.password ? "password-error" : undefined}
-                    className="h-11 min-h-11 rounded-none border-0 border-b-[1.5px] border-border-interactive bg-transparent pl-0 pr-12 shadow-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring"
+                    className="h-11 min-h-11 rounded-none border-0 border-b-[1.5px] border-border-interactive bg-transparent pl-0 pr-12 shadow-none transition-colors focus-visible:border-b-2 focus-visible:border-b-primary focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 aria-invalid:border-b-destructive focus-visible:aria-invalid:border-b-destructive"
                   />
                   <button
                     type="button"
@@ -426,7 +426,7 @@ function AuthPage() {
                     }}
                     aria-invalid={!!errors.confirmPassword}
                     aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
-                    className="h-11 min-h-11 rounded-none border-0 border-b-[1.5px] border-border-interactive bg-transparent px-0 shadow-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring"
+                    className="h-11 min-h-11 rounded-none border-0 border-b-[1.5px] border-border-interactive bg-transparent px-0 shadow-none transition-colors focus-visible:border-b-2 focus-visible:border-b-primary focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 aria-invalid:border-b-destructive focus-visible:aria-invalid:border-b-destructive"
                   />
                   {errors.confirmPassword && (
                     <p id="confirm-password-error" role="alert" className="text-xs text-destructive">
