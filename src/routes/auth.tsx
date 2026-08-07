@@ -187,6 +187,23 @@ function AuthPage() {
           margin-top: var(--auth-form-mt);
           gap: var(--auth-form-gap);
         }
+        .auth-page input:-webkit-autofill,
+        .auth-page input:-webkit-autofill:hover,
+        .auth-page input:-webkit-autofill:focus,
+        .auth-page input:-webkit-autofill:active {
+          -webkit-text-fill-color: var(--foreground);
+          caret-color: var(--foreground);
+          -webkit-background-clip: text;
+          background-clip: text;
+          transition: background-color 600000s 0s, color 600000s 0s;
+        }
+        .auth-page input:autofill {
+          -webkit-text-fill-color: var(--foreground);
+          caret-color: var(--foreground);
+          -webkit-background-clip: text;
+          background-clip: text;
+          transition: background-color 600000s 0s, color 600000s 0s;
+        }
         @media (min-width: 1024px) {
           .auth-page .auth-main {
             padding-top: 0;
