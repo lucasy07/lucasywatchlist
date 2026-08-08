@@ -17,27 +17,43 @@ const STARS = [
   { left: "94%", top: "30%", delay: "3.6s" },
 ];
 
-function AnimeCardDebris({ scale = 1 }: { scale?: number }) {
+const WAVE_1 = "M0 15 q15 -6 30 0" + " t30 0".repeat(43);
+const WAVE_2 = "M0 20 q20 -7 40 0" + " t40 0".repeat(33);
+
+function CardDebris({ big = false }: { big?: boolean }) {
   return (
     <div
-      className="rounded-md border p-1"
       style={{
-        width: `${64 * scale}px`,
+        width: big ? "66px" : "54px",
+        borderRadius: "5px",
         background: "var(--card)",
-        borderColor: "var(--border)",
+        border: "1px solid var(--border)",
+        paddingBottom: "6px",
       }}
     >
       <div
-        className="rounded-sm"
-        style={{ height: `${44 * scale}px`, background: "var(--card-elevated)" }}
+        style={{
+          height: big ? "68px" : "56px",
+          background: "var(--card-elevated)",
+          borderRadius: "4px 4px 0 0",
+        }}
       />
       <div
-        className="mt-1 rounded-full"
-        style={{ height: "3px", width: "80%", background: "var(--border)" }}
+        style={{
+          height: "4px",
+          borderRadius: "2px",
+          background: "var(--card-elevated)",
+          margin: "6px 6px 0",
+        }}
       />
       <div
-        className="mt-1 rounded-full"
-        style={{ height: "3px", width: "55%", background: "var(--border)" }}
+        style={{
+          height: "4px",
+          borderRadius: "2px",
+          background: "var(--card-elevated)",
+          margin: "6px 6px 0",
+          width: "56%",
+        }}
       />
     </div>
   );
@@ -45,22 +61,30 @@ function AnimeCardDebris({ scale = 1 }: { scale?: number }) {
 
 function TierDebris({ tiers }: { tiers: string[] }) {
   return (
-    <div className="flex flex-col gap-1">
+    <div
+      style={{
+        padding: "5px",
+        borderRadius: "5px",
+        background: "var(--card)",
+        border: "1px solid var(--border)",
+        display: "flex",
+        flexDirection: "column",
+        gap: "3px",
+      }}
+    >
       {tiers.map((t, i) => (
-        <div key={t} className="flex items-center gap-1">
+        <div key={t} style={{ display: "flex", gap: "3px" }}>
           <div
-            className="rounded-sm"
-            style={{ width: "10px", height: "10px", background: `var(${t})` }}
+            style={{ width: "11px", height: "13px", borderRadius: "2px", background: `var(${t})` }}
           />
           {Array.from({ length: i === 0 ? 3 : 2 }).map((_, j) => (
             <div
               key={j}
-              className="rounded-sm border"
               style={{
                 width: "10px",
-                height: "10px",
+                height: "13px",
+                borderRadius: "2px",
                 background: "var(--card-elevated)",
-                borderColor: "var(--border)",
               }}
             />
           ))}
@@ -70,11 +94,54 @@ function TierDebris({ tiers }: { tiers: string[] }) {
   );
 }
 
+function ButtonDebris() {
+  return (
+    <div
+      style={{
+        height: "15px",
+        width: "48px",
+        borderRadius: "999px",
+        background: "var(--gradient-primary)",
+      }}
+    />
+  );
+}
+
+const DEBRIS = [
+  { left: "6%", top: "60%", layer: "near", node: <CardDebris big />, delay: "-1s", drift: "a" },
+  {
+    left: "31%",
+    top: "88%",
+    layer: "far",
+    node: <TierDebris tiers={["--tier-s", "--tier-b"]} />,
+    delay: "-3s",
+    drift: "b",
+  },
+  { left: "49%", top: "67%", layer: "mid", node: <ButtonDebris />, delay: "-6s", drift: "a" },
+  { left: "69%", top: "56%", layer: "far", node: <CardDebris />, delay: "-8s", drift: "b" },
+  {
+    left: "83%",
+    top: "85%",
+    layer: "near",
+    node: <TierDebris tiers={["--tier-a", "--tier-c"]} />,
+    delay: "-11s",
+    drift: "a",
+  },
+];
+
 export function BootSplash({ progress, label }: BootSplashProps) {
   const clamped = Math.min(1, Math.max(0, progress));
   const [diving, setDiving] = useState(false);
   const [ripple, setRipple] = useState(0);
   const prev = useRef(clamped);
+
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, []);
 
   useEffect(() => {
     if (prev.current === clamped) return;
@@ -88,12 +155,7 @@ export function BootSplash({ progress, label }: BootSplashProps) {
   }, [clamped]);
 
   return (
-    <div
-      role="status"
-      aria-busy="true"
-      className="boot-splash fixed inset-0 overflow-hidden"
-      style={{ ["--wl" as string]: "46%" }}
-    >
+    <div role="status" aria-busy="true" className="boot-splash fixed inset-0 overflow-hidden">
       <span className="sr-only">Carregando</span>
 
       <style>{`
@@ -111,27 +173,28 @@ export function BootSplash({ progress, label }: BootSplashProps) {
         }
         @keyframes bs-twinkle {
           0%, 100% { opacity: .18; }
-          50% { opacity: .55; }
+          50% { opacity: .6; }
         }
         @keyframes bs-shimmer {
-          0%, 100% { transform: scaleX(1); }
-          50% { transform: scaleX(1.3); }
+          0%, 100% { transform: translateX(50%) scaleX(1); opacity: .75; }
+          50% { transform: translateX(50%) scaleX(1.3); opacity: 1; }
         }
-        @keyframes bs-drift {
-          0%, 100% { transform: translateY(0) rotate(-2deg); }
-          50% { transform: translateY(-15px) rotate(2deg); }
+        @keyframes bs-drift-a {
+          0%, 100% { transform: translateY(0) rotate(-7deg); }
+          50% { transform: translateY(-14px) rotate(-3deg); }
         }
-        @keyframes bs-waveslide {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
+        @keyframes bs-drift-b {
+          0%, 100% { transform: translateY(0) rotate(6deg); }
+          50% { transform: translateY(-18px) rotate(2deg); }
         }
+        @keyframes bs-drift { to { transform: translateX(-50%); } }
         @keyframes bs-finbob {
           0%, 100% { transform: translateY(2px) rotate(-3deg); }
           50% { transform: translateY(-2px) rotate(0deg); }
         }
         @keyframes bs-ripple {
-          from { transform: translate(-50%, -50%) scale(.5); opacity: .8; }
-          to { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+          from { transform: scale(.5); opacity: .8; }
+          to { transform: scale(1.6); opacity: 0; }
         }
         @keyframes bs-fadein {
           from { opacity: 0; }
@@ -164,7 +227,7 @@ export function BootSplash({ progress, label }: BootSplashProps) {
             width: "2px",
             height: "2px",
             background: "color-mix(in srgb, var(--foreground) 70%, transparent)",
-            animation: "bs-twinkle 4.5s ease-in-out infinite",
+            animation: "bs-twinkle 4s ease-in-out infinite",
             animationDelay: s.delay,
           }}
         />
@@ -188,8 +251,8 @@ export function BootSplash({ progress, label }: BootSplashProps) {
         style={{
           right: "14%",
           top: "var(--wl)",
-          width: "var(--moon)",
-          height: "38%",
+          width: "calc(var(--moon) * .8)",
+          height: "34%",
           transform: "translateX(50%)",
           filter: "blur(5px)",
           background:
@@ -208,59 +271,20 @@ export function BootSplash({ progress, label }: BootSplashProps) {
             "linear-gradient(to bottom, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%)",
         }}
       />
+      {/* sedimento */}
       <div
         className="absolute inset-x-0"
         style={{
           top: "74%",
           bottom: 0,
           background:
-            "linear-gradient(to bottom, transparent, color-mix(in oklab, var(--background) 40%, black))",
+            "linear-gradient(to bottom, transparent, color-mix(in oklab, var(--background) 8%, black) 100%)",
+          opacity: 0.92,
         }}
       />
 
       {/* 5. Destroços */}
-      {[
-        {
-          left: "6%",
-          top: "60%",
-          layer: "near",
-          node: <AnimeCardDebris scale={1} />,
-          delay: "-2s",
-        },
-        {
-          left: "31%",
-          top: "88%",
-          layer: "far",
-          node: <TierDebris tiers={["--tier-s", "--tier-b"]} />,
-          delay: "-7s",
-        },
-        {
-          left: "49%",
-          top: "67%",
-          layer: "mid",
-          node: (
-            <div
-              className="rounded-full"
-              style={{ width: "58px", height: "18px", background: "var(--gradient-primary)" }}
-            />
-          ),
-          delay: "-4s",
-        },
-        {
-          left: "69%",
-          top: "56%",
-          layer: "far",
-          node: <AnimeCardDebris scale={0.68} />,
-          delay: "-11s",
-        },
-        {
-          left: "83%",
-          top: "85%",
-          layer: "near",
-          node: <TierDebris tiers={["--tier-a", "--tier-c"]} />,
-          delay: "-6s",
-        },
-      ].map((d) => {
+      {DEBRIS.map((d) => {
         const cfg =
           d.layer === "far"
             ? { opacity: 0.2, blur: "blur(2.4px)", dur: "17s" }
@@ -276,7 +300,7 @@ export function BootSplash({ progress, label }: BootSplashProps) {
               top: d.top,
               opacity: cfg.opacity,
               filter: cfg.blur,
-              animation: `bs-drift ${cfg.dur} ease-in-out infinite`,
+              animation: `bs-drift-${d.drift} ${cfg.dur} ease-in-out infinite`,
               animationDelay: d.delay,
             }}
           >
@@ -285,7 +309,7 @@ export function BootSplash({ progress, label }: BootSplashProps) {
         );
       })}
 
-      {/* 6. Rastro + 8. Nadadeira */}
+      {/* 6. Rastro + nadadeira */}
       <div
         className="absolute left-0 top-0 h-full"
         style={{
@@ -309,13 +333,13 @@ export function BootSplash({ progress, label }: BootSplashProps) {
         <div
           className="absolute"
           style={{
-            right: 0,
-            top: "var(--wl)",
+            right: "2px",
+            top: "calc(var(--wl) - 22px)",
             width: "180px",
             height: "46px",
-            clipPath: "polygon(100% 0, 100% 100%, 0 50%)",
+            clipPath: "polygon(100% 50%, 0 0, 0 6%, 94% 50%, 0 94%, 0 100%)",
             background:
-              "linear-gradient(to left, color-mix(in srgb, var(--primary-glow) 32%, transparent), transparent)",
+              "linear-gradient(to left, color-mix(in srgb, var(--primary-glow) 26%, transparent), transparent)",
           }}
         />
 
@@ -323,9 +347,11 @@ export function BootSplash({ progress, label }: BootSplashProps) {
         <div
           className="absolute"
           style={{
-            right: 0,
-            top: "var(--wl)",
-            transform: diving ? "translate(50%, calc(-100% + 22px))" : "translate(50%, -100%)",
+            right: "-8px",
+            top: "calc(var(--wl) - var(--fin-h))",
+            width: "var(--fin-w)",
+            height: "var(--fin-h)",
+            transform: diving ? "translateY(22px)" : "translateY(0)",
             opacity: diving ? 0 : 1,
             transition: "opacity 380ms ease, transform 380ms ease",
           }}
@@ -333,12 +359,13 @@ export function BootSplash({ progress, label }: BootSplashProps) {
           <div style={{ animation: "bs-finbob 1.6s ease-in-out infinite" }}>
             <svg
               viewBox="0 0 26 19"
-              width="var(--fin-w)"
-              height="var(--fin-h)"
+              width="100%"
+              height="100%"
               fill="currentColor"
               aria-hidden="true"
               className="text-primary"
               style={{
+                display: "block",
                 filter: "drop-shadow(0 2px 8px color-mix(in srgb, var(--primary) 55%, transparent))",
               }}
             >
@@ -351,51 +378,77 @@ export function BootSplash({ progress, label }: BootSplashProps) {
         {ripple > 0 && !diving && (
           <div
             key={ripple}
-            className="motion-reduce:hidden absolute rounded-[50%] border"
+            className="motion-reduce:hidden absolute"
             style={{
-              right: 0,
-              top: "var(--wl)",
-              width: "84px",
-              height: "26px",
-              transform: "translate(50%, -50%)",
-              borderColor: "color-mix(in srgb, var(--primary-glow) 70%, transparent)",
+              right: "-30px",
+              top: "calc(var(--wl) - 9px)",
+              width: "86px",
+              height: "22px",
+              borderRadius: "50%",
+              border: "1px solid color-mix(in srgb, var(--primary-glow) 70%, transparent)",
               animation: "bs-ripple 700ms ease-out forwards",
             }}
           />
         )}
       </div>
 
-      {/* 7. Linha d'água */}
+      {/* 7. Linha d'água — duas linhas finas */}
       <div
-        className="absolute inset-x-0 overflow-hidden"
-        style={{ top: "var(--wl)", height: "60px", transform: "translateY(-50%)" }}
+        style={{
+          position: "absolute",
+          left: 0,
+          width: "100%",
+          height: "30px",
+          overflow: "hidden",
+          top: "calc(var(--wl) - 14px)",
+        }}
       >
         <svg
-          className="absolute left-0 top-0 h-full"
-          style={{ width: "200%", animation: "bs-waveslide 9s linear infinite" }}
-          viewBox="0 0 1200 60"
+          style={{
+            width: "200%",
+            height: "30px",
+            color: "var(--border)",
+            opacity: 0.9,
+            animation: "bs-drift 9s linear infinite",
+            position: "absolute",
+            left: 0,
+            top: 0,
+          }}
+          viewBox="0 0 1200 30"
           preserveAspectRatio="none"
           aria-hidden="true"
         >
-          <path
-            d="M0 30 Q75 12 150 30 T300 30 T450 30 T600 30 T750 30 T900 30 T1050 30 T1200 30 V60 H0 Z"
-            fill="var(--border)"
-          />
+          <path d={WAVE_1} fill="none" stroke="currentColor" strokeWidth="1.5" />
         </svg>
         <svg
-          className="absolute left-0 top-0 h-full"
-          style={{ width: "200%", animation: "bs-waveslide 15s linear infinite" }}
-          viewBox="0 0 1200 60"
+          style={{
+            width: "200%",
+            height: "30px",
+            color: "var(--accent)",
+            opacity: 0.22,
+            animation: "bs-drift 15s linear infinite",
+            position: "absolute",
+            left: 0,
+            top: 0,
+          }}
+          viewBox="0 0 1200 30"
           preserveAspectRatio="none"
           aria-hidden="true"
         >
-          <path
-            d="M0 34 Q100 20 200 34 T400 34 T600 34 T800 34 T1000 34 T1200 34 V60 H0 Z"
-            fill="var(--accent)"
-            opacity="0.18"
-          />
+          <path d={WAVE_2} fill="none" stroke="currentColor" strokeWidth="1.5" />
         </svg>
       </div>
+
+      {/* 8. Vinheta */}
+      <div
+        className="absolute inset-0"
+        style={{
+          pointerEvents: "none",
+          background:
+            "radial-gradient(ellipse at 50% var(--wl), transparent 40%, color-mix(in oklab, var(--background) 0%, black) 100%)",
+          opacity: 0.5,
+        }}
+      />
 
       {/* 9. Texto */}
       <p
