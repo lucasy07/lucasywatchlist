@@ -245,6 +245,7 @@ function Index() {
     (async () => {
       try {
         const imported = await importLegacyIfNeeded(user.id);
+        setStep(2);
         if (imported > 0) {
           toast.success(`${imported} anime${imported === 1 ? "" : "s"} importado${imported === 1 ? "" : "s"} do dispositivo`);
         }
@@ -252,11 +253,14 @@ function Index() {
         if (!cancelled) {
           setAnimes(data);
           setHydrated(true);
+          setStep(3);
         }
       } catch (err) {
         console.error(err);
         toast.error("Falha ao carregar seus animes");
         if (!cancelled) setHydrated(true);
+        setStep(3);
+
       }
     })();
     const savedView =
