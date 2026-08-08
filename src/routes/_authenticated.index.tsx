@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useBootProgress } from "@/boot/BootProgress";
+
 import { BrandLockup } from "@/components/BrandLockup";
 import { useTilt } from "@/hooks/use-tilt";
 import {
