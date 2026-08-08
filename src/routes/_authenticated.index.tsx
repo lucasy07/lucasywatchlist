@@ -160,6 +160,8 @@ function scoreColor(n: number | null): string {
 
 function Index() {
   const { user, signOut } = useAuth();
+  const { setStep } = useBootProgress();
+
   const [animes, setAnimes] = useState<Anime[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [search, setSearch] = useState("");
