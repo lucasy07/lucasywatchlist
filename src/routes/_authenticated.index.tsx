@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useBootProgress } from "@/boot/BootProgress";
+
 import { BrandLockup } from "@/components/BrandLockup";
 import { useTilt } from "@/hooks/use-tilt";
 import {
@@ -160,6 +162,8 @@ function scoreColor(n: number | null): string {
 
 function Index() {
   const { user, signOut } = useAuth();
+  const { setStep } = useBootProgress();
+
   const [animes, setAnimes] = useState<Anime[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [search, setSearch] = useState("");
@@ -245,6 +249,7 @@ function Index() {
     (async () => {
       try {
         const imported = await importLegacyIfNeeded(user.id);
+        setStep(2);
         if (imported > 0) {
           toast.success(`${imported} anime${imported === 1 ? "" : "s"} importado${imported === 1 ? "" : "s"} do dispositivo`);
         }
@@ -252,11 +257,14 @@ function Index() {
         if (!cancelled) {
           setAnimes(data);
           setHydrated(true);
+          setStep(3);
         }
       } catch (err) {
         console.error(err);
         toast.error("Falha ao carregar seus animes");
         if (!cancelled) setHydrated(true);
+        setStep(3);
+
       }
     })();
     const savedView =
