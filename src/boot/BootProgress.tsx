@@ -1,7 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
-const MIN_BOOT_MS = 1800; // tempo mínimo total do splash na tela
-const MIN_STEP_MS = 420; // tempo mínimo que cada etapa fica visível
+const MIN_BOOT_MS = 3000; // tempo mínimo total do splash na tela
+// Precisa ser maior que a transição da largura do rastro (800ms) + ~150ms,
+// senão uma etapa começa antes de a anterior terminar.
+const MIN_STEP_MS = 1000; // tempo mínimo que cada etapa fica visível
+const ARRIVAL_HOLD_MS = 500; // respiro após a chegada na borda direita
 
 export type BootProgressValue = {
   step: number;
@@ -35,6 +38,7 @@ export function useBootPacer() {
   const target = useRef(0);
   const [step, setStepState] = useState(0);
   const [canExit, setCanExit] = useState(reduced.current);
+  const [arrived, setArrived] = useState(false);
   const [, force] = useState(0);
 
   const setStep = useCallback((n: number) => {
