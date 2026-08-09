@@ -162,9 +162,6 @@ export function BootSplash({ progress, label }: BootSplashProps) {
             color-mix(in oklab, var(--accent) 0%, transparent) 55%); }
         .bs-silt { position: absolute; left: 0; right: 0; top: 74%; bottom: 0;
           background: linear-gradient(to bottom,
-            color-mix(in oklab, var(--background) 56%, black) 0%,
-            color-mix(in oklab, var(--background) 56%, black) 0%);
-          background: linear-gradient(to bottom,
             transparent,
             color-mix(in oklab, color-mix(in oklab, var(--background) 56%, black) 92%, transparent)); }
         .bs-vignette { position: absolute; inset: 0; pointer-events: none;
