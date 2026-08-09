@@ -1307,9 +1307,7 @@ function Index() {
                           </button>
                         );
                       })
-                    ) : (
-                      <span className="text-xs text-muted-foreground">Nenhum anime neste tier</span>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               );
