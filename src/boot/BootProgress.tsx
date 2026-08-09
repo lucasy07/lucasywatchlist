@@ -71,5 +71,16 @@ export function useBootPacer() {
     return () => clearTimeout(t);
   }, [canExit]);
 
-  return { step, setStep, done: step >= 3 && canExit };
+  // Respiro para ver a chegada na borda direita (conta dentro do MIN_BOOT_MS).
+  useEffect(() => {
+    if (arrived || step < 3) return;
+    if (reduced.current) {
+      setArrived(true);
+      return;
+    }
+    const t = setTimeout(() => setArrived(true), ARRIVAL_HOLD_MS);
+    return () => clearTimeout(t);
+  }, [arrived, step]);
+
+  return { step, setStep, done: step >= 3 && arrived && canExit };
 }

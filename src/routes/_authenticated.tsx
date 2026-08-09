@@ -40,7 +40,7 @@ function AuthenticatedLayout() {
   const value = useMemo(() => ({ step, setStep }), [step, setStep]);
 
   if (loading || !session) {
-    return <BootSplash progress={1 / 3} label="restaurando sessão" />;
+    return <BootSplash progress={0} label="restaurando sessão" />;
   }
 
   return (
