@@ -150,7 +150,7 @@ export function BootSplash({ progress, label }: BootSplashProps) {
     const t = setTimeout(() => {
       setDiving(false);
       setRipple((r) => r + 1);
-    }, 450);
+    }, 850);
     return () => clearTimeout(t);
   }, [clamped]);
 
@@ -314,7 +314,7 @@ export function BootSplash({ progress, label }: BootSplashProps) {
         className="absolute left-0 top-0 h-full"
         style={{
           width: `${clamped * 100}%`,
-          transition: "width 700ms cubic-bezier(.22,.8,.28,1)",
+          transition: "width 800ms cubic-bezier(.22,.8,.28,1)",
         }}
       >
         {/* linha */}
