@@ -6,87 +6,38 @@ type BootSplashProps = {
 };
 
 const STARS = [
-  { left: "8%", top: "12%", delay: "0s" },
-  { left: "17%", top: "26%", delay: "1.2s" },
-  { left: "29%", top: "8%", delay: "2.4s" },
-  { left: "38%", top: "20%", delay: "0.6s" },
-  { left: "52%", top: "10%", delay: "3.1s" },
-  { left: "61%", top: "24%", delay: "1.8s" },
-  { left: "73%", top: "6%", delay: "2.7s" },
-  { left: "88%", top: "18%", delay: "0.9s" },
-  { left: "94%", top: "30%", delay: "3.6s" },
+  { left: "8%", top: "14%", delay: "0s" },
+  { left: "17%", top: "28%", delay: "1.2s" },
+  { left: "26%", top: "9%", delay: "2.4s" },
+  { left: "37%", top: "22%", delay: ".6s" },
+  { left: "45%", top: "7%", delay: "3s" },
+  { left: "54%", top: "31%", delay: "1.8s" },
+  { left: "63%", top: "16%", delay: "2.1s" },
+  { left: "78%", top: "33%", delay: ".9s" },
+  { left: "91%", top: "20%", delay: "2.7s" },
 ];
 
 const WAVE_1 = "M0 15 q15 -6 30 0" + " t30 0".repeat(43);
 const WAVE_2 = "M0 20 q20 -7 40 0" + " t40 0".repeat(33);
 
-function CardDebris({ big = false }: { big?: boolean }) {
+function MiniCard({ big = false }: { big?: boolean }) {
   return (
-    <div
-      style={{
-        width: big ? "66px" : "54px",
-        borderRadius: "5px",
-        background: "var(--card)",
-        border: "1px solid var(--border)",
-        paddingBottom: "6px",
-      }}
-    >
-      <div
-        style={{
-          height: big ? "68px" : "56px",
-          background: "var(--card-elevated)",
-          borderRadius: "4px 4px 0 0",
-        }}
-      />
-      <div
-        style={{
-          height: "4px",
-          borderRadius: "2px",
-          background: "var(--card-elevated)",
-          margin: "6px 6px 0",
-        }}
-      />
-      <div
-        style={{
-          height: "4px",
-          borderRadius: "2px",
-          background: "var(--card-elevated)",
-          margin: "6px 6px 0",
-          width: "56%",
-        }}
-      />
+    <div className="bs-mcard" style={big ? { width: "66px" } : undefined}>
+      <div className="bs-cv" style={big ? { height: "68px" } : undefined} />
+      <div className="bs-ln" />
+      <div className="bs-ln bs-ln-s" />
     </div>
   );
 }
 
-function TierDebris({ tiers }: { tiers: string[] }) {
+function TierList({ rows }: { rows: { tier: string; blanks: number }[] }) {
   return (
-    <div
-      style={{
-        padding: "5px",
-        borderRadius: "5px",
-        background: "var(--card)",
-        border: "1px solid var(--border)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "3px",
-      }}
-    >
-      {tiers.map((t, i) => (
-        <div key={t} style={{ display: "flex", gap: "3px" }}>
-          <div
-            style={{ width: "11px", height: "13px", borderRadius: "2px", background: `var(${t})` }}
-          />
-          {Array.from({ length: i === 0 ? 3 : 2 }).map((_, j) => (
-            <div
-              key={j}
-              style={{
-                width: "10px",
-                height: "13px",
-                borderRadius: "2px",
-                background: "var(--card-elevated)",
-              }}
-            />
+    <div className="bs-tl">
+      {rows.map((r) => (
+        <div className="bs-row" key={r.tier}>
+          <i style={{ background: `var(${r.tier})` }} />
+          {Array.from({ length: r.blanks }).map((_, j) => (
+            <b key={j} />
           ))}
         </div>
       ))}
@@ -94,38 +45,55 @@ function TierDebris({ tiers }: { tiers: string[] }) {
   );
 }
 
-function ButtonDebris() {
-  return (
-    <div
-      style={{
-        height: "15px",
-        width: "48px",
-        borderRadius: "999px",
-        background: "var(--gradient-primary)",
-      }}
-    />
-  );
-}
-
-const DEBRIS = [
-  { left: "6%", top: "60%", layer: "near", node: <CardDebris big />, delay: "-1s", drift: "a" },
+const FLOATERS = [
+  {
+    left: "6%",
+    top: "60%",
+    layer: "bs-near",
+    delay: "-1s",
+    node: <MiniCard big />,
+  },
   {
     left: "31%",
     top: "88%",
-    layer: "far",
-    node: <TierDebris tiers={["--tier-s", "--tier-b"]} />,
-    delay: "-3s",
-    drift: "b",
+    layer: "bs-far",
+    delay: "-11s",
+    node: (
+      <TierList
+        rows={[
+          { tier: "--tier-s", blanks: 2 },
+          { tier: "--tier-a", blanks: 3 },
+        ]}
+      />
+    ),
   },
-  { left: "49%", top: "67%", layer: "mid", node: <ButtonDebris />, delay: "-6s", drift: "a" },
-  { left: "69%", top: "56%", layer: "far", node: <CardDebris />, delay: "-8s", drift: "b" },
+  {
+    left: "49%",
+    top: "67%",
+    layer: "bs-mid",
+    delay: "-6s",
+    node: <div className="bs-btn bs-btn-pri" style={{ width: "48px" }} />,
+  },
+  {
+    left: "69%",
+    top: "56%",
+    layer: "bs-far",
+    delay: "-3s",
+    node: <MiniCard />,
+  },
   {
     left: "83%",
     top: "85%",
-    layer: "near",
-    node: <TierDebris tiers={["--tier-a", "--tier-c"]} />,
-    delay: "-11s",
-    drift: "a",
+    layer: "bs-near",
+    delay: "-8s",
+    node: (
+      <TierList
+        rows={[
+          { tier: "--tier-b", blanks: 3 },
+          { tier: "--tier-c", blanks: 2 },
+        ]}
+      />
+    ),
   },
 ];
 
@@ -154,310 +122,184 @@ export function BootSplash({ progress, label }: BootSplashProps) {
     return () => clearTimeout(t);
   }, [clamped]);
 
+  const width = `${clamped * 100}%`;
+
   return (
-    <div role="status" aria-busy="true" className="boot-splash fixed inset-0 overflow-hidden">
+    <div className="bs-stage" role="status" aria-busy="true">
       <span className="sr-only">Carregando</span>
 
       <style>{`
-        .boot-splash {
-          --wl: 46%;
-          --fin-w: 42px;
-          --fin-h: 31px;
-          --moon: 64px;
+        .bs-stage {
+          position: fixed; inset: 0; overflow: hidden;
+          --wl: 46%; --moon: 64px; --fin-w: 42px; --fin-h: 31px; --dz: 1;
+          background: linear-gradient(to bottom,
+            color-mix(in oklab, var(--background) 78%, black) 0%,
+            var(--background) 40%,
+            color-mix(in oklab, var(--background) 92%, black) 56%,
+            color-mix(in oklab, var(--background) 56%, black) 100%);
         }
         @media (max-width: 640px) {
-          .boot-splash { --wl: 42%; --fin-w: 32px; --fin-h: 24px; --moon: 46px; }
+          .bs-stage { --wl: 42%; --moon: 44px; --fin-w: 32px; --fin-h: 24px; --dz: .72; }
         }
-        @media (max-aspect-ratio: 3/5) {
-          .boot-splash { --wl: 40%; }
-        }
-        @keyframes bs-twinkle {
-          0%, 100% { opacity: .18; }
-          50% { opacity: .6; }
-        }
-        @keyframes bs-shimmer {
-          0%, 100% { transform: translateX(50%) scaleX(1); opacity: .75; }
-          50% { transform: translateX(50%) scaleX(1.3); opacity: 1; }
-        }
-        @keyframes bs-drift-a {
-          0%, 100% { transform: translateY(0) rotate(-7deg); }
-          50% { transform: translateY(-14px) rotate(-3deg); }
-        }
-        @keyframes bs-drift-b {
-          0%, 100% { transform: translateY(0) rotate(6deg); }
-          50% { transform: translateY(-18px) rotate(2deg); }
-        }
+        @media (max-aspect-ratio: 3/5) { .bs-stage { --wl: 40%; } }
+
+        .bs-star { position: absolute; width: 2px; height: 2px; border-radius: 50%;
+          background: var(--foreground); opacity: .35; animation: bs-tw 4s ease-in-out infinite; }
+        .bs-moon { position: absolute; right: 14%; top: 12%; width: var(--moon); height: var(--moon);
+          border-radius: 50%; background: color-mix(in oklab, var(--foreground) 90%, transparent);
+          box-shadow: 0 0 40px color-mix(in oklab, var(--foreground) 20%, transparent),
+                      0 0 120px color-mix(in oklab, var(--accent) 16%, transparent); }
+        .bs-moonRef { position: absolute; right: 14%; top: var(--wl); width: calc(var(--moon) * .8);
+          height: 34%; transform: translateX(6px); filter: blur(5px);
+          background: linear-gradient(to bottom,
+            color-mix(in oklab, var(--foreground) 22%, transparent),
+            color-mix(in oklab, var(--foreground) 0%, transparent));
+          animation: bs-shimmer 6s ease-in-out infinite; }
+
+        .bs-depth { position: absolute; left: 0; right: 0; top: var(--wl); bottom: 0;
+          background: linear-gradient(to bottom,
+            color-mix(in oklab, var(--accent) 10%, transparent),
+            color-mix(in oklab, var(--accent) 0%, transparent) 55%); }
+        .bs-silt { position: absolute; left: 0; right: 0; top: 74%; bottom: 0;
+          background: linear-gradient(to bottom,
+            transparent,
+            color-mix(in oklab, color-mix(in oklab, var(--background) 56%, black) 92%, transparent)); }
+        .bs-vignette { position: absolute; inset: 0; pointer-events: none;
+          background: radial-gradient(ellipse at 50% var(--wl), transparent 40%,
+            color-mix(in oklab, black 50%, transparent) 100%); }
+
+        .bs-floaters { position: absolute; inset: 0; transform: scale(var(--dz)); transform-origin: 50% var(--wl); }
+        .bs-f { position: absolute; }
+        .bs-far { opacity: .20; filter: blur(2.4px); animation: bs-bobA 17s ease-in-out infinite; }
+        .bs-mid { opacity: .34; filter: blur(1.1px); animation: bs-bobB 13s ease-in-out infinite; }
+        .bs-near { opacity: .50; animation: bs-bobA 10s ease-in-out infinite; }
+
+        .bs-mcard { width: 54px; border-radius: 5px; background: var(--card);
+          border: 1px solid var(--border); overflow: hidden; padding-bottom: 6px; }
+        .bs-cv { height: 56px; background: var(--card-elevated); }
+        .bs-ln { height: 4px; margin: 6px 6px 0; border-radius: 2px; background: var(--card-elevated); }
+        .bs-ln-s { width: 56%; }
+
+        .bs-tl { display: flex; flex-direction: column; gap: 3px; padding: 5px; border-radius: 5px;
+          background: var(--card); border: 1px solid var(--border); }
+        .bs-row { display: flex; gap: 3px; align-items: center; }
+        .bs-row i { width: 11px; height: 13px; border-radius: 2px; display: block; }
+        .bs-row b { width: 10px; height: 13px; border-radius: 2px; background: var(--card-elevated); display: block; }
+
+        .bs-btn { height: 15px; border-radius: 999px; background: var(--card); border: 1px solid var(--border); }
+        .bs-btn-pri { border: 0; background: linear-gradient(135deg, var(--primary), var(--primary-glow)); }
+
+        .bs-wakeWrap, .bs-finWrap { position: absolute; left: 0; top: 0; height: 100%;
+          transition: width 800ms cubic-bezier(.22,.8,.28,1); }
+        .bs-wake { position: absolute; left: 0; right: 0; top: var(--wl); height: 2px; border-radius: 999px;
+          background: linear-gradient(to right,
+            color-mix(in oklab, var(--primary) 0%, transparent),
+            color-mix(in oklab, var(--primary) 32%, transparent) 40%,
+            var(--primary-glow)); }
+        .bs-vee { position: absolute; right: 2px; top: calc(var(--wl) - 22px); width: 180px; height: 46px;
+          background: linear-gradient(to left,
+            color-mix(in oklab, var(--primary-glow) 26%, transparent),
+            color-mix(in oklab, var(--primary-glow) 0%, transparent));
+          clip-path: polygon(100% 50%, 0 0, 0 6%, 94% 50%, 0 94%, 0 100%); }
+        .bs-waves { position: absolute; left: 0; top: calc(var(--wl) - 14px); width: 100%; height: 30px; overflow: hidden; }
+        .bs-waves svg { position: absolute; top: 0; left: 0; width: 200%; height: 30px; }
+        .bs-w1 { animation: bs-drift 9s linear infinite; color: var(--border); opacity: .9; }
+        .bs-w2 { animation: bs-drift 15s linear infinite; color: var(--accent); opacity: .22; }
+
+        .bs-fin { position: absolute; right: -8px; top: calc(var(--wl) - var(--fin-h));
+          width: var(--fin-w); height: var(--fin-h); color: var(--primary);
+          transition: opacity 380ms ease, transform 380ms ease; }
+        .bs-fin svg { display: block; width: 100%; height: 100%;
+          filter: drop-shadow(0 0 10px color-mix(in oklab, var(--primary) 35%, transparent)); }
+        .bs-bob { animation: bs-bob 1.6s ease-in-out infinite; }
+        .bs-ripple { position: absolute; right: -30px; top: calc(var(--wl) - 9px); width: 86px; height: 22px;
+          border-radius: 50%; border: 1px solid color-mix(in oklab, var(--primary-glow) 50%, transparent);
+          animation: bs-rippleout 700ms ease-out forwards; }
+
+        .bs-steps { position: absolute; left: 0; right: 0; bottom: 76px; height: 20px; text-align: center; }
+        .bs-steps span { position: absolute; left: 0; right: 0; font-size: 13px; letter-spacing: .04em;
+          color: var(--muted-foreground); animation: bs-fadein 300ms ease-out; }
+
+        @keyframes bs-bob { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-2px) rotate(-3deg); } }
+        @keyframes bs-bobA { 0%,100% { transform: translateY(0) rotate(-7deg); } 50% { transform: translateY(-14px) rotate(-3deg); } }
+        @keyframes bs-bobB { 0%,100% { transform: translateY(0) rotate(6deg); } 50% { transform: translateY(-18px) rotate(2deg); } }
         @keyframes bs-drift { to { transform: translateX(-50%); } }
-        @keyframes bs-finbob {
-          0%, 100% { transform: translateY(2px) rotate(-3deg); }
-          50% { transform: translateY(-2px) rotate(0deg); }
+        @keyframes bs-tw { 0%,100% { opacity: .18; } 50% { opacity: .6; } }
+        @keyframes bs-shimmer {
+          0%,100% { opacity: .75; transform: translateX(6px) scaleX(1); }
+          50% { opacity: 1; transform: translateX(6px) scaleX(1.3); }
         }
-        @keyframes bs-ripple {
-          from { transform: scale(.5); opacity: .8; }
-          to { transform: scale(1.6); opacity: 0; }
-        }
-        @keyframes bs-fadein {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
+        @keyframes bs-rippleout { from { transform: scale(.5); opacity: .8; } to { transform: scale(1.6); opacity: 0; } }
+        @keyframes bs-fadein { from { opacity: 0; } to { opacity: 1; } }
+
         @media (prefers-reduced-motion: reduce) {
-          .boot-splash *,
-          .boot-splash *::before,
-          .boot-splash *::after { animation: none !important; transition: none !important; }
+          .bs-wakeWrap, .bs-finWrap, .bs-fin { transition: none; }
+          .bs-fin, .bs-ripple, .bs-bob, .bs-w1, .bs-w2, .bs-star, .bs-moonRef,
+          .bs-far, .bs-mid, .bs-near, .bs-steps span { animation: none; }
+          .bs-ripple { opacity: 0; }
         }
       `}</style>
 
-      {/* 1. Fundo */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to bottom, color-mix(in oklab, var(--background) 88%, black) 0%, var(--background) 38%, color-mix(in oklab, var(--background) 70%, black) 100%)",
-        }}
-      />
-
-      {/* 2. Céu */}
       {STARS.map((s) => (
-        <div
+        <span
           key={s.left + s.top}
-          className="absolute rounded-full"
-          style={{
-            left: s.left,
-            top: s.top,
-            width: "2px",
-            height: "2px",
-            background: "color-mix(in srgb, var(--foreground) 70%, transparent)",
-            animation: "bs-twinkle 4s ease-in-out infinite",
-            animationDelay: s.delay,
-          }}
+          className="bs-star"
+          style={{ left: s.left, top: s.top, animationDelay: s.delay }}
         />
       ))}
-      <div
-        className="absolute rounded-full"
-        style={{
-          right: "14%",
-          top: "9%",
-          width: "var(--moon)",
-          height: "var(--moon)",
-          background: "color-mix(in srgb, var(--foreground) 92%, transparent)",
-          boxShadow:
-            "0 0 60px 18px color-mix(in srgb, var(--accent) 26%, transparent), 0 0 140px 40px color-mix(in srgb, var(--accent) 12%, transparent)",
-        }}
-      />
+      <div className="bs-moon" />
+      <div className="bs-moonRef" />
 
-      {/* 3. Reflexo da lua */}
-      <div
-        className="absolute"
-        style={{
-          right: "14%",
-          top: "var(--wl)",
-          width: "calc(var(--moon) * .8)",
-          height: "34%",
-          transform: "translateX(50%)",
-          filter: "blur(5px)",
-          background:
-            "linear-gradient(to bottom, color-mix(in srgb, var(--foreground) 26%, transparent), transparent)",
-          animation: "bs-shimmer 6s ease-in-out infinite",
-        }}
-      />
+      <div className="bs-depth" />
 
-      {/* 4. Profundidade */}
-      <div
-        className="absolute inset-x-0"
-        style={{
-          top: "var(--wl)",
-          bottom: 0,
-          background:
-            "linear-gradient(to bottom, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%)",
-        }}
-      />
-      {/* sedimento */}
-      <div
-        className="absolute inset-x-0"
-        style={{
-          top: "74%",
-          bottom: 0,
-          background:
-            "linear-gradient(to bottom, transparent, color-mix(in oklab, var(--background) 8%, black) 100%)",
-          opacity: 0.92,
-        }}
-      />
-
-      {/* 5. Destroços */}
-      {DEBRIS.map((d) => {
-        const cfg =
-          d.layer === "far"
-            ? { opacity: 0.2, blur: "blur(2.4px)", dur: "17s" }
-            : d.layer === "mid"
-              ? { opacity: 0.34, blur: "blur(1.1px)", dur: "13s" }
-              : { opacity: 0.5, blur: "none", dur: "10s" };
-        return (
+      <div className="bs-floaters">
+        {FLOATERS.map((f) => (
           <div
-            key={d.left + d.top}
-            className="absolute"
-            style={{
-              left: d.left,
-              top: d.top,
-              opacity: cfg.opacity,
-              filter: cfg.blur,
-              animation: `bs-drift-${d.drift} ${cfg.dur} ease-in-out infinite`,
-              animationDelay: d.delay,
-            }}
+            key={f.left + f.top}
+            className={`bs-f ${f.layer}`}
+            style={{ left: f.left, top: f.top, animationDelay: f.delay }}
           >
-            {d.node}
+            {f.node}
           </div>
-        );
-      })}
+        ))}
+      </div>
 
-      {/* 6. Rastro + nadadeira */}
-      <div
-        className="absolute left-0 top-0 h-full"
-        style={{
-          width: `${clamped * 100}%`,
-          transition: "width 800ms cubic-bezier(.22,.8,.28,1)",
-        }}
-      >
-        {/* linha */}
-        <div
-          className="absolute"
-          style={{
-            left: 0,
-            right: 0,
-            top: "var(--wl)",
-            height: "2px",
-            background:
-              "linear-gradient(to right, transparent, color-mix(in srgb, var(--primary-glow) 85%, transparent))",
-          }}
-        />
-        {/* esteira em V */}
-        <div
-          className="absolute"
-          style={{
-            right: "2px",
-            top: "calc(var(--wl) - 22px)",
-            width: "180px",
-            height: "46px",
-            clipPath: "polygon(100% 50%, 0 0, 0 6%, 94% 50%, 0 94%, 0 100%)",
-            background:
-              "linear-gradient(to left, color-mix(in srgb, var(--primary-glow) 26%, transparent), transparent)",
-          }}
-        />
+      <div className="bs-silt" />
 
-        {/* nadadeira */}
+      <div className="bs-wakeWrap" style={{ width }}>
+        <div className="bs-wake" />
+        <div className="bs-vee" />
+      </div>
+
+      <div className="bs-waves">
+        <svg viewBox="0 0 1200 30" preserveAspectRatio="none" aria-hidden="true">
+          <path className="bs-w1" d={WAVE_1} fill="none" stroke="currentColor" strokeWidth="1.5" />
+          <path className="bs-w2" d={WAVE_2} fill="none" stroke="currentColor" strokeWidth="1.5" />
+        </svg>
+      </div>
+
+      <div className="bs-finWrap" style={{ width }}>
+        {ripple > 0 && !diving && <div key={ripple} className="bs-ripple" />}
         <div
-          className="absolute"
+          className="bs-fin"
           style={{
-            right: "-8px",
-            top: "calc(var(--wl) - var(--fin-h))",
-            width: "var(--fin-w)",
-            height: "var(--fin-h)",
-            transform: diving ? "translateY(22px)" : "translateY(0)",
             opacity: diving ? 0 : 1,
-            transition: "opacity 380ms ease, transform 380ms ease",
+            transform: diving ? "translateY(22px)" : "translateY(0)",
           }}
         >
-          <div style={{ animation: "bs-finbob 1.6s ease-in-out infinite" }}>
-            <svg
-              viewBox="0 0 26 19"
-              width="100%"
-              height="100%"
-              fill="currentColor"
-              aria-hidden="true"
-              className="text-primary"
-              style={{
-                display: "block",
-                filter: "drop-shadow(0 2px 8px color-mix(in srgb, var(--primary) 55%, transparent))",
-              }}
-            >
-              <path d="M25 19C21 11 15 4 1 0c4 6 8 12 8 19z" />
+          <div className="bs-bob">
+            <svg viewBox="0 0 26 19" aria-hidden="true">
+              <path fill="currentColor" d="M25 19C21 11 15 4 1 0c4 6 8 12 8 19z" />
             </svg>
           </div>
         </div>
-
-        {/* onda circular */}
-        {ripple > 0 && !diving && (
-          <div
-            key={ripple}
-            className="motion-reduce:hidden absolute"
-            style={{
-              right: "-30px",
-              top: "calc(var(--wl) - 9px)",
-              width: "86px",
-              height: "22px",
-              borderRadius: "50%",
-              border: "1px solid color-mix(in srgb, var(--primary-glow) 70%, transparent)",
-              animation: "bs-ripple 700ms ease-out forwards",
-            }}
-          />
-        )}
       </div>
 
-      {/* 7. Linha d'água — duas linhas finas */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          width: "100%",
-          height: "30px",
-          overflow: "hidden",
-          top: "calc(var(--wl) - 14px)",
-        }}
-      >
-        <svg
-          style={{
-            width: "200%",
-            height: "30px",
-            color: "var(--border)",
-            opacity: 0.9,
-            animation: "bs-drift 9s linear infinite",
-            position: "absolute",
-            left: 0,
-            top: 0,
-          }}
-          viewBox="0 0 1200 30"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <path d={WAVE_1} fill="none" stroke="currentColor" strokeWidth="1.5" />
-        </svg>
-        <svg
-          style={{
-            width: "200%",
-            height: "30px",
-            color: "var(--accent)",
-            opacity: 0.22,
-            animation: "bs-drift 15s linear infinite",
-            position: "absolute",
-            left: 0,
-            top: 0,
-          }}
-          viewBox="0 0 1200 30"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <path d={WAVE_2} fill="none" stroke="currentColor" strokeWidth="1.5" />
-        </svg>
+      <div className="bs-vignette" />
+
+      <div className="bs-steps">
+        <span key={label}>{label}</span>
       </div>
-
-      {/* 8. Vinheta */}
-      <div
-        className="absolute inset-0"
-        style={{
-          pointerEvents: "none",
-          background:
-            "radial-gradient(ellipse at 50% var(--wl), transparent 40%, color-mix(in oklab, var(--background) 0%, black) 100%)",
-          opacity: 0.5,
-        }}
-      />
-
-      {/* 9. Texto */}
-      <p
-        key={label}
-        className="absolute inset-x-0 text-center text-sm text-muted-foreground"
-        style={{ bottom: "76px", animation: "bs-fadein 300ms ease-out" }}
-      >
-        {label}
-      </p>
     </div>
   );
 }
