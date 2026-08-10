@@ -78,6 +78,7 @@ import {
   updateAnime,
   updateAnimeMeta,
   updateTier,
+  updateTierPositions,
   setWatched,
   importLegacyIfNeeded,
   uid,
