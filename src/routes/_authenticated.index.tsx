@@ -1357,9 +1357,9 @@ function Index() {
             <DndContext
               sensors={tierSensors}
               collisionDetection={closestCenter}
-              onDragStart={(e) => setDraggingAnimeId(String(e.active.id))}
+              onDragStart={(e: DragStartEvent) => setDraggingAnimeId(String(e.active.id))}
               onDragCancel={() => setDraggingAnimeId(null)}
-              onDragEnd={(e) => {
+              onDragEnd={(e: DragEndEvent) => {
                 setDraggingAnimeId(null);
                 const overId = e.over?.id;
                 if (!overId) return;
