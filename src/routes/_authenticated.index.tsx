@@ -79,6 +79,7 @@ import {
   updateAnimeMeta,
   updateTier,
   updateTierPositions,
+  updateLastCheckedAt,
   setWatched,
   importLegacyIfNeeded,
   uid,
@@ -88,6 +89,7 @@ import {
   rankColor,
   formatReleaseLabel,
   formatDateBR,
+  formatLastChecked,
   isExcludedFromAverage,
 } from "@/lib/anime-storage";
 import { useAuth } from "@/auth/AuthProvider";
