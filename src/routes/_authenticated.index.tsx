@@ -1430,11 +1430,17 @@ function Index() {
                 setDraggingAnimeId(null);
                 const overId = e.over?.id;
                 if (!overId) return;
-                const anime = animes.find((a) => a.id === String(e.active.id));
+                const activeId = String(e.active.id);
+                if (String(overId) === activeId) return;
+                const anime = animes.find((a) => a.id === activeId);
                 if (!anime) return;
+                const overAnime = animes.find((a) => a.id === String(overId));
+                if (overAnime) {
+                  void moveAnimeInTierlist(anime.id, overAnime.tier, overAnime.id);
+                  return;
+                }
                 const target = overId === "none" ? null : (String(overId) as Tier);
-                if (anime.tier === target) return;
-                void setAnimeTier(anime.id, target);
+                void moveAnimeInTierlist(anime.id, target, null);
               }}
             >
             <div className="overflow-hidden rounded-xl border border-border/60">
@@ -1445,6 +1451,7 @@ function Index() {
                 <TierDropRow
                   key={t}
                   id={t}
+                  items={items.map((a) => a.id)}
                   className={`border-b border-border/60 last:border-b-0 ${hasItems ? "min-h-32" : "min-h-20"}`}
                   label={
                     <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
@@ -1462,6 +1469,7 @@ function Index() {
             {ranked.some((a) => a.tier === null && a.watched) && (
               <TierDropRow
                 id="none"
+                items={ranked.filter((a) => a.tier === null && a.watched).map((a) => a.id)}
                 className="min-h-32 border-t border-border/60"
                 label={
                   <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
