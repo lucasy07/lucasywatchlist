@@ -1,4 +1,6 @@
-import { useDraggable, useDroppable } from "@dnd-kit/core";
+import { useDroppable } from "@dnd-kit/core";
+import { SortableContext, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Image as ImageIcon } from "lucide-react";
 import type { Anime } from "@/lib/anime-storage";
 
@@ -36,7 +38,9 @@ export function DraggableCover({
   idx: number;
   onOpen: (id: string) => void;
 }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: anime.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: anime.id,
+  });
   return (
     <button
       ref={setNodeRef}
@@ -49,7 +53,11 @@ export function DraggableCover({
       className={`group relative focus-ring w-20 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none appearance-none border-0 bg-transparent p-0 text-left touch-none ${
         isDragging ? "opacity-40" : ""
       }`}
-      style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
+      style={{
+        animationDelay: `${Math.min(idx, 12) * 30}ms`,
+        transform: CSS.Transform.toString(transform),
+        transition,
+      }}
     >
       <CoverArt anime={anime} />
       <span className="mt-1 line-clamp-2 text-[10px] leading-tight text-muted-foreground sm:hidden">
@@ -61,11 +69,13 @@ export function DraggableCover({
 
 export function TierDropRow({
   id,
+  items,
   children,
   className,
   label,
 }: {
   id: string;
+  items: string[];
   children: React.ReactNode;
   className?: string;
   label: React.ReactNode;
@@ -79,7 +89,9 @@ export function TierDropRow({
           isOver ? "bg-primary/5 ring-1 ring-inset ring-primary/40" : ""
         }`}
       >
-        {children}
+        <SortableContext items={items} strategy={rectSortingStrategy}>
+          {children}
+        </SortableContext>
       </div>
     </div>
   );
