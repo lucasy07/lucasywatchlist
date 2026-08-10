@@ -233,6 +233,15 @@ function Index() {
     type: string | null;
     year: number | null;
   };
+  type UpdatedSeason = {
+    parentId: string;
+    parentName: string;
+    title: string;
+    malId: number;
+    oldScore: number | null;
+    newScore: number | null;
+    filledFields: string[];
+  };
   const [checking, setChecking] = useState(false);
   const [checkingId, setCheckingId] = useState<string | null>(null);
   const [checkProgress, setCheckProgress] = useState<{ current: number; total: number } | null>(null);
@@ -241,6 +250,7 @@ function Index() {
   const [foundUpcoming, setFoundUpcoming] = useState<
     Array<{ parentId: string; parentName: string; title: string; releaseDate: string }>
   >([]);
+  const [foundUpdated, setFoundUpdated] = useState<UpdatedSeason[]>([]);
 
 
   useEffect(() => {
@@ -721,13 +731,53 @@ function Index() {
     }
     const available: FoundSeason[] = [];
     const upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }> = [];
+    const updated: UpdatedSeason[] = [];
     for (let i = 0; i < targets.length; i++) {
       const a = targets[i];
       onProgress?.(i + 1, targets.length);
       try {
         const chain = await buildChain(a.malId!);
+        const seasonsDraft = a.seasons.map((s) => ({ ...s }));
+        let seasonsChanged = false;
         for (const s of chain) {
-          if (existing.has(s.malId)) continue;
+          if (existing.has(s.malId)) {
+            const idx = seasonsDraft.findIndex((x) => x.malId === s.malId);
+            if (idx >= 0) {
+              const cur = seasonsDraft[idx];
+              const next = { ...cur };
+              let changed = false;
+              const filledFields: string[] = [];
+              const oldScore = typeof cur.malScore === "number" ? cur.malScore : null;
+              if (typeof s.malScore === "number" && s.malScore !== oldScore) {
+                next.malScore = s.malScore;
+                changed = true;
+              }
+              if ((cur.year === null || cur.year === undefined) && s.year !== null && s.year !== undefined) {
+                next.year = s.year;
+                changed = true;
+                filledFields.push("year");
+              }
+              if ((cur.type === null || cur.type === undefined) && s.type !== null && s.type !== undefined) {
+                next.type = s.type;
+                changed = true;
+                filledFields.push("type");
+              }
+              if (changed) {
+                seasonsDraft[idx] = next;
+                seasonsChanged = true;
+                updated.push({
+                  parentId: a.id,
+                  parentName: a.name,
+                  title: cur.name,
+                  malId: s.malId,
+                  oldScore,
+                  newScore: typeof next.malScore === "number" ? next.malScore : null,
+                  filledFields,
+                });
+              }
+            }
+            continue;
+          }
           existing.add(s.malId);
           const notAired =
             typeof s.status === "string" && s.status.toLowerCase().includes("not yet");
@@ -784,11 +834,22 @@ function Index() {
             });
           }
         }
+        if (seasonsChanged) {
+          try {
+            await updateSeasons(a.id, seasonsDraft);
+            setAnimes((prev) =>
+              prev.map((x) => (x.id === a.id ? { ...x, seasons: seasonsDraft } : x)),
+            );
+            a.seasons = seasonsDraft;
+          } catch (err) {
+            console.error("failed to persist season updates for", a.name, err);
+          }
+        }
       } catch (err) {
         console.error("check chain failed for", a.name, err);
       }
     }
-    return { available, upcomingSaved };
+    return { available, upcomingSaved, updated };
   }
 
   async function checkNewSeasons() {
@@ -800,7 +861,7 @@ function Index() {
     }
     setChecking(true);
     setCheckProgress({ current: 0, total: targets.length });
-    let result: { available: FoundSeason[]; upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }> };
+    let result: { available: FoundSeason[]; upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }>; updated: UpdatedSeason[] };
     try {
       result = await scanTargets(targets, (current, total) =>
         setCheckProgress({ current, total }),
@@ -809,12 +870,17 @@ function Index() {
       setChecking(false);
       setCheckProgress(null);
     }
-    if (result.available.length === 0 && result.upcomingSaved.length === 0) {
+    if (
+      result.available.length === 0 &&
+      result.upcomingSaved.length === 0 &&
+      result.updated.length === 0
+    ) {
       toast("Nenhuma temporada nova encontrada");
       return;
     }
     setFoundAvailable(result.available);
     setFoundUpcoming(result.upcomingSaved);
+    setFoundUpdated(result.updated);
     setCheckDialogOpen(true);
   }
 
@@ -827,18 +893,23 @@ function Index() {
       return;
     }
     setCheckingId(animeId);
-    let result: { available: FoundSeason[]; upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }> };
+    let result: { available: FoundSeason[]; upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }>; updated: UpdatedSeason[] };
     try {
       result = await scanTargets([anime]);
     } finally {
       setCheckingId(null);
     }
-    if (result.available.length === 0 && result.upcomingSaved.length === 0) {
+    if (
+      result.available.length === 0 &&
+      result.upcomingSaved.length === 0 &&
+      result.updated.length === 0
+    ) {
       toast("Nenhuma temporada nova encontrada");
       return;
     }
     setFoundAvailable(result.available);
     setFoundUpcoming(result.upcomingSaved);
+    setFoundUpdated(result.updated);
     setCheckDialogOpen(true);
   }
 
@@ -2077,6 +2148,36 @@ function Index() {
                         <p className="truncate text-[11px] text-muted-foreground">
                           em {u.parentName} • {formatDateBR(u.releaseDate)} •{" "}
                           {formatReleaseLabel(u.releaseDate)}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+            <section className="grid gap-2">
+              <h3 className="font-display text-xs uppercase tracking-widest text-muted-foreground">
+                Notas atualizadas
+              </h3>
+              {foundUpdated.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
+                  Nada atualizado.
+                </p>
+              ) : (
+                <ul className="grid gap-2">
+                  {foundUpdated.map((u) => (
+                    <li
+                      key={`${u.parentId}-${u.malId}`}
+                      className="overflow-hidden rounded-lg border border-border/60 bg-card-elevated p-2 min-w-0"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="line-clamp-2 text-sm font-medium">{u.title}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">
+                          em {u.parentName} •{" "}
+                          {typeof u.oldScore === "number" ? u.oldScore.toFixed(2) : "—"} →{" "}
+                          {typeof u.newScore === "number" ? u.newScore.toFixed(2) : "—"}
+                          {u.filledFields.includes("year") ? " • ano preenchido" : ""}
+                          {u.filledFields.includes("type") ? " • tipo preenchido" : ""}
                         </p>
                       </div>
                     </li>
