@@ -208,10 +208,12 @@ export function BootSplash({ progress, label }: BootSplashProps) {
 
         .bs-fin { position: absolute; right: -8px; top: calc(var(--wl) - var(--fin-h));
           width: var(--fin-w); height: var(--fin-h); color: var(--primary);
-          transition: opacity 380ms ease, transform 380ms ease; }
+          transition: opacity 300ms ease-out, transform 420ms cubic-bezier(.16,.9,.3,1); }
+        .bs-fin[data-diving="true"] {
+          transition: opacity 260ms ease-in, transform 450ms cubic-bezier(.55,0,.85,.35); }
         .bs-fin svg { display: block; width: 100%; height: 100%;
           filter: drop-shadow(0 0 10px color-mix(in oklab, var(--primary) 35%, transparent)); }
-        .bs-bob { animation: bs-bob 1.6s ease-in-out infinite; }
+        .bs-bob { animation: bs-bob 1.6s ease-in-out infinite; transform-origin: 50% 100%; }
         .bs-ripple { position: absolute; right: -30px; top: calc(var(--wl) - 9px); width: 86px; height: 22px;
           border-radius: 50%; border: 1px solid color-mix(in oklab, var(--primary-glow) 50%, transparent);
           animation: bs-rippleout 700ms ease-out forwards; }
