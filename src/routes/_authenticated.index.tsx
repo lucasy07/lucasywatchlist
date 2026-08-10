@@ -731,13 +731,53 @@ function Index() {
     }
     const available: FoundSeason[] = [];
     const upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }> = [];
+    const updated: UpdatedSeason[] = [];
     for (let i = 0; i < targets.length; i++) {
       const a = targets[i];
       onProgress?.(i + 1, targets.length);
       try {
         const chain = await buildChain(a.malId!);
+        let seasonsDraft = a.seasons.map((s) => ({ ...s }));
+        let seasonsChanged = false;
         for (const s of chain) {
-          if (existing.has(s.malId)) continue;
+          if (existing.has(s.malId)) {
+            const idx = seasonsDraft.findIndex((x) => x.malId === s.malId);
+            if (idx >= 0) {
+              const cur = seasonsDraft[idx];
+              const next = { ...cur };
+              let changed = false;
+              const filledFields: string[] = [];
+              const oldScore = typeof cur.malScore === "number" ? cur.malScore : null;
+              if (typeof s.malScore === "number" && s.malScore !== oldScore) {
+                next.malScore = s.malScore;
+                changed = true;
+              }
+              if ((cur.year === null || cur.year === undefined) && s.year !== null && s.year !== undefined) {
+                next.year = s.year;
+                changed = true;
+                filledFields.push("year");
+              }
+              if ((cur.type === null || cur.type === undefined) && s.type !== null && s.type !== undefined) {
+                next.type = s.type;
+                changed = true;
+                filledFields.push("type");
+              }
+              if (changed) {
+                seasonsDraft[idx] = next;
+                seasonsChanged = true;
+                updated.push({
+                  parentId: a.id,
+                  parentName: a.name,
+                  title: cur.name,
+                  malId: s.malId,
+                  oldScore,
+                  newScore: typeof next.malScore === "number" ? next.malScore : null,
+                  filledFields,
+                });
+              }
+            }
+            continue;
+          }
           existing.add(s.malId);
           const notAired =
             typeof s.status === "string" && s.status.toLowerCase().includes("not yet");
