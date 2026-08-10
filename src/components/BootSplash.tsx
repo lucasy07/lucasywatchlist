@@ -118,7 +118,7 @@ export function BootSplash({ progress, label }: BootSplashProps) {
     const t = setTimeout(() => {
       setDiving(false);
       setRipple((r) => r + 1);
-    }, 850);
+    }, 450);
     return () => clearTimeout(t);
   }, [clamped]);
 
