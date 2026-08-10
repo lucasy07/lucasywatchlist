@@ -1622,17 +1622,17 @@ function Index() {
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-col items-end gap-1">
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                        MAL
+                      </span>
                       <div className="flex items-baseline gap-1">
                         <span className={`font-display text-2xl font-bold tabular-nums sm:text-3xl ${primaryColor}`}>
                           {primaryValue}
                         </span>
                         <span className="text-[10px] text-muted-foreground">/10</span>
                       </div>
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                        MAL
-                      </span>
-                      <Badge variant="outline" className="gap-1 border-primary/30 px-1.5 py-0 text-[10px] text-foreground/80">
+                      <Badge variant="outline" className="mt-1 gap-1 border-primary/30 px-1.5 py-0 text-[10px] text-foreground/80">
                         <span className={`font-display font-bold ${tierColor(anime.tier)}`}>
                           {anime.tier ?? "—"}
                         </span>
