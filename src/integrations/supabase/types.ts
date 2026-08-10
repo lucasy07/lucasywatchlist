@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          last_checked_at: string | null
           mal_id: number | null
           mal_score: number | null
           name: string
@@ -36,6 +37,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          last_checked_at?: string | null
           mal_id?: number | null
           mal_score?: number | null
           name: string
@@ -52,6 +54,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          last_checked_at?: string | null
           mal_id?: number | null
           mal_score?: number | null
           name?: string

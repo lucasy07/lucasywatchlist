@@ -79,6 +79,7 @@ import {
   updateAnimeMeta,
   updateTier,
   updateTierPositions,
+  updateLastCheckedAt,
   setWatched,
   importLegacyIfNeeded,
   uid,
@@ -88,6 +89,7 @@ import {
   rankColor,
   formatReleaseLabel,
   formatDateBR,
+  formatLastChecked,
   isExcludedFromAverage,
 } from "@/lib/anime-storage";
 import { useAuth } from "@/auth/AuthProvider";
@@ -352,6 +354,14 @@ function Index() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated]);
+
+  const lastCheckedGlobal = useMemo(() => {
+    let latest: string | null = null;
+    for (const a of animes) {
+      if (a.lastCheckedAt && (latest === null || a.lastCheckedAt > latest)) latest = a.lastCheckedAt;
+    }
+    return latest;
+  }, [animes]);
 
   const ranked = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -937,6 +947,15 @@ function Index() {
             console.error("failed to persist season updates for", a.name, err);
           }
         }
+        try {
+          const iso = new Date().toISOString();
+          await updateLastCheckedAt(a.id, iso);
+          setAnimes((prev) =>
+            prev.map((x) => (x.id === a.id ? { ...x, lastCheckedAt: iso } : x)),
+          );
+        } catch (err) {
+          console.error("failed to persist last checked for", a.name, err);
+        }
       } catch (err) {
         console.error("check chain failed for", a.name, err);
       }
@@ -1253,22 +1272,29 @@ function Index() {
           className={`mb-4 flex items-center gap-3 ${scoreMode === "gosto" ? "justify-end" : "justify-between"}`}
         >
           {scoreMode !== "gosto" && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={checkNewSeasons}
-              disabled={checking || animes.length === 0}
-              className="h-8 gap-1.5 text-xs"
-              aria-label="Verificar novas temporadas"
-              title="Verificar novas temporadas"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${checking ? "animate-spin" : ""}`} />
-              {checking && checkProgress ? (
-                `Verificando ${checkProgress.current}/${checkProgress.total}`
-              ) : (
-                <span className="hidden sm:inline">Verificar novas temporadas</span>
+            <div className="flex min-w-0 items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={checkNewSeasons}
+                disabled={checking || animes.length === 0}
+                className="h-8 gap-1.5 text-xs"
+                aria-label="Verificar novas temporadas"
+                title="Verificar novas temporadas"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${checking ? "animate-spin" : ""}`} />
+                {checking && checkProgress ? (
+                  `Verificando ${checkProgress.current}/${checkProgress.total}`
+                ) : (
+                  <span className="hidden sm:inline">Verificar novas temporadas</span>
+                )}
+              </Button>
+              {!checking && (
+                <span className="truncate text-[11px] text-muted-foreground">
+                  {formatLastChecked(lastCheckedGlobal)}
+                </span>
               )}
-            </Button>
+            </div>
           )}
           <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
             {filtersActive || search.trim() !== ""
@@ -2376,14 +2402,19 @@ function Index() {
           )}
           <DialogFooter>
             {scoreMode !== "gosto" && (
-              <Button
-                variant="outline"
-                onClick={() => detailAnimeId && checkNewSeasonsForAnime(detailAnimeId)}
-                disabled={checking || checkingId !== null || !detailAnime?.malId}
-              >
-                <RefreshCw className={`mr-1 h-4 w-4 ${detailAnimeId && checkingId === detailAnimeId ? "animate-spin" : ""}`} />
-                Verificar novas temporadas
-              </Button>
+              <div className="flex flex-1 flex-wrap items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => detailAnimeId && checkNewSeasonsForAnime(detailAnimeId)}
+                  disabled={checking || checkingId !== null || !detailAnime?.malId}
+                >
+                  <RefreshCw className={`mr-1 h-4 w-4 ${detailAnimeId && checkingId === detailAnimeId ? "animate-spin" : ""}`} />
+                  Verificar novas temporadas
+                </Button>
+                <span className="text-[11px] text-muted-foreground">
+                  {formatLastChecked(detailAnime?.lastCheckedAt)}
+                </span>
+              </div>
             )}
             <Button
               onClick={() => {
