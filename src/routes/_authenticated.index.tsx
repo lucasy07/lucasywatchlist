@@ -2402,14 +2402,20 @@ function Index() {
           )}
           <DialogFooter>
             {scoreMode !== "gosto" && (
-              <Button
-                variant="outline"
-                onClick={() => detailAnimeId && checkNewSeasonsForAnime(detailAnimeId)}
-                disabled={checking || checkingId !== null || !detailAnime?.malId}
-              >
-                <RefreshCw className={`mr-1 h-4 w-4 ${detailAnimeId && checkingId === detailAnimeId ? "animate-spin" : ""}`} />
-                Verificar novas temporadas
-              </Button>
+              <div className="flex flex-1 flex-wrap items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => detailAnimeId && checkNewSeasonsForAnime(detailAnimeId)}
+                  disabled={checking || checkingId !== null || !detailAnime?.malId}
+                >
+                  <RefreshCw className={`mr-1 h-4 w-4 ${detailAnimeId && checkingId === detailAnimeId ? "animate-spin" : ""}`} />
+                  Verificar novas temporadas
+                </Button>
+                <span className="text-[11px] text-muted-foreground">
+                  {formatLastChecked(detailAnime?.lastCheckedAt)}
+                </span>
+              </div>
+            )}
             )}
             <Button
               onClick={() => {
