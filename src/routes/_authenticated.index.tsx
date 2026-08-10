@@ -241,6 +241,7 @@ function Index() {
   const [foundUpcoming, setFoundUpcoming] = useState<
     Array<{ parentId: string; parentName: string; title: string; releaseDate: string }>
   >([]);
+  const [foundUpdated, setFoundUpdated] = useState<UpdatedSeason[]>([]);
 
 
   useEffect(() => {
