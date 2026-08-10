@@ -1,0 +1,1 @@
+ALTER TABLE public.animes ADD COLUMN IF NOT EXISTS tier_position integer;

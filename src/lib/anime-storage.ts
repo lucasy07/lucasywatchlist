@@ -55,7 +55,10 @@ export type Anime = {
   imageUrl?: string | null;
   malScore?: number | null;
   tier: Tier | null;
+  /** Manual position inside the tier row. null = unpositioned (falls back to created_at order). */
+  tierPosition: number | null;
 };
+
 
 /** Legacy localStorage key — used only for one-time auto-import. */
 export const LEGACY_STORAGE_KEY = "anime-ranker:v1";
@@ -73,6 +76,7 @@ type DbRow = {
   image_url: string | null;
   mal_score: number | null;
   tier: string | null;
+  tier_position: number | null;
 };
 
 function rowToAnime(row: DbRow): Anime {
@@ -93,7 +97,9 @@ function rowToAnime(row: DbRow): Anime {
     imageUrl: row.image_url ?? null,
     malScore: row.mal_score ?? null,
     tier,
+    tierPosition: row.tier_position ?? null,
   };
+
 }
 
 
@@ -113,7 +119,7 @@ function readLegacyLocal(): Anime[] {
 export async function fetchAnimes(): Promise<Anime[]> {
   const { data, error } = await supabase
     .from("animes")
-    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier")
+    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier, tier_position")
     .order("created_at", { ascending: true });
   if (error) throw error;
   return (data as DbRow[]).map(rowToAnime);
@@ -165,8 +171,9 @@ export async function createAnime(input: {
       image_url: input.imageUrl ?? null,
       mal_score: input.malScore ?? null,
       tier: null,
+      tier_position: null,
     })
-    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier")
+    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier, tier_position")
     .single();
   if (error) throw error;
   return rowToAnime(data as DbRow);
@@ -174,9 +181,28 @@ export async function createAnime(input: {
 
 
 export async function updateTier(id: string, tier: Tier | null): Promise<void> {
-  const { error } = await supabase.from("animes").update({ tier }).eq("id", id);
+  const { error } = await supabase
+    .from("animes")
+    .update({ tier, tier_position: null })
+    .eq("id", id);
   if (error) throw error;
 }
+
+/** Persist manual positions inside tier rows. One update per entry. */
+export async function updateTierPositions(
+  entries: Array<{ id: string; tierPosition: number | null }>,
+): Promise<void> {
+  await Promise.all(
+    entries.map(async ({ id, tierPosition }) => {
+      const { error } = await supabase
+        .from("animes")
+        .update({ tier_position: tierPosition })
+        .eq("id", id);
+      if (error) throw error;
+    }),
+  );
+}
+
 
 
 export async function setWatched(id: string, watched: boolean): Promise<void> {
