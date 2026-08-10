@@ -57,6 +57,8 @@ export type Anime = {
   tier: Tier | null;
   /** Manual position inside the tier row. null = unpositioned (falls back to created_at order). */
   tierPosition: number | null;
+  /** ISO timestamp of the last new-seasons check. null = never checked. */
+  lastCheckedAt: string | null;
 };
 
 
