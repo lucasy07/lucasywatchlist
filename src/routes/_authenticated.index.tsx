@@ -1186,97 +1186,98 @@ function Index() {
         </div>
 
         {showFilters && (
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-            <Filter className="h-3.5 w-3.5" />
-            Tier
+        <div className="mb-4 flex items-start gap-2">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              <Filter className="h-3.5 w-3.5" />
+              Tier
+            </div>
+            {TIER_ROWS.map((t) => {
+              const active = tierFilter.has(t);
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => toggleTier(t)}
+                  aria-pressed={active}
+                  className={`focus-ring h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-semibold transition-colors ${
+                    active
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {t}
+                </button>
+              );
+            })}
+            <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Tipo
+            </div>
+            {["TV", "Movie", "ONA"].map((t) => {
+              const active = typeFilter.has(t);
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => toggleType(t)}
+                  aria-pressed={active}
+                  className={`focus-ring h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
+                    active
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {t}
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              onClick={() => setSemDadosFilter((v) => !v)}
+              aria-pressed={semDadosFilter}
+              className={`focus-ring ml-2 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
+                semDadosFilter
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Sem dados
+            </button>
+            {scoreMode !== "gosto" && (
+              <>
+                <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Assistidos
+                </div>
+                {([
+                  { v: "todos", label: "Todos" },
+                  { v: "nao", label: "Não assistidos" },
+                  { v: "sim", label: `Assistidos${watchedCount > 0 ? ` (${watchedCount})` : ""}` },
+                ] as const).map((opt) => {
+                  const active = watchedFilter === opt.v;
+                  return (
+                    <button
+                      key={opt.v}
+                      type="button"
+                      onClick={() => setWatchedFilter(opt.v)}
+                      aria-pressed={active}
+                      className={`focus-ring h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
+                        active
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </>
+            )}
           </div>
-          {TIER_ROWS.map((t) => {
-            const active = tierFilter.has(t);
-            return (
-              <button
-                key={t}
-                type="button"
-                onClick={() => toggleTier(t)}
-                aria-pressed={active}
-                className={`focus-ring h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-semibold transition-colors ${
-                  active
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {t}
-              </button>
-            );
-          })}
-          <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-            Tipo
-          </div>
-          {["TV", "Movie", "ONA"].map((t) => {
-            const active = typeFilter.has(t);
-            return (
-              <button
-                key={t}
-                type="button"
-                onClick={() => toggleType(t)}
-                aria-pressed={active}
-                className={`focus-ring h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
-                  active
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {t}
-              </button>
-            );
-          })}
-          <button
-            type="button"
-            onClick={() => setSemDadosFilter((v) => !v)}
-            aria-pressed={semDadosFilter}
-            className={`focus-ring ml-2 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
-              semDadosFilter
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Sem dados
-          </button>
-          {scoreMode !== "gosto" && (
-            <>
-              <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Assistidos
-              </div>
-              {([
-                { v: "todos", label: "Todos" },
-                { v: "nao", label: "Não assistidos" },
-                { v: "sim", label: `Assistidos${watchedCount > 0 ? ` (${watchedCount})` : ""}` },
-              ] as const).map((opt) => {
-                const active = watchedFilter === opt.v;
-                return (
-                  <button
-                    key={opt.v}
-                    type="button"
-                    onClick={() => setWatchedFilter(opt.v)}
-                    aria-pressed={active}
-                    className={`focus-ring h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
-                      active
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                );
-              })}
-            </>
-          )}
           {filtersActive && (
             <button
               type="button"
               onClick={clearFilters}
-              className="focus-ring ml-auto h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border border-border/60 bg-card text-xs font-medium text-muted-foreground transition-colors hover:text-destructive"
+              className="focus-ring shrink-0 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border border-border/60 bg-card text-xs font-medium text-muted-foreground transition-colors hover:text-destructive"
             >
               Limpar
             </button>
