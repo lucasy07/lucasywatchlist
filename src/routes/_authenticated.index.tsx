@@ -2416,7 +2416,6 @@ function Index() {
                 </span>
               </div>
             )}
-            )}
             <Button
               onClick={() => {
                 setDetailOpen(false);
