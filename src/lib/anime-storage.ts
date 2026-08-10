@@ -76,6 +76,7 @@ type DbRow = {
   image_url: string | null;
   mal_score: number | null;
   tier: string | null;
+  tier_position: number | null;
 };
 
 function rowToAnime(row: DbRow): Anime {
@@ -96,7 +97,9 @@ function rowToAnime(row: DbRow): Anime {
     imageUrl: row.image_url ?? null,
     malScore: row.mal_score ?? null,
     tier,
+    tierPosition: row.tier_position ?? null,
   };
+
 }
 
 
