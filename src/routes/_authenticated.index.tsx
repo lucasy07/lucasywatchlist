@@ -78,6 +78,7 @@ import {
   updateAnime,
   updateAnimeMeta,
   updateTier,
+  updateTierPositions,
   setWatched,
   importLegacyIfNeeded,
   uid,
@@ -665,6 +666,65 @@ function Index() {
     setAnimes((p) => p.map((a) => (a.id === animeId ? { ...a, tier, tierPosition: null } : a)));
     try {
       await updateTier(animeId, tier);
+    } catch (err) {
+      console.error(err);
+      toast.error("Falha ao salvar tier");
+      setAnimes(prev);
+    }
+  }
+
+  function tierRowOrdered(list: Anime[], destTier: Tier | null) {
+    return list
+      .filter((a) => a.watched && a.tier === destTier)
+      .map((a, i) => ({ a, i }))
+      .sort((x, y) => {
+        const px = x.a.tierPosition;
+        const py = y.a.tierPosition;
+        if (px !== py) {
+          if (px === null || px === undefined) return 1;
+          if (py === null || py === undefined) return -1;
+          return px - py;
+        }
+        return x.i - y.i;
+      })
+      .map(({ a }) => a);
+  }
+
+  async function moveAnimeInTierlist(
+    animeId: string,
+    destTier: Tier | null,
+    overAnimeId: string | null,
+  ) {
+    const prev = animes;
+    const dragged = prev.find((a) => a.id === animeId);
+    if (!dragged) return;
+
+    const row = tierRowOrdered(prev, destTier).filter((a) => a.id !== animeId);
+    let insertAt = row.length;
+    if (overAnimeId) {
+      const idx = row.findIndex((a) => a.id === overAnimeId);
+      if (idx !== -1) insertAt = idx;
+    }
+    row.splice(insertAt, 0, dragged);
+
+    const positions = new Map(row.map((a, i) => [a.id, i] as const));
+    const tierChanged = dragged.tier !== destTier;
+
+    setAnimes((p) =>
+      p.map((a) => {
+        const pos = positions.get(a.id);
+        if (pos === undefined) return a;
+        return {
+          ...a,
+          tier: a.id === animeId ? destTier : a.tier,
+          tierPosition: pos,
+        };
+      }),
+    );
+
+    try {
+      if (tierChanged) await updateTier(animeId, destTier);
+      await updateTierPositions(row.map((a, i) => ({ id: a.id, tierPosition: i })));
     } catch (err) {
       console.error(err);
       toast.error("Falha ao salvar tier");
@@ -1370,11 +1430,17 @@ function Index() {
                 setDraggingAnimeId(null);
                 const overId = e.over?.id;
                 if (!overId) return;
-                const anime = animes.find((a) => a.id === String(e.active.id));
+                const activeId = String(e.active.id);
+                if (String(overId) === activeId) return;
+                const anime = animes.find((a) => a.id === activeId);
                 if (!anime) return;
+                const overAnime = animes.find((a) => a.id === String(overId));
+                if (overAnime) {
+                  void moveAnimeInTierlist(anime.id, overAnime.tier, overAnime.id);
+                  return;
+                }
                 const target = overId === "none" ? null : (String(overId) as Tier);
-                if (anime.tier === target) return;
-                void setAnimeTier(anime.id, target);
+                void moveAnimeInTierlist(anime.id, target, null);
               }}
             >
             <div className="overflow-hidden rounded-xl border border-border/60">
@@ -1385,6 +1451,7 @@ function Index() {
                 <TierDropRow
                   key={t}
                   id={t}
+                  items={items.map((a) => a.id)}
                   className={`border-b border-border/60 last:border-b-0 ${hasItems ? "min-h-32" : "min-h-20"}`}
                   label={
                     <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
@@ -1402,6 +1469,7 @@ function Index() {
             {ranked.some((a) => a.tier === null && a.watched) && (
               <TierDropRow
                 id="none"
+                items={ranked.filter((a) => a.tier === null && a.watched).map((a) => a.id)}
                 className="min-h-32 border-t border-border/60"
                 label={
                   <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
