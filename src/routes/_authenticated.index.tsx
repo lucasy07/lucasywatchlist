@@ -174,6 +174,13 @@ function Index() {
   const [typeFilter, setTypeFilter] = useState<Set<string>>(() => new Set());
   const [semDadosFilter, setSemDadosFilter] = useState(false);
   const [watchedFilter, setWatchedFilter] = useState<"todos" | "nao" | "sim">("nao");
+  const [draggingAnimeId, setDraggingAnimeId] = useState<string | null>(null);
+  const tierSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
   const [showFilters, setShowFilters] = useState(false);
   
   
