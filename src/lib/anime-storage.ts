@@ -79,6 +79,7 @@ type DbRow = {
   mal_score: number | null;
   tier: string | null;
   tier_position: number | null;
+  last_checked_at: string | null;
 };
 
 function rowToAnime(row: DbRow): Anime {
