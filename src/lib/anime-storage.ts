@@ -171,6 +171,7 @@ export async function createAnime(input: {
       image_url: input.imageUrl ?? null,
       mal_score: input.malScore ?? null,
       tier: null,
+      tier_position: null,
     })
     .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier, tier_position")
     .single();
@@ -180,9 +181,28 @@ export async function createAnime(input: {
 
 
 export async function updateTier(id: string, tier: Tier | null): Promise<void> {
-  const { error } = await supabase.from("animes").update({ tier }).eq("id", id);
+  const { error } = await supabase
+    .from("animes")
+    .update({ tier, tier_position: null })
+    .eq("id", id);
   if (error) throw error;
 }
+
+/** Persist manual positions inside tier rows. One update per entry. */
+export async function updateTierPositions(
+  entries: Array<{ id: string; tierPosition: number | null }>,
+): Promise<void> {
+  await Promise.all(
+    entries.map(async ({ id, tierPosition }) => {
+      const { error } = await supabase
+        .from("animes")
+        .update({ tier_position: tierPosition })
+        .eq("id", id);
+      if (error) throw error;
+    }),
+  );
+}
+
 
 
 export async function setWatched(id: string, watched: boolean): Promise<void> {
