@@ -94,7 +94,21 @@ import { JikanSearch, type JikanPick } from "@/components/JikanSearch";
 import { TierPicker, tierColor, tierBg } from "@/components/TierPicker";
 import { SortableSeasonList } from "@/components/SortableSeasonList";
 import { SortableCardSeasons } from "@/components/SortableCardSeasons";
-import { arrayMove } from "@dnd-kit/sortable";
+import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import {
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
+import { CoverArt, DraggableCover, TierDropRow } from "@/components/TierlistDnD";
+
 import { buildChain, type ChainSeason } from "@/lib/jikan-chain";
 import { runMigrations } from "@/lib/migrations";
 import { EmptyState } from "@/components/EmptyState";
@@ -174,6 +188,17 @@ function Index() {
   const [typeFilter, setTypeFilter] = useState<Set<string>>(() => new Set());
   const [semDadosFilter, setSemDadosFilter] = useState(false);
   const [watchedFilter, setWatchedFilter] = useState<"todos" | "nao" | "sim">("nao");
+  const [draggingAnimeId, setDraggingAnimeId] = useState<string | null>(null);
+  const tierSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+  const draggingAnime = draggingAnimeId
+    ? (animes.find((a) => a.id === draggingAnimeId) ?? null)
+    : null;
+
+
   const [showFilters, setShowFilters] = useState(false);
   
   
@@ -1329,115 +1354,75 @@ function Index() {
             />
           ) : (
           <div key={`${scoreMode}-${viewMode}`} className="space-y-2">
+            <DndContext
+              sensors={tierSensors}
+              collisionDetection={closestCenter}
+              onDragStart={(e: DragStartEvent) => setDraggingAnimeId(String(e.active.id))}
+              onDragCancel={() => setDraggingAnimeId(null)}
+              onDragEnd={(e: DragEndEvent) => {
+                setDraggingAnimeId(null);
+                const overId = e.over?.id;
+                if (!overId) return;
+                const anime = animes.find((a) => a.id === String(e.active.id));
+                if (!anime) return;
+                const target = overId === "none" ? null : (String(overId) as Tier);
+                if (anime.tier === target) return;
+                void setAnimeTier(anime.id, target);
+              }}
+            >
             <div className="overflow-hidden rounded-xl border border-border/60">
             {TIER_ROWS.map((t) => {
               const items = ranked.filter((a) => a.tier === t && a.watched);
               const hasItems = items.length > 0;
               return (
-                <div key={t} className={`flex items-stretch border-b border-border/60 last:border-b-0 ${hasItems ? "min-h-32" : "min-h-14"}`}>
-                  <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
-                    <div className={`absolute inset-y-0 left-0 w-1.5 ${tierBg(t)}`} />
-                    <span className={`font-display text-2xl font-bold sm:text-3xl ${tierColor(t)}`}>{t}</span>
-                  </div>
-                  <div className="flex flex-1 flex-wrap items-center gap-2.5 p-3">
-                    {hasItems ? (
-                      items.map((anime, idx) => {
-                        const img = anime.imageUrl ?? anime.cover;
-                        return (
-                          <button
-                            key={anime.id}
-                            type="button"
-                            onClick={() => openDetail(anime.id)}
-                            aria-label={anime.name}
-                            title={anime.name}
-                            className="group relative focus-ring w-20 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none appearance-none border-0 bg-transparent p-0 text-left"
-                            style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
-                          >
-                            {img ? (
-                              <div className="relative overflow-hidden rounded-lg ring-1 ring-border/50 transition-transform duration-200 group-hover:scale-105 group-hover:ring-primary/50 motion-reduce:transform-none">
-                                <img
-                                  src={img}
-                                  alt={anime.name}
-                                  loading="lazy"
-                                  className="aspect-[2/3] w-20 object-cover"
-                                />
-                                <div className="absolute inset-x-0 bottom-0 p-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 bg-gradient-to-t from-background/95 to-transparent">
-                                  <span className="line-clamp-2 text-[10px] font-medium leading-tight text-foreground">{anime.name}</span>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="relative overflow-hidden rounded-lg ring-1 ring-border/50 transition-transform duration-200 group-hover:scale-105 group-hover:ring-primary/50 motion-reduce:transform-none">
-                                <div className="flex aspect-[2/3] w-20 items-center justify-center bg-secondary text-muted-foreground">
-                                  <ImageIcon className="h-5 w-5" />
-                                </div>
-                                <div className="absolute inset-x-0 bottom-0 p-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 bg-gradient-to-t from-background/95 to-transparent">
-                                  <span className="line-clamp-2 text-[10px] font-medium leading-tight text-foreground">{anime.name}</span>
-                                </div>
-                              </div>
-                            )}
-                            <span className="mt-1 line-clamp-2 text-[10px] leading-tight text-muted-foreground sm:hidden">{anime.name}</span>
-                          </button>
-                        );
-                      })
-                    ) : null}
-                  </div>
-                </div>
+                <TierDropRow
+                  key={t}
+                  id={t}
+                  className={`border-b border-border/60 last:border-b-0 ${hasItems ? "min-h-32" : "min-h-20"}`}
+                  label={
+                    <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
+                      <div className={`absolute inset-y-0 left-0 w-1.5 ${tierBg(t)}`} />
+                      <span className={`font-display text-2xl font-bold sm:text-3xl ${tierColor(t)}`}>{t}</span>
+                    </div>
+                  }
+                >
+                  {items.map((anime, idx) => (
+                    <DraggableCover key={anime.id} anime={anime} idx={idx} onOpen={openDetail} />
+                  ))}
+                </TierDropRow>
               );
             })}
             {ranked.some((a) => a.tier === null && a.watched) && (
-              <div className="flex min-h-32 items-stretch border-t border-border/60">
-                <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
-                  <div className="absolute inset-y-0 left-0 w-1.5 bg-muted-foreground/30" />
-                  <span className="font-display text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                    Sem tier
-                  </span>
-                </div>
-                <div className="flex flex-1 flex-wrap items-center gap-2.5 p-3">
-                    {ranked
-                      .filter((a) => a.tier === null && a.watched)
-                      .map((anime, idx) => {
-                        const img = anime.imageUrl ?? anime.cover;
-                        return (
-                          <button
-                            key={anime.id}
-                            type="button"
-                            onClick={() => openDetail(anime.id)}
-                            aria-label={anime.name}
-                            title={anime.name}
-                            className="group relative focus-ring w-20 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none appearance-none border-0 bg-transparent p-0 text-left"
-                            style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
-                          >
-                            {img ? (
-                              <div className="relative overflow-hidden rounded-lg ring-1 ring-border/50 transition-transform duration-200 group-hover:scale-105 group-hover:ring-primary/50 motion-reduce:transform-none">
-                                <img
-                                  src={img}
-                                  alt={anime.name}
-                                  loading="lazy"
-                                  className="aspect-[2/3] w-20 object-cover"
-                                />
-                                <div className="absolute inset-x-0 bottom-0 p-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 bg-gradient-to-t from-background/95 to-transparent">
-                                  <span className="line-clamp-2 text-[10px] font-medium leading-tight text-foreground">{anime.name}</span>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="relative overflow-hidden rounded-lg ring-1 ring-border/50 transition-transform duration-200 group-hover:scale-105 group-hover:ring-primary/50 motion-reduce:transform-none">
-                                <div className="flex aspect-[2/3] w-20 items-center justify-center bg-secondary text-muted-foreground">
-                                  <ImageIcon className="h-5 w-5" />
-                                </div>
-                                <div className="absolute inset-x-0 bottom-0 p-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 bg-gradient-to-t from-background/95 to-transparent">
-                                  <span className="line-clamp-2 text-[10px] font-medium leading-tight text-foreground">{anime.name}</span>
-                                </div>
-                              </div>
-                            )}
-                            <span className="mt-1 line-clamp-2 text-[10px] leading-tight text-muted-foreground sm:hidden">{anime.name}</span>
-                          </button>
-                        );
-                      })}
-                </div>
-              </div>
+              <TierDropRow
+                id="none"
+                className="min-h-32 border-t border-border/60"
+                label={
+                  <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
+                    <div className="absolute inset-y-0 left-0 w-1.5 bg-muted-foreground/30" />
+                    <span className="font-display text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                      Sem tier
+                    </span>
+                  </div>
+                }
+              >
+                {ranked
+                  .filter((a) => a.tier === null && a.watched)
+                  .map((anime, idx) => (
+                    <DraggableCover key={anime.id} anime={anime} idx={idx} onOpen={openDetail} />
+                  ))}
+              </TierDropRow>
             )}
           </div>
+            <DragOverlay>
+              {draggingAnime ? (
+                <div className="group w-20 scale-105 rounded-lg ring-2 ring-primary/50">
+                  <CoverArt anime={draggingAnime} />
+                </div>
+              ) : null}
+            </DragOverlay>
+            </DndContext>
           </div>
+
           )
         ) : viewMode === "grid" ? (
           <ul key={`${scoreMode}-${viewMode}`} className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">

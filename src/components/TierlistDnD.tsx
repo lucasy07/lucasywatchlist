@@ -1,0 +1,86 @@
+import { useDraggable, useDroppable } from "@dnd-kit/core";
+import { Image as ImageIcon } from "lucide-react";
+import type { Anime } from "@/lib/anime-storage";
+
+export function CoverArt({ anime }: { anime: Anime }) {
+  const img = anime.imageUrl ?? anime.cover;
+  return (
+    <div className="relative overflow-hidden rounded-lg ring-1 ring-border/50 transition-transform duration-200 group-hover:scale-105 group-hover:ring-primary/50 motion-reduce:transform-none">
+      {img ? (
+        <img
+          src={img}
+          alt={anime.name}
+          loading="lazy"
+          className="aspect-[2/3] w-20 object-cover"
+        />
+      ) : (
+        <div className="flex aspect-[2/3] w-20 items-center justify-center bg-secondary text-muted-foreground">
+          <ImageIcon className="h-5 w-5" />
+        </div>
+      )}
+      <div className="absolute inset-x-0 bottom-0 p-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 bg-gradient-to-t from-background/95 to-transparent">
+        <span className="line-clamp-2 text-[10px] font-medium leading-tight text-foreground">
+          {anime.name}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+export function DraggableCover({
+  anime,
+  idx,
+  onOpen,
+}: {
+  anime: Anime;
+  idx: number;
+  onOpen: (id: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: anime.id });
+  return (
+    <button
+      ref={setNodeRef}
+      type="button"
+      {...attributes}
+      {...listeners}
+      onClick={() => onOpen(anime.id)}
+      aria-label={anime.name}
+      title={anime.name}
+      className={`group relative focus-ring w-20 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none appearance-none border-0 bg-transparent p-0 text-left touch-none ${
+        isDragging ? "opacity-40" : ""
+      }`}
+      style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
+    >
+      <CoverArt anime={anime} />
+      <span className="mt-1 line-clamp-2 text-[10px] leading-tight text-muted-foreground sm:hidden">
+        {anime.name}
+      </span>
+    </button>
+  );
+}
+
+export function TierDropRow({
+  id,
+  children,
+  className,
+  label,
+}: {
+  id: string;
+  children: React.ReactNode;
+  className?: string;
+  label: React.ReactNode;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <div ref={setNodeRef} className={`relative flex items-stretch ${className ?? ""}`}>
+      {label}
+      <div
+        className={`flex flex-1 flex-wrap items-center gap-2.5 p-3 transition-colors duration-150 motion-reduce:transition-none ${
+          isOver ? "bg-primary/5 ring-1 ring-inset ring-primary/40" : ""
+        }`}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
