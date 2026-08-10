@@ -2155,6 +2155,36 @@ function Index() {
                 </ul>
               )}
             </section>
+            <section className="grid gap-2">
+              <h3 className="font-display text-xs uppercase tracking-widest text-muted-foreground">
+                Notas atualizadas
+              </h3>
+              {foundUpdated.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
+                  Nada atualizado.
+                </p>
+              ) : (
+                <ul className="grid gap-2">
+                  {foundUpdated.map((u) => (
+                    <li
+                      key={`${u.parentId}-${u.malId}`}
+                      className="overflow-hidden rounded-lg border border-border/60 bg-card-elevated p-2 min-w-0"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="line-clamp-2 text-sm font-medium">{u.title}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">
+                          em {u.parentName} •{" "}
+                          {typeof u.oldScore === "number" ? u.oldScore.toFixed(2) : "—"} →{" "}
+                          {typeof u.newScore === "number" ? u.newScore.toFixed(2) : "—"}
+                          {u.filledFields.includes("year") ? " • ano preenchido" : ""}
+                          {u.filledFields.includes("type") ? " • tipo preenchido" : ""}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
           </div>
           <DialogFooter>
             <Button onClick={() => setCheckDialogOpen(false)}>Fechar</Button>
