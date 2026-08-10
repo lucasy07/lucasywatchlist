@@ -834,11 +834,22 @@ function Index() {
             });
           }
         }
+        if (seasonsChanged) {
+          try {
+            await updateSeasons(a.id, seasonsDraft);
+            setAnimes((prev) =>
+              prev.map((x) => (x.id === a.id ? { ...x, seasons: seasonsDraft } : x)),
+            );
+            a.seasons = seasonsDraft;
+          } catch (err) {
+            console.error("failed to persist season updates for", a.name, err);
+          }
+        }
       } catch (err) {
         console.error("check chain failed for", a.name, err);
       }
     }
-    return { available, upcomingSaved };
+    return { available, upcomingSaved, updated };
   }
 
   async function checkNewSeasons() {
