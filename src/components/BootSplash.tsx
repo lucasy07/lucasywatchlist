@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 
 type BootSplashProps = {
   progress: number;
@@ -97,40 +97,9 @@ const FLOATERS = [
   },
 ];
 
-export function BootSplash({ progress, label }: BootSplashProps) {
-  const clamped = Math.min(1, Math.max(0, progress));
-  const [diving, setDiving] = useState(false);
-  const [ripple, setRipple] = useState(0);
-  const prev = useRef(clamped);
-
-  useEffect(() => {
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (prev.current === clamped) return;
-    prev.current = clamped;
-    setDiving(true);
-    const t = setTimeout(() => {
-      setDiving(false);
-      setRipple((r) => r + 1);
-    }, 450);
-    return () => clearTimeout(t);
-  }, [clamped]);
-
-  const width = `${clamped * 100}%`;
-
-  return (
-    <div className="bs-stage" role="status" aria-busy="true">
-      <span className="sr-only">Carregando</span>
-
-      <style>{`
+const SCENE_CSS = `
         .bs-stage {
-          position: fixed; inset: 0; overflow: hidden;
+          position: fixed; inset: 0; overflow: hidden; z-index: 60;
           --wl: 46%; --moon: 64px; --fin-w: 42px; --fin-h: 31px; --dz: 1;
           background: linear-gradient(to bottom,
             color-mix(in oklab, var(--background) 78%, black) 0%,
@@ -208,12 +177,13 @@ export function BootSplash({ progress, label }: BootSplashProps) {
 
         .bs-fin { position: absolute; right: -8px; top: calc(var(--wl) - var(--fin-h));
           width: var(--fin-w); height: var(--fin-h); color: var(--primary);
+          will-change: transform, opacity;
           transition: opacity 300ms ease-out, transform 420ms cubic-bezier(.16,.9,.3,1); }
         .bs-fin[data-diving="true"] {
           transition: opacity 260ms ease-in, transform 450ms cubic-bezier(.55,0,.85,.35); }
         .bs-fin svg { display: block; width: 100%; height: 100%;
           filter: drop-shadow(0 0 10px color-mix(in oklab, var(--primary) 35%, transparent)); }
-        .bs-bob { animation: bs-bob 1.6s ease-in-out infinite; transform-origin: 50% 100%; }
+        .bs-bob { will-change: transform; animation: bs-bob 1.6s ease-in-out infinite; transform-origin: 50% 100%; }
         .bs-ripple { position: absolute; right: -30px; top: calc(var(--wl) - 9px); width: 86px; height: 22px;
           border-radius: 50%; border: 1px solid color-mix(in oklab, var(--primary-glow) 50%, transparent);
           animation: bs-rippleout 700ms ease-out forwards; }
@@ -241,8 +211,16 @@ export function BootSplash({ progress, label }: BootSplashProps) {
           .bs-far, .bs-mid, .bs-near, .bs-steps span { animation: none; }
           .bs-ripple { opacity: 0; }
         }
-      `}</style>
+      `;
 
+const SceneStyle = memo(function SceneStyle() {
+  return <style>{SCENE_CSS}</style>;
+});
+
+/** Sky, water depth and floating debris — independent of progress. */
+const SceneBack = memo(function SceneBack() {
+  return (
+    <>
       {STARS.map((s) => (
         <span
           key={s.left + s.top}
@@ -268,35 +246,85 @@ export function BootSplash({ progress, label }: BootSplashProps) {
       </div>
 
       <div className="bs-silt" />
+    </>
+  );
+});
+
+const SceneWaves = memo(function SceneWaves() {
+  return (
+    <div className="bs-waves">
+      <svg viewBox="0 0 1200 30" preserveAspectRatio="none" aria-hidden="true">
+        <path className="bs-w1" d={WAVE_1} fill="none" stroke="currentColor" strokeWidth="1.5" />
+        <path className="bs-w2" d={WAVE_2} fill="none" stroke="currentColor" strokeWidth="1.5" />
+      </svg>
+    </div>
+  );
+});
+
+/** Shark fin: `.bs-fin` handles the dive, `.bs-bob` keeps a never-restarted sway. */
+const Fin = memo(function Fin({ diving }: { diving: boolean }) {
+  return (
+    <div
+      className="bs-fin"
+      data-diving={diving}
+      style={{
+        opacity: diving ? 0 : 1,
+        transform: diving ? "translateY(22px)" : "translateY(0)",
+      }}
+    >
+      <div className="bs-bob">
+        <svg viewBox="0 0 26 19" aria-hidden="true">
+          <path fill="currentColor" d="M25 19C21 11 15 4 1 0c4 6 8 12 8 19z" />
+        </svg>
+      </div>
+    </div>
+  );
+});
+
+export function BootSplash({ progress, label }: BootSplashProps) {
+  const clamped = Math.min(1, Math.max(0, progress));
+  const [diving, setDiving] = useState(false);
+  const [ripple, setRipple] = useState(0);
+  const prev = useRef(clamped);
+
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (prev.current === clamped) return;
+    prev.current = clamped;
+    setDiving(true);
+    const t = setTimeout(() => {
+      setDiving(false);
+      setRipple((r) => r + 1);
+    }, 450);
+    return () => clearTimeout(t);
+  }, [clamped]);
+
+  const width = `${clamped * 100}%`;
+
+  return (
+    <div className="bs-stage" role="status" aria-busy="true">
+      <span className="sr-only">Carregando</span>
+
+      <SceneStyle />
+      <SceneBack />
 
       <div className="bs-wakeWrap" style={{ width }}>
         <div className="bs-wake" />
         <div className="bs-vee" />
       </div>
 
-      <div className="bs-waves">
-        <svg viewBox="0 0 1200 30" preserveAspectRatio="none" aria-hidden="true">
-          <path className="bs-w1" d={WAVE_1} fill="none" stroke="currentColor" strokeWidth="1.5" />
-          <path className="bs-w2" d={WAVE_2} fill="none" stroke="currentColor" strokeWidth="1.5" />
-        </svg>
-      </div>
+      <SceneWaves />
 
       <div className="bs-finWrap" style={{ width }}>
         {ripple > 0 && !diving && <div key={ripple} className="bs-ripple" />}
-        <div
-          className="bs-fin"
-          data-diving={diving}
-          style={{
-            opacity: diving ? 0 : 1,
-            transform: diving ? "translateY(22px)" : "translateY(0)",
-          }}
-        >
-          <div className="bs-bob" key="fin-bob">
-            <svg viewBox="0 0 26 19" aria-hidden="true">
-              <path fill="currentColor" d="M25 19C21 11 15 4 1 0c4 6 8 12 8 19z" />
-            </svg>
-          </div>
-        </div>
+        <Fin diving={diving} />
       </div>
 
       <div className="bs-vignette" />
