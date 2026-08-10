@@ -235,8 +235,9 @@ export function BootSplash({ progress, label }: BootSplashProps) {
         @keyframes bs-fadein { from { opacity: 0; } to { opacity: 1; } }
 
         @media (prefers-reduced-motion: reduce) {
-          .bs-wakeWrap, .bs-finWrap, .bs-fin { transition: none; }
-          .bs-fin, .bs-ripple, .bs-bob, .bs-w1, .bs-w2, .bs-star, .bs-moonRef,
+          .bs-wakeWrap, .bs-finWrap, .bs-fin { transition: none !important; }
+          .bs-fin { opacity: 1 !important; transform: none !important; }
+          .bs-bob, .bs-ripple, .bs-w1, .bs-w2, .bs-star, .bs-moonRef,
           .bs-far, .bs-mid, .bs-near, .bs-steps span { animation: none; }
           .bs-ripple { opacity: 0; }
         }
