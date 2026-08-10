@@ -355,6 +355,14 @@ function Index() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated]);
 
+  const lastCheckedGlobal = useMemo(() => {
+    let latest: string | null = null;
+    for (const a of animes) {
+      if (a.lastCheckedAt && (latest === null || a.lastCheckedAt > latest)) latest = a.lastCheckedAt;
+    }
+    return latest;
+  }, [animes]);
+
   const ranked = useMemo(() => {
     const q = search.toLowerCase().trim();
     const wantedTypes = new Set(
