@@ -101,6 +101,7 @@ function rowToAnime(row: DbRow): Anime {
     malScore: row.mal_score ?? null,
     tier,
     tierPosition: row.tier_position ?? null,
+    lastCheckedAt: row.last_checked_at ?? null,
   };
 
 }
