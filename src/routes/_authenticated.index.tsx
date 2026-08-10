@@ -737,7 +737,7 @@ function Index() {
       onProgress?.(i + 1, targets.length);
       try {
         const chain = await buildChain(a.malId!);
-        let seasonsDraft = a.seasons.map((s) => ({ ...s }));
+        const seasonsDraft = a.seasons.map((s) => ({ ...s }));
         let seasonsChanged = false;
         for (const s of chain) {
           if (existing.has(s.malId)) {
@@ -861,7 +861,7 @@ function Index() {
     }
     setChecking(true);
     setCheckProgress({ current: 0, total: targets.length });
-    let result: { available: FoundSeason[]; upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }> };
+    let result: { available: FoundSeason[]; upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }>; updated: UpdatedSeason[] };
     try {
       result = await scanTargets(targets, (current, total) =>
         setCheckProgress({ current, total }),
@@ -870,12 +870,17 @@ function Index() {
       setChecking(false);
       setCheckProgress(null);
     }
-    if (result.available.length === 0 && result.upcomingSaved.length === 0) {
+    if (
+      result.available.length === 0 &&
+      result.upcomingSaved.length === 0 &&
+      result.updated.length === 0
+    ) {
       toast("Nenhuma temporada nova encontrada");
       return;
     }
     setFoundAvailable(result.available);
     setFoundUpcoming(result.upcomingSaved);
+    setFoundUpdated(result.updated);
     setCheckDialogOpen(true);
   }
 
@@ -888,18 +893,23 @@ function Index() {
       return;
     }
     setCheckingId(animeId);
-    let result: { available: FoundSeason[]; upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }> };
+    let result: { available: FoundSeason[]; upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }>; updated: UpdatedSeason[] };
     try {
       result = await scanTargets([anime]);
     } finally {
       setCheckingId(null);
     }
-    if (result.available.length === 0 && result.upcomingSaved.length === 0) {
+    if (
+      result.available.length === 0 &&
+      result.upcomingSaved.length === 0 &&
+      result.updated.length === 0
+    ) {
       toast("Nenhuma temporada nova encontrada");
       return;
     }
     setFoundAvailable(result.available);
     setFoundUpcoming(result.upcomingSaved);
+    setFoundUpdated(result.updated);
     setCheckDialogOpen(true);
   }
 
