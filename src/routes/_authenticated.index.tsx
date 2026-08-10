@@ -180,6 +180,10 @@ function Index() {
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
+  const draggingAnime = draggingAnimeId
+    ? (animes.find((a) => a.id === draggingAnimeId) ?? null)
+    : null;
+
 
   const [showFilters, setShowFilters] = useState(false);
   
