@@ -233,6 +233,15 @@ function Index() {
     type: string | null;
     year: number | null;
   };
+  type UpdatedSeason = {
+    parentId: string;
+    parentName: string;
+    title: string;
+    malId: number;
+    oldScore: number | null;
+    newScore: number | null;
+    filledFields: string[];
+  };
   const [checking, setChecking] = useState(false);
   const [checkingId, setCheckingId] = useState<string | null>(null);
   const [checkProgress, setCheckProgress] = useState<{ current: number; total: number } | null>(null);
