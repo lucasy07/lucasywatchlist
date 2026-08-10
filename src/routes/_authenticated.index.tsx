@@ -1264,22 +1264,29 @@ function Index() {
           className={`mb-4 flex items-center gap-3 ${scoreMode === "gosto" ? "justify-end" : "justify-between"}`}
         >
           {scoreMode !== "gosto" && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={checkNewSeasons}
-              disabled={checking || animes.length === 0}
-              className="h-8 gap-1.5 text-xs"
-              aria-label="Verificar novas temporadas"
-              title="Verificar novas temporadas"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${checking ? "animate-spin" : ""}`} />
-              {checking && checkProgress ? (
-                `Verificando ${checkProgress.current}/${checkProgress.total}`
-              ) : (
-                <span className="hidden sm:inline">Verificar novas temporadas</span>
+            <div className="flex min-w-0 items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={checkNewSeasons}
+                disabled={checking || animes.length === 0}
+                className="h-8 gap-1.5 text-xs"
+                aria-label="Verificar novas temporadas"
+                title="Verificar novas temporadas"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${checking ? "animate-spin" : ""}`} />
+                {checking && checkProgress ? (
+                  `Verificando ${checkProgress.current}/${checkProgress.total}`
+                ) : (
+                  <span className="hidden sm:inline">Verificar novas temporadas</span>
+                )}
+              </Button>
+              {!checking && (
+                <span className="truncate text-[11px] text-muted-foreground">
+                  {formatLastChecked(lastCheckedGlobal)}
+                </span>
               )}
-            </Button>
+            </div>
           )}
           <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
             {filtersActive || search.trim() !== ""
