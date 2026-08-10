@@ -285,12 +285,13 @@ export function BootSplash({ progress, label }: BootSplashProps) {
         {ripple > 0 && !diving && <div key={ripple} className="bs-ripple" />}
         <div
           className="bs-fin"
+          data-diving={diving}
           style={{
             opacity: diving ? 0 : 1,
             transform: diving ? "translateY(22px)" : "translateY(0)",
           }}
         >
-          <div className="bs-bob">
+          <div className="bs-bob" key="fin-bob">
             <svg viewBox="0 0 26 19" aria-hidden="true">
               <path fill="currentColor" d="M25 19C21 11 15 4 1 0c4 6 8 12 8 19z" />
             </svg>
