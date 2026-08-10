@@ -937,6 +937,15 @@ function Index() {
             console.error("failed to persist season updates for", a.name, err);
           }
         }
+        try {
+          const iso = new Date().toISOString();
+          await updateLastCheckedAt(a.id, iso);
+          setAnimes((prev) =>
+            prev.map((x) => (x.id === a.id ? { ...x, lastCheckedAt: iso } : x)),
+          );
+        } catch (err) {
+          console.error("failed to persist last checked for", a.name, err);
+        }
       } catch (err) {
         console.error("check chain failed for", a.name, err);
       }
