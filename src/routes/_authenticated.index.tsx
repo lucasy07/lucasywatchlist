@@ -1591,27 +1591,19 @@ function Index() {
                     >
                       #{idx + 1}
                     </div>
-                    <div className="relative self-stretch min-h-[120px] w-20 shrink-0 sm:min-h-[168px] sm:w-28">
-                      <div className="relative h-full w-full overflow-hidden rounded-lg bg-card-elevated ring-1 ring-border/40">
-                        {anime.imageUrl || anime.cover ? (
-                          <img
-                            src={anime.imageUrl ?? anime.cover}
-                            alt={anime.name}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center">
-                            <ImageIcon className="h-7 w-7 text-primary/40" />
-                          </div>
-                        )}
-                      </div>
-                      <div
-                        className={`absolute -left-1.5 -top-1.5 z-10 flex h-5.5 w-5.5 items-center justify-center rounded-full font-display text-[11px] font-bold sm:h-6 sm:w-6 ${anime.tier ? `${tierBg(anime.tier)} text-tier-foreground` : "bg-card border border-border/60 text-muted-foreground"}`}
-                        title={anime.tier ? `Tier ${anime.tier}` : "Sem tier"}
-                      >
-                        {anime.tier ?? "—"}
-                      </div>
+                    <div className="relative self-stretch min-h-[120px] w-20 shrink-0 overflow-hidden rounded-lg bg-card-elevated ring-1 ring-border/40 sm:min-h-[168px] sm:w-28">
+                      {anime.imageUrl || anime.cover ? (
+                        <img
+                          src={anime.imageUrl ?? anime.cover}
+                          alt={anime.name}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center">
+                          <ImageIcon className="h-7 w-7 text-primary/40" />
+                        </div>
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="font-display truncate text-base font-semibold tracking-tight sm:text-lg">
@@ -1630,16 +1622,21 @@ function Index() {
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-col items-end gap-0.5">
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                        MAL
-                      </span>
+                    <div className="flex flex-col items-end gap-1">
                       <div className="flex items-baseline gap-1">
                         <span className={`font-display text-2xl font-bold tabular-nums sm:text-3xl ${primaryColor}`}>
                           {primaryValue}
                         </span>
                         <span className="text-[10px] text-muted-foreground">/10</span>
                       </div>
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                        MAL
+                      </span>
+                      <Badge variant="outline" className="gap-1 border-primary/30 px-1.5 py-0 text-[10px] text-foreground/80">
+                        <span className={`font-display font-bold ${tierColor(anime.tier)}`}>
+                          {anime.tier ?? "—"}
+                        </span>
+                      </Badge>
                     </div>
                     <Button
                       variant="ghost"
