@@ -377,9 +377,16 @@ function Index() {
       return [...filtered].sort((a, b) => {
         const va = a.tier === null ? -1 : TIER_VALUE[a.tier];
         const vb = b.tier === null ? -1 : TIER_VALUE[b.tier];
-        return vb - va;
+        if (vb !== va) return vb - va;
+        const pa = a.tierPosition;
+        const pb = b.tierPosition;
+        if (pa == null && pb == null) return 0;
+        if (pa == null) return 1;
+        if (pb == null) return -1;
+        return pa - pb;
       });
     }
+
     return [...filtered].sort((a, b) => {
       const ma = mediaMAL(a.seasons);
       const mb = mediaMAL(b.seasons);
@@ -655,7 +662,7 @@ function Index() {
 
   async function setAnimeTier(animeId: string, tier: Tier | null) {
     const prev = animes;
-    setAnimes((p) => p.map((a) => (a.id === animeId ? { ...a, tier } : a)));
+    setAnimes((p) => p.map((a) => (a.id === animeId ? { ...a, tier, tierPosition: null } : a)));
     try {
       await updateTier(animeId, tier);
     } catch (err) {

@@ -55,7 +55,10 @@ export type Anime = {
   imageUrl?: string | null;
   malScore?: number | null;
   tier: Tier | null;
+  /** Manual position inside the tier row. null = unpositioned (falls back to created_at order). */
+  tierPosition: number | null;
 };
+
 
 /** Legacy localStorage key — used only for one-time auto-import. */
 export const LEGACY_STORAGE_KEY = "anime-ranker:v1";
