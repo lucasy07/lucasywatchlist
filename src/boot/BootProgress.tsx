@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
 const MIN_BOOT_MS = 4000; // tempo mínimo total do splash na tela
+// Precisa ser maior que a transição da largura do rastro (400ms) + respiro,
+// senão uma etapa começa antes de a anterior terminar.
 const MIN_STEP_MS = 1200; // tempo mínimo que cada etapa fica visível
 const ARRIVAL_HOLD_MS = 500; // respiro após a chegada na borda direita
 
