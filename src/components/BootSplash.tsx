@@ -118,7 +118,7 @@ export function BootSplash({ progress, label }: BootSplashProps) {
     const t = setTimeout(() => {
       setDiving(false);
       setRipple((r) => r + 1);
-    }, 850);
+    }, 450);
     return () => clearTimeout(t);
   }, [clamped]);
 
@@ -190,7 +190,7 @@ export function BootSplash({ progress, label }: BootSplashProps) {
         .bs-btn-pri { border: 0; background: linear-gradient(135deg, var(--primary), var(--primary-glow)); }
 
         .bs-wakeWrap, .bs-finWrap { position: absolute; left: 0; top: 0; height: 100%;
-          transition: width 800ms cubic-bezier(.22,.8,.28,1); }
+          transition: width 400ms cubic-bezier(.22,.8,.28,1); }
         .bs-wake { position: absolute; left: 0; right: 0; top: var(--wl); height: 2px; border-radius: 999px;
           background: linear-gradient(to right,
             color-mix(in oklab, var(--primary) 0%, transparent),
