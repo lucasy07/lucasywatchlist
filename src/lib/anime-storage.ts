@@ -123,7 +123,7 @@ function readLegacyLocal(): Anime[] {
 export async function fetchAnimes(): Promise<Anime[]> {
   const { data, error } = await supabase
     .from("animes")
-    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier, tier_position")
+    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier, tier_position, last_checked_at")
     .order("created_at", { ascending: true });
   if (error) throw error;
   return (data as DbRow[]).map(rowToAnime);
@@ -176,8 +176,9 @@ export async function createAnime(input: {
       mal_score: input.malScore ?? null,
       tier: null,
       tier_position: null,
+      last_checked_at: null,
     })
-    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier, tier_position")
+    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier, tier_position, last_checked_at")
     .single();
   if (error) throw error;
   return rowToAnime(data as DbRow);
@@ -326,5 +327,29 @@ export function formatDateBR(dateStr?: string): string {
   if (!dateStr) return "";
   const d = new Date(dateStr + "T00:00:00");
   if (Number.isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+export async function updateLastCheckedAt(id: string, iso: string): Promise<void> {
+  const { error } = await supabase
+    .from("animes")
+    .update({ last_checked_at: iso })
+    .eq("id", id);
+  if (error) throw error;
+}
+
+export function formatLastChecked(iso?: string | null): string {
+  if (!iso) return "Nunca verificado";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const diffMs = Date.now() - d.getTime();
+  const min = Math.floor(diffMs / 60000);
+  if (min < 1) return "agora mesmo";
+  if (min < 60) return `há ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `há ${h} h`;
+  const days = Math.floor(h / 24);
+  if (days === 1) return "ontem";
+  if (days <= 30) return `há ${days} dias`;
   return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
 }
