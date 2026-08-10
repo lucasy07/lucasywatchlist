@@ -25,6 +25,7 @@ export type Database = {
           name: string
           seasons: Json
           tier: string | null
+          tier_position: number | null
           upcoming: Json | null
           updated_at: string
           user_id: string
@@ -40,6 +41,7 @@ export type Database = {
           name: string
           seasons?: Json
           tier?: string | null
+          tier_position?: number | null
           upcoming?: Json | null
           updated_at?: string
           user_id: string
@@ -55,6 +57,7 @@ export type Database = {
           name?: string
           seasons?: Json
           tier?: string | null
+          tier_position?: number | null
           upcoming?: Json | null
           updated_at?: string
           user_id?: string
