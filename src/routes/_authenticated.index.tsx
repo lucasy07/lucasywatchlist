@@ -1599,12 +1599,12 @@ function Index() {
                     </div>
                   </div>
 
-                  <div className="flex gap-1 p-2">
+                  <div className="flex flex-wrap gap-2 p-2 sm:gap-1">
                     <Button
                       variant="secondary"
                       size="sm"
                       onClick={() => openAddSeason(anime.id)}
-                      className="h-8 flex-1 text-xs"
+                      className="h-11 flex-1 text-xs sm:h-8"
                     >
                       <Plus className="mr-1 h-3.5 w-3.5" /> Temp.
                     </Button>
@@ -1612,7 +1612,7 @@ function Index() {
                       variant="ghost"
                       size="icon"
                       onClick={() => openEdit(anime.id)}
-                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                      className="h-11 w-11 text-muted-foreground hover:text-primary sm:h-8 sm:w-8"
                       aria-label="Editar"
                       title="Editar"
                     >
@@ -1623,7 +1623,7 @@ function Index() {
                       size="icon"
                       onClick={() => checkNewSeasonsForAnime(anime.id)}
                       disabled={checking || checkingId !== null}
-                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                      className="h-11 w-11 text-muted-foreground hover:text-primary sm:h-8 sm:w-8"
                       aria-label="Verificar novas temporadas"
                       title="Verificar novas temporadas"
                     >
@@ -1633,7 +1633,7 @@ function Index() {
                       variant="ghost"
                       size="icon"
                       onClick={() => toggleWatched(anime.id, !anime.watched)}
-                      className={`h-8 w-8 hover:text-primary ${anime.watched ? "text-primary" : "text-muted-foreground"}`}
+                      className={`h-11 w-11 hover:text-primary sm:h-8 sm:w-8 ${anime.watched ? "text-primary" : "text-muted-foreground"}`}
                       aria-label={anime.watched ? "Desmarcar assistido" : "Marcar como assistido"}
                       title={anime.watched ? "Desmarcar assistido" : "Marcar como assistido"}
                     >
@@ -1647,7 +1647,7 @@ function Index() {
                       variant="ghost"
                       size="icon"
                       onClick={() => setConfirmDelete({ id: anime.id, name: anime.name })}
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      className="h-11 w-11 text-muted-foreground hover:text-destructive sm:h-8 sm:w-8"
                       aria-label="Remover anime"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
