@@ -2510,11 +2510,11 @@ function RankingSkeleton({
                   <Skeleton aria-hidden className="h-4 w-3/4" />
                   <Skeleton aria-hidden className="h-3 w-1/2" />
                 </div>
-                <div className="flex gap-1 p-2">
-                  <Skeleton aria-hidden className="h-8 flex-1" />
-                  <Skeleton aria-hidden className="h-8 w-8" />
-                  <Skeleton aria-hidden className="h-8 w-8" />
-                  <Skeleton aria-hidden className="h-8 w-8" />
+                <div className="flex flex-wrap gap-2 p-2 sm:gap-1">
+                  <Skeleton aria-hidden className="h-11 flex-1 sm:h-8" />
+                  <Skeleton aria-hidden className="h-11 w-11 sm:h-8 sm:w-8" />
+                  <Skeleton aria-hidden className="h-11 w-11 sm:h-8 sm:w-8" />
+                  <Skeleton aria-hidden className="h-11 w-11 sm:h-8 sm:w-8" />
                 </div>
               </div>
             </li>
