@@ -2121,7 +2121,7 @@ function Index() {
                     <button
                       type="button"
                       onClick={() => setEditCover(undefined)}
-                      className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-background/80 text-foreground hover:bg-destructive hover:text-destructive-foreground"
+                      className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full bg-background/80 text-foreground hover:bg-destructive hover:text-destructive-foreground sm:h-7 sm:w-7"
                       aria-label="Remover capa"
                     >
                       <X className="h-3.5 w-3.5" />
