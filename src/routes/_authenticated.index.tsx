@@ -444,7 +444,9 @@ function Index() {
     setAnimes((p) => p.map((a) => (a.id === id ? { ...a, watched: next } : a)));
     try {
       await setWatched(id, next);
-      toast.success(next ? "Marcado como assistido" : "Movido para a lista");
+      toast.success(next ? "Marcado como assistido" : "Movido para a lista", {
+        action: { label: "Desfazer", onClick: () => toggleWatched(id, !next) },
+      });
     } catch (err) {
       console.error(err);
       toast.error("Falha ao atualizar");
@@ -1629,12 +1631,16 @@ function Index() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => toggleWatched(anime.id, true)}
-                      className="h-8 w-8 text-muted-foreground hover:text-primary"
-                      aria-label="Marcar como assistido"
-                      title="Marcar como assistido"
+                      onClick={() => toggleWatched(anime.id, !anime.watched)}
+                      className={`h-8 w-8 hover:text-primary ${anime.watched ? "text-primary" : "text-muted-foreground"}`}
+                      aria-label={anime.watched ? "Desmarcar assistido" : "Marcar como assistido"}
+                      title={anime.watched ? "Desmarcar assistido" : "Marcar como assistido"}
                     >
-                      <Check className="h-3.5 w-3.5" />
+                      {anime.watched ? (
+                        <RotateCcw className="h-3.5 w-3.5" />
+                      ) : (
+                        <Check className="h-3.5 w-3.5" />
+                      )}
                     </Button>
                     <Button
                       variant="ghost"
@@ -1804,10 +1810,14 @@ function Index() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => toggleWatched(anime.id, true)}
+                          onClick={() => toggleWatched(anime.id, !anime.watched)}
                           className="flex-1"
                         >
-                          <Check className="mr-1 h-4 w-4" /> Assistido
+                          {anime.watched ? (
+                            <><RotateCcw className="mr-1 h-4 w-4" /> Desmarcar</>
+                          ) : (
+                            <><Check className="mr-1 h-4 w-4" /> Assistido</>
+                          )}
                         </Button>
                         <Button
                           variant="outline"
@@ -2415,6 +2425,18 @@ function Index() {
                   {formatLastChecked(detailAnime?.lastCheckedAt)}
                 </span>
               </div>
+            )}
+            {detailAnime && (
+              <Button
+                variant="outline"
+                onClick={() => toggleWatched(detailAnime.id, !detailAnime.watched)}
+              >
+                {detailAnime.watched ? (
+                  <><RotateCcw className="mr-1 h-4 w-4" /> Desmarcar</>
+                ) : (
+                  <><Check className="mr-1 h-4 w-4" /> Assistido</>
+                )}
+              </Button>
             )}
             <Button
               onClick={() => {
