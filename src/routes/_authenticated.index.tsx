@@ -1599,12 +1599,12 @@ function Index() {
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-2 p-2 sm:gap-1">
+                  <div className="flex gap-1 p-2">
                     <Button
                       variant="secondary"
                       size="sm"
                       onClick={() => openAddSeason(anime.id)}
-                      className="h-11 flex-1 text-xs sm:h-8"
+                      className="h-8 flex-1 text-xs"
                     >
                       <Plus className="mr-1 h-3.5 w-3.5" /> Temp.
                     </Button>
@@ -1612,7 +1612,7 @@ function Index() {
                       variant="ghost"
                       size="icon"
                       onClick={() => openEdit(anime.id)}
-                      className="h-11 w-11 text-muted-foreground hover:text-primary sm:h-8 sm:w-8"
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
                       aria-label="Editar"
                       title="Editar"
                     >
@@ -1623,7 +1623,7 @@ function Index() {
                       size="icon"
                       onClick={() => checkNewSeasonsForAnime(anime.id)}
                       disabled={checking || checkingId !== null}
-                      className="h-11 w-11 text-muted-foreground hover:text-primary sm:h-8 sm:w-8"
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
                       aria-label="Verificar novas temporadas"
                       title="Verificar novas temporadas"
                     >
@@ -1633,7 +1633,7 @@ function Index() {
                       variant="ghost"
                       size="icon"
                       onClick={() => toggleWatched(anime.id, !anime.watched)}
-                      className={`h-11 w-11 hover:text-primary sm:h-8 sm:w-8 ${anime.watched ? "text-primary" : "text-muted-foreground"}`}
+                      className={`h-8 w-8 hover:text-primary ${anime.watched ? "text-primary" : "text-muted-foreground"}`}
                       aria-label={anime.watched ? "Desmarcar assistido" : "Marcar como assistido"}
                       title={anime.watched ? "Desmarcar assistido" : "Marcar como assistido"}
                     >
@@ -1647,7 +1647,7 @@ function Index() {
                       variant="ghost"
                       size="icon"
                       onClick={() => setConfirmDelete({ id: anime.id, name: anime.name })}
-                      className="h-11 w-11 text-muted-foreground hover:text-destructive sm:h-8 sm:w-8"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
                       aria-label="Remover anime"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -1784,7 +1784,7 @@ function Index() {
                             variant="ghost"
                             size="icon"
                             onClick={() => clearUpcoming(anime.id)}
-                            className="h-11 w-11 shrink-0 text-muted-foreground hover:text-destructive sm:h-7 sm:w-7"
+                            className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
                             aria-label="Remover lançamento"
                           >
                             <X className="h-3.5 w-3.5" />
@@ -2121,7 +2121,7 @@ function Index() {
                     <button
                       type="button"
                       onClick={() => setEditCover(undefined)}
-                      className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full bg-background/80 text-foreground hover:bg-destructive hover:text-destructive-foreground sm:h-7 sm:w-7"
+                      className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-background/80 text-foreground hover:bg-destructive hover:text-destructive-foreground"
                       aria-label="Remover capa"
                     >
                       <X className="h-3.5 w-3.5" />
@@ -2510,11 +2510,11 @@ function RankingSkeleton({
                   <Skeleton aria-hidden className="h-4 w-3/4" />
                   <Skeleton aria-hidden className="h-3 w-1/2" />
                 </div>
-                <div className="flex flex-wrap gap-2 p-2 sm:gap-1">
-                  <Skeleton aria-hidden className="h-11 flex-1 sm:h-8" />
-                  <Skeleton aria-hidden className="h-11 w-11 sm:h-8 sm:w-8" />
-                  <Skeleton aria-hidden className="h-11 w-11 sm:h-8 sm:w-8" />
-                  <Skeleton aria-hidden className="h-11 w-11 sm:h-8 sm:w-8" />
+                <div className="flex gap-1 p-2">
+                  <Skeleton aria-hidden className="h-8 flex-1" />
+                  <Skeleton aria-hidden className="h-8 w-8" />
+                  <Skeleton aria-hidden className="h-8 w-8" />
+                  <Skeleton aria-hidden className="h-8 w-8" />
                 </div>
               </div>
             </li>
