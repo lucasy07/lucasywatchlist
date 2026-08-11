@@ -20,6 +20,7 @@ import {
   CalendarClock,
   LogOut,
   Check,
+  RotateCcw,
 
   Pencil,
   Image as ImageIcon,
