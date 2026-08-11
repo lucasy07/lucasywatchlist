@@ -1709,7 +1709,7 @@ function Index() {
                       </p>
                       {anime.upcoming?.releaseDate && (
                         <span
-                          className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary"
+                          className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary-text"
                         >
                           <CalendarClock className="h-3 w-3" />
                           {formatReleaseLabel(anime.upcoming.releaseDate)}
@@ -1771,7 +1771,7 @@ function Index() {
                       {anime.upcoming?.releaseDate && (
                         <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
                           <div className="min-w-0">
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-primary-text">
                               <CalendarClock className="h-3.5 w-3.5" />
                               {formatReleaseLabel(anime.upcoming.releaseDate)}
                             </div>
