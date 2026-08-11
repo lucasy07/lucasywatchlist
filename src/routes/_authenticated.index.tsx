@@ -1784,7 +1784,7 @@ function Index() {
                             variant="ghost"
                             size="icon"
                             onClick={() => clearUpcoming(anime.id)}
-                            className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
+                            className="h-11 w-11 shrink-0 text-muted-foreground hover:text-destructive sm:h-7 sm:w-7"
                             aria-label="Remover lançamento"
                           >
                             <X className="h-3.5 w-3.5" />
