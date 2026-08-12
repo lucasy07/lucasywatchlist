@@ -1717,6 +1717,26 @@ function Index() {
                           {formatReleaseLabel(anime.upcoming.releaseDate)}
                         </span>
                       )}
+                      {anime.genres && anime.genres.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {anime.genres.map((g) => {
+                            const on = genreFilter.has(g.toLowerCase());
+                            return (
+                              <span
+                                key={g}
+                                className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium ${
+                                  on
+                                    ? "bg-primary/15 text-primary"
+                                    : "bg-foreground/5 text-muted-foreground"
+                                }`}
+                              >
+                                {g}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
+
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       <div className="flex items-baseline gap-1">
