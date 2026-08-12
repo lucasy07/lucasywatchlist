@@ -270,5 +270,7 @@ export async function runMigrations(params: MigrationParams): Promise<void> {
   if (params.signal.aborted) return;
   await backfillSeasonType(params);
   if (params.signal.aborted) return;
+  await backfillGenres(params);
+  if (params.signal.aborted) return;
   await migrateTierFromRatings(params);
 }
