@@ -92,7 +92,17 @@ import {
   formatDateBR,
   formatLastChecked,
   isExcludedFromAverage,
+  allGenres,
 } from "@/lib/anime-storage";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { useAuth } from "@/auth/AuthProvider";
 import { JikanSearch, type JikanPick } from "@/components/JikanSearch";
 import { TierPicker, tierColor, tierBg } from "@/components/TierPicker";
@@ -190,6 +200,7 @@ function Index() {
   const [scoreMode, setScoreMode] = useState<"mal" | "gosto">("mal");
   const [tierFilter, setTierFilter] = useState<Set<Tier>>(() => new Set());
   const [typeFilter, setTypeFilter] = useState<Set<string>>(() => new Set());
+  const [genreFilter, setGenreFilter] = useState<Set<string>>(() => new Set());
   const [semDadosFilter, setSemDadosFilter] = useState(false);
   const [watchedFilter, setWatchedFilter] = useState<"todos" | "nao" | "sim">("nao");
   const [draggingAnimeId, setDraggingAnimeId] = useState<string | null>(null);
@@ -364,11 +375,18 @@ function Index() {
     return latest;
   }, [animes]);
 
+  const genreOptions = useMemo(() => allGenres(animes), [animes]);
+  const genreFilterLower = useMemo(
+    () => new Set([...genreFilter].map((g) => g.toLowerCase())),
+    [genreFilter],
+  );
+
   const ranked = useMemo(() => {
     const q = search.toLowerCase().trim();
     const wantedTypes = new Set(
       [...typeFilter].map((t) => t.toLowerCase()),
     );
+    const wantedGenres = [...genreFilter].map((g) => g.toLowerCase());
     const filtered = animes.filter((a) => {
       if (scoreMode !== "gosto") {
         if (watchedFilter === "nao" && a.watched) return false;
@@ -381,6 +399,11 @@ function Index() {
         !a.seasons.some((s) => s.type && wantedTypes.has(s.type.toLowerCase()))
       ) {
         return false;
+      }
+      if (wantedGenres.length > 0) {
+        const have = new Set((a.genres ?? []).map((g) => g.toLowerCase()));
+        if (have.size === 0) return false;
+        if (!wantedGenres.every((g) => have.has(g))) return false;
       }
       if (semDadosFilter && !(a.tier === null || mediaMAL(a.seasons) === null)) return false;
       return true;
@@ -407,15 +430,17 @@ function Index() {
       if (mb === null) return -1;
       return mb - ma;
     });
-  }, [animes, search, scoreMode, tierFilter, typeFilter, semDadosFilter, watchedFilter]);
+  }, [animes, search, scoreMode, tierFilter, typeFilter, genreFilter, semDadosFilter, watchedFilter]);
 
   const watchedFilterActive = scoreMode !== "gosto" && watchedFilter !== "nao";
-  const filtersActive = tierFilter.size > 0 || typeFilter.size > 0 || semDadosFilter || watchedFilterActive;
+  const filtersActive =
+    tierFilter.size > 0 || typeFilter.size > 0 || genreFilter.size > 0 || semDadosFilter || watchedFilterActive;
   const filtersActiveCount =
-    tierFilter.size + typeFilter.size + (semDadosFilter ? 1 : 0) + (watchedFilterActive ? 1 : 0);
+    tierFilter.size + typeFilter.size + genreFilter.size + (semDadosFilter ? 1 : 0) + (watchedFilterActive ? 1 : 0);
   function clearFilters() {
     setTierFilter(new Set());
     setTypeFilter(new Set());
+    setGenreFilter(new Set());
     setSemDadosFilter(false);
     setWatchedFilter("nao");
   }
@@ -433,6 +458,14 @@ function Index() {
       return n;
     });
   }
+  function toggleGenre(g: string) {
+    setGenreFilter((prev) => {
+      const n = new Set(prev);
+      if (n.has(g)) n.delete(g); else n.add(g);
+      return n;
+    });
+  }
+
 
   const watchedCount = useMemo(() => animes.filter((a) => a.watched).length, [animes]);
   const detailAnime = useMemo(
@@ -1354,6 +1387,80 @@ function Index() {
                 </button>
               );
             })}
+            {genreOptions.length > 0 && (
+              <>
+                <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Gênero
+                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className={`focus-ring inline-flex items-center gap-1 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
+                        genreFilter.size > 0
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Selecionar
+                      {genreFilter.size > 0 && <span>({genreFilter.size})</span>}
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Buscar gênero..." />
+                      <CommandList>
+                        <CommandEmpty>Nenhum gênero encontrado.</CommandEmpty>
+                        <CommandGroup>
+                          {genreOptions.map((g) => {
+                            const active = genreFilter.has(g.name);
+                            return (
+                              <CommandItem
+                                key={g.name}
+                                value={g.name}
+                                onSelect={() => toggleGenre(g.name)}
+                              >
+                                <Check
+                                  className={`mr-2 h-4 w-4 ${active ? "opacity-100 text-primary" : "opacity-0"}`}
+                                />
+                                <span className="flex-1 truncate">{g.name}</span>
+                                <span className="ml-2 text-[11px] tabular-nums text-muted-foreground">
+                                  {g.count}
+                                </span>
+                              </CommandItem>
+                            );
+                          })}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                    {genreFilter.size > 0 && (
+                      <div className="border-t border-border/60 p-2">
+                        <button
+                          type="button"
+                          onClick={() => setGenreFilter(new Set())}
+                          className="focus-ring w-full rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-destructive"
+                        >
+                          Limpar gêneros
+                        </button>
+                      </div>
+                    )}
+                  </PopoverContent>
+                </Popover>
+                {[...genreFilter].map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => toggleGenre(g)}
+                    aria-label={`Remover filtro ${g}`}
+                    className="focus-ring inline-flex items-center gap-1 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border border-primary bg-primary text-xs font-medium text-primary-foreground transition-colors"
+                  >
+                    {g}
+                    <X className="h-3 w-3" />
+                  </button>
+                ))}
+              </>
+            )}
             <button
               type="button"
               onClick={() => setSemDadosFilter((v) => !v)}
@@ -1717,6 +1824,26 @@ function Index() {
                           {formatReleaseLabel(anime.upcoming.releaseDate)}
                         </span>
                       )}
+                      {anime.genres && anime.genres.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {anime.genres.map((g) => {
+                            const on = genreFilterLower.has(g.toLowerCase());
+                            return (
+                              <span
+                                key={g}
+                                className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium ${
+                                  on
+                                    ? "bg-primary/15 text-primary"
+                                    : "bg-foreground/5 text-muted-foreground"
+                                }`}
+                              >
+                                {g}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
+
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       <div className="flex items-baseline gap-1">
@@ -2367,6 +2494,35 @@ function Index() {
                 </div>
               </div>
               <div className="grid gap-2">
+                <h4 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Gêneros
+                </h4>
+                {detailAnime.genres === null || detailAnime.genres === undefined ? (
+                  <p className="text-sm text-muted-foreground">Sem gêneros</p>
+                ) : detailAnime.genres.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Nenhum gênero no MAL</p>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {detailAnime.genres.map((g) => (
+                      <button
+                        key={g}
+                        type="button"
+                        aria-label={`Filtrar por ${g}`}
+                        onClick={() => {
+                          setDetailAnimeId("");
+                          setGenreFilter(new Set([g]));
+                          setShowFilters(true);
+                        }}
+                        className="focus-ring rounded-md bg-foreground/5 px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-primary/15 hover:text-primary"
+                      >
+                        {g}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="grid gap-2">
+
                 <h4 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                   Temporadas
                 </h4>
