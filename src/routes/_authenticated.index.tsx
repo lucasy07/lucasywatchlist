@@ -499,6 +499,7 @@ function Index() {
                 type: null,
                 status: null,
                 airedFrom: null,
+                genres: [],
               },
             ];
       setChainSeasons(finalSeasons);
