@@ -105,6 +105,10 @@ function rowToAnime(row: DbRow): Anime {
     tier,
     tierPosition: row.tier_position ?? null,
     lastCheckedAt: row.last_checked_at ?? null,
+    genres:
+      Array.isArray(row.genres) && row.genres.every((g) => typeof g === "string")
+        ? (row.genres as string[])
+        : null,
   };
 
 }
