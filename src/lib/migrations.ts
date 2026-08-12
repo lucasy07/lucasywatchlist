@@ -211,6 +211,36 @@ async function backfillSeasonType({ animes, onPatch, signal }: MigrationParams):
   }
 }
 
+async function backfillGenres({ animes, onPatch, signal }: MigrationParams): Promise<void> {
+  const targets = animes.filter((a) => a.genres == null && typeof a.malId === "number");
+  if (targets.length === 0) return;
+
+  for (const anime of targets) {
+    if (signal.aborted) return;
+    try {
+      const res = await fetch(`https://api.jikan.moe/v4/anime/${anime.malId}`);
+      if (signal.aborted) return;
+      if (res.ok) {
+        const json = await res.json();
+        const raw = json?.data?.genres;
+        const genres = [
+          ...new Set(
+            (Array.isArray(raw) ? raw : [])
+              .map((g: { name?: unknown }) => (typeof g?.name === "string" ? g.name.trim() : ""))
+              .filter((n: string) => n.length > 0),
+          ),
+        ] as string[];
+        await updateAnimeMeta(anime.id, { genres });
+        if (signal.aborted) return;
+        onPatch(anime.id, { genres });
+      }
+    } catch {
+      // ignore; retried in a future session
+    }
+    await sleep(400);
+  }
+}
+
 async function migrateTierFromRatings({ userId, animes, onPatch, signal }: MigrationParams): Promise<void> {
   if (readVersion(userId) >= TIER_MIGRATION_VERSION) return;
   const candidates = animes.filter(
