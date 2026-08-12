@@ -11,6 +11,7 @@ export type ChainSeason = {
   type: string | null;
   status: string | null;
   airedFrom: string | null;
+  genres: string[];
 };
 
 type JikanRelation = {
@@ -27,6 +28,7 @@ type JikanFull = {
   score: number | null;
   aired?: { from?: string | null } | null;
   images?: { jpg?: { large_image_url?: string; image_url?: string } };
+  genres?: Array<{ name: string }> | null;
 };
 
 const KEEP_TYPES = new Set(["TV", "ONA", "Movie", "OVA", "Special"]);
@@ -157,6 +159,13 @@ export async function buildChain(
         type: d.type,
         status: d.status ?? null,
         airedFrom: d.aired?.from ?? null,
+        genres: [
+          ...new Set(
+            (Array.isArray(d.genres) ? d.genres : [])
+              .map((g) => (typeof g?.name === "string" ? g.name.trim() : ""))
+              .filter((n) => n.length > 0),
+          ),
+        ],
       });
     }
     onProgress?.({ current: i + 1, total });
