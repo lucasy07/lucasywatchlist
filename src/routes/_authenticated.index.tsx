@@ -190,6 +190,7 @@ function Index() {
   const [scoreMode, setScoreMode] = useState<"mal" | "gosto">("mal");
   const [tierFilter, setTierFilter] = useState<Set<Tier>>(() => new Set());
   const [typeFilter, setTypeFilter] = useState<Set<string>>(() => new Set());
+  const [genreFilter, setGenreFilter] = useState<Set<string>>(() => new Set());
   const [semDadosFilter, setSemDadosFilter] = useState(false);
   const [watchedFilter, setWatchedFilter] = useState<"todos" | "nao" | "sim">("nao");
   const [draggingAnimeId, setDraggingAnimeId] = useState<string | null>(null);
