@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           cover: string | null
           created_at: string
+          genres: string[] | null
           id: string
           image_url: string | null
           last_checked_at: string | null
@@ -35,6 +36,7 @@ export type Database = {
         Insert: {
           cover?: string | null
           created_at?: string
+          genres?: string[] | null
           id?: string
           image_url?: string | null
           last_checked_at?: string | null
@@ -52,6 +54,7 @@ export type Database = {
         Update: {
           cover?: string | null
           created_at?: string
+          genres?: string[] | null
           id?: string
           image_url?: string | null
           last_checked_at?: string | null
