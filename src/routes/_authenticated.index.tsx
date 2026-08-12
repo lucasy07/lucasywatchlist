@@ -92,7 +92,17 @@ import {
   formatDateBR,
   formatLastChecked,
   isExcludedFromAverage,
+  allGenres,
 } from "@/lib/anime-storage";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { useAuth } from "@/auth/AuthProvider";
 import { JikanSearch, type JikanPick } from "@/components/JikanSearch";
 import { TierPicker, tierColor, tierBg } from "@/components/TierPicker";
