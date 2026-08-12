@@ -59,6 +59,8 @@ export type Anime = {
   tierPosition: number | null;
   /** ISO timestamp of the last new-seasons check. null = never checked. */
   lastCheckedAt: string | null;
+  /** MAL genres. null = never fetched; [] = fetched and none. */
+  genres: string[] | null;
 };
 
 
@@ -80,6 +82,7 @@ type DbRow = {
   tier: string | null;
   tier_position: number | null;
   last_checked_at: string | null;
+  genres: string[] | null;
 };
 
 function rowToAnime(row: DbRow): Anime {
@@ -102,6 +105,10 @@ function rowToAnime(row: DbRow): Anime {
     tier,
     tierPosition: row.tier_position ?? null,
     lastCheckedAt: row.last_checked_at ?? null,
+    genres:
+      Array.isArray(row.genres) && row.genres.every((g) => typeof g === "string")
+        ? (row.genres as string[])
+        : null,
   };
 
 }
@@ -123,7 +130,7 @@ function readLegacyLocal(): Anime[] {
 export async function fetchAnimes(): Promise<Anime[]> {
   const { data, error } = await supabase
     .from("animes")
-    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier, tier_position, last_checked_at")
+    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier, tier_position, last_checked_at, genres")
     .order("created_at", { ascending: true });
   if (error) throw error;
   return (data as DbRow[]).map(rowToAnime);
@@ -159,6 +166,7 @@ export async function createAnime(input: {
   imageUrl?: string | null;
   malScore?: number | null;
   seasons?: Season[];
+  genres?: string[] | null;
 }): Promise<Anime> {
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user?.id;
@@ -177,8 +185,9 @@ export async function createAnime(input: {
       tier: null,
       tier_position: null,
       last_checked_at: null,
+      genres: input.genres ?? null,
     })
-    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier, tier_position, last_checked_at")
+    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier, tier_position, last_checked_at, genres")
     .single();
   if (error) throw error;
   return rowToAnime(data as DbRow);
@@ -236,12 +245,13 @@ export async function updateAnime(
 
 export async function updateAnimeMeta(
   id: string,
-  meta: { malId?: number | null; imageUrl?: string | null; malScore?: number | null },
+  meta: { malId?: number | null; imageUrl?: string | null; malScore?: number | null; genres?: string[] | null },
 ): Promise<void> {
-  const update: { mal_id?: number | null; image_url?: string | null; mal_score?: number | null } = {};
+  const update: { mal_id?: number | null; image_url?: string | null; mal_score?: number | null; genres?: string[] | null } = {};
   if (meta.malId !== undefined) update.mal_id = meta.malId;
   if (meta.imageUrl !== undefined) update.image_url = meta.imageUrl;
   if (meta.malScore !== undefined) update.mal_score = meta.malScore;
+  if (meta.genres !== undefined) update.genres = meta.genres;
   const { error } = await supabase.from("animes").update(update).eq("id", id);
   if (error) throw error;
 }
@@ -352,4 +362,18 @@ export function formatLastChecked(iso?: string | null): string {
   if (days === 1) return "ontem";
   if (days <= 30) return `há ${days} dias`;
   return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+/** Distinct genres across animes with how many animes have each. */
+export function allGenres(animes: Anime[]): Array<{ name: string; count: number }> {
+  const counts = new Map<string, number>();
+  for (const a of animes) {
+    if (!Array.isArray(a.genres)) continue;
+    for (const g of new Set(a.genres)) {
+      counts.set(g, (counts.get(g) ?? 0) + 1);
+    }
+  }
+  return [...counts.entries()]
+    .map(([name, count]) => ({ name, count }))
+    .sort((x, y) => (y.count - x.count) || x.name.localeCompare(y.name));
 }
