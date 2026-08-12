@@ -556,6 +556,7 @@ function Index() {
           malId: first.malId,
           imageUrl: first.imageUrl,
           malScore: first.malScore,
+          genres: first.genres,
           seasons,
         });
         setAnimes((prev) => [...prev, created]);

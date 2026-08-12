@@ -59,6 +59,8 @@ export type Anime = {
   tierPosition: number | null;
   /** ISO timestamp of the last new-seasons check. null = never checked. */
   lastCheckedAt: string | null;
+  /** MAL genres. null = never fetched; [] = fetched and none. */
+  genres: string[] | null;
 };
 
 
@@ -80,6 +82,7 @@ type DbRow = {
   tier: string | null;
   tier_position: number | null;
   last_checked_at: string | null;
+  genres: string[] | null;
 };
 
 function rowToAnime(row: DbRow): Anime {
