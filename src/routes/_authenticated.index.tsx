@@ -1354,6 +1354,80 @@ function Index() {
                 </button>
               );
             })}
+            {genreOptions.length > 0 && (
+              <>
+                <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Gênero
+                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className={`focus-ring inline-flex items-center gap-1 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
+                        genreFilter.size > 0
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Selecionar
+                      {genreFilter.size > 0 && <span>({genreFilter.size})</span>}
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Buscar gênero..." />
+                      <CommandList>
+                        <CommandEmpty>Nenhum gênero encontrado.</CommandEmpty>
+                        <CommandGroup>
+                          {genreOptions.map((g) => {
+                            const active = genreFilter.has(g.name);
+                            return (
+                              <CommandItem
+                                key={g.name}
+                                value={g.name}
+                                onSelect={() => toggleGenre(g.name)}
+                              >
+                                <Check
+                                  className={`mr-2 h-4 w-4 ${active ? "opacity-100 text-primary" : "opacity-0"}`}
+                                />
+                                <span className="flex-1 truncate">{g.name}</span>
+                                <span className="ml-2 text-[11px] tabular-nums text-muted-foreground">
+                                  {g.count}
+                                </span>
+                              </CommandItem>
+                            );
+                          })}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                    {genreFilter.size > 0 && (
+                      <div className="border-t border-border/60 p-2">
+                        <button
+                          type="button"
+                          onClick={() => setGenreFilter(new Set())}
+                          className="focus-ring w-full rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-destructive"
+                        >
+                          Limpar gêneros
+                        </button>
+                      </div>
+                    )}
+                  </PopoverContent>
+                </Popover>
+                {[...genreFilter].map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => toggleGenre(g)}
+                    aria-label={`Remover filtro ${g}`}
+                    className="focus-ring inline-flex items-center gap-1 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border border-primary bg-primary text-xs font-medium text-primary-foreground transition-colors"
+                  >
+                    {g}
+                    <X className="h-3 w-3" />
+                  </button>
+                ))}
+              </>
+            )}
             <button
               type="button"
               onClick={() => setSemDadosFilter((v) => !v)}
