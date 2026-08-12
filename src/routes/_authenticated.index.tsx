@@ -364,11 +364,18 @@ function Index() {
     return latest;
   }, [animes]);
 
+  const genreOptions = useMemo(() => allGenres(animes), [animes]);
+  const genreFilterLower = useMemo(
+    () => new Set([...genreFilter].map((g) => g.toLowerCase())),
+    [genreFilter],
+  );
+
   const ranked = useMemo(() => {
     const q = search.toLowerCase().trim();
     const wantedTypes = new Set(
       [...typeFilter].map((t) => t.toLowerCase()),
     );
+    const wantedGenres = [...genreFilter].map((g) => g.toLowerCase());
     const filtered = animes.filter((a) => {
       if (scoreMode !== "gosto") {
         if (watchedFilter === "nao" && a.watched) return false;
@@ -381,6 +388,11 @@ function Index() {
         !a.seasons.some((s) => s.type && wantedTypes.has(s.type.toLowerCase()))
       ) {
         return false;
+      }
+      if (wantedGenres.length > 0) {
+        const have = new Set((a.genres ?? []).map((g) => g.toLowerCase()));
+        if (have.size === 0) return false;
+        if (!wantedGenres.every((g) => have.has(g))) return false;
       }
       if (semDadosFilter && !(a.tier === null || mediaMAL(a.seasons) === null)) return false;
       return true;
@@ -407,15 +419,17 @@ function Index() {
       if (mb === null) return -1;
       return mb - ma;
     });
-  }, [animes, search, scoreMode, tierFilter, typeFilter, semDadosFilter, watchedFilter]);
+  }, [animes, search, scoreMode, tierFilter, typeFilter, genreFilter, semDadosFilter, watchedFilter]);
 
   const watchedFilterActive = scoreMode !== "gosto" && watchedFilter !== "nao";
-  const filtersActive = tierFilter.size > 0 || typeFilter.size > 0 || semDadosFilter || watchedFilterActive;
+  const filtersActive =
+    tierFilter.size > 0 || typeFilter.size > 0 || genreFilter.size > 0 || semDadosFilter || watchedFilterActive;
   const filtersActiveCount =
-    tierFilter.size + typeFilter.size + (semDadosFilter ? 1 : 0) + (watchedFilterActive ? 1 : 0);
+    tierFilter.size + typeFilter.size + genreFilter.size + (semDadosFilter ? 1 : 0) + (watchedFilterActive ? 1 : 0);
   function clearFilters() {
     setTierFilter(new Set());
     setTypeFilter(new Set());
+    setGenreFilter(new Set());
     setSemDadosFilter(false);
     setWatchedFilter("nao");
   }
@@ -433,6 +447,14 @@ function Index() {
       return n;
     });
   }
+  function toggleGenre(g: string) {
+    setGenreFilter((prev) => {
+      const n = new Set(prev);
+      if (n.has(g)) n.delete(g); else n.add(g);
+      return n;
+    });
+  }
+
 
   const watchedCount = useMemo(() => animes.filter((a) => a.watched).length, [animes]);
   const detailAnime = useMemo(
