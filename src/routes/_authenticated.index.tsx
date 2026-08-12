@@ -2368,6 +2368,35 @@ function Index() {
               </div>
               <div className="grid gap-2">
                 <h4 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Gêneros
+                </h4>
+                {detailAnime.genres === null || detailAnime.genres === undefined ? (
+                  <p className="text-sm text-muted-foreground">Sem gêneros</p>
+                ) : detailAnime.genres.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Nenhum gênero no MAL</p>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {detailAnime.genres.map((g) => (
+                      <button
+                        key={g}
+                        type="button"
+                        aria-label={`Filtrar por ${g}`}
+                        onClick={() => {
+                          setDetailAnimeId("");
+                          setGenreFilter(new Set([g]));
+                          setShowFilters(true);
+                        }}
+                        className="focus-ring rounded-md bg-foreground/5 px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-primary/15 hover:text-primary"
+                      >
+                        {g}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="grid gap-2">
+
+                <h4 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                   Temporadas
                 </h4>
                 {detailAnime.seasons.length === 0 ? (
