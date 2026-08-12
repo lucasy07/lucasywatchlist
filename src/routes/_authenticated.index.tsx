@@ -1720,7 +1720,7 @@ function Index() {
                       {anime.genres && anime.genres.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-1">
                           {anime.genres.map((g) => {
-                            const on = genreFilter.has(g.toLowerCase());
+                            const on = genreFilterLower.has(g.toLowerCase());
                             return (
                               <span
                                 key={g}
