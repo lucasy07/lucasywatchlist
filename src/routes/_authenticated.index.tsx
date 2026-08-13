@@ -2624,6 +2624,9 @@ function Index() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Stats dialog */}
+      <StatsDialog animes={animes} open={statsOpen} onOpenChange={setStatsOpen} />
     </div>
   );
 }
