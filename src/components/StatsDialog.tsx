@@ -96,7 +96,9 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
     const topGenre = genres[0] ?? null;
 
     // Tier distribution among watched animes
-    const tierDistribution = (Object.keys(TIER_VALUE) as Tier[])
+    const tierDistribution: Array<{ tier: Tier | "none"; count: number }> = (
+      Object.keys(TIER_VALUE) as Tier[]
+    )
       .sort((a, b) => TIER_VALUE[b] - TIER_VALUE[a])
       .map((tier) => {
         const count = animes.filter((a) => a.watched && a.tier === tier).length;
