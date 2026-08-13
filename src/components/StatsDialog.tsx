@@ -18,11 +18,30 @@ type StatsDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
+type Stats = {
+  total: number;
+  watchedCount: number;
+  queuedCount: number;
+  totalSeasons: number;
+  genresCount: number;
+  watchedPercent: number;
+  avgMal: number | null;
+  scoredCount: number;
+  bestAnime: Anime | null;
+  bestScore: number | null;
+  mostSeasonsAnime: Anime | null;
+  mostSeasons: number | null;
+  dominantTier: string | null;
+  dominantTierCount: number;
+  topGenre: { name: string; count: number } | null;
+  seasonsPerAnime: number | null;
+};
+
 export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
   const { user } = useAuth();
 
   // All calculations are based on the entire collection, never the filtered view.
-  const stats = useMemo(() => {
+  const stats = useMemo<Stats>(() => {
     const total = animes.length;
     const watchedCount = animes.filter((a) => a.watched).length;
     const queuedCount = total - watchedCount;
