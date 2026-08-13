@@ -1339,11 +1339,21 @@ function Index() {
               )}
             </div>
           )}
-          <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
-            {filtersActive || search.trim() !== ""
-              ? `${ranked.length} de ${animes.length} animes`
-              : `${ranked.length} ${ranked.length === 1 ? "anime" : "animes"}`}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
+              {filtersActive || search.trim() !== ""
+                ? `${ranked.length} de ${animes.length} animes`
+                : `${ranked.length} ${ranked.length === 1 ? "anime" : "animes"}`}
+            </p>
+            <button
+              type="button"
+              onClick={() => setStatsOpen(true)}
+              aria-label="Estatísticas"
+              className="focus-ring flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-primary"
+            >
+              <BarChart3 className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         {showFilters && (
