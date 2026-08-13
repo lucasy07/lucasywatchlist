@@ -226,11 +226,11 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                   <p className="font-display font-bold tabular-nums">
                     {stats.mostSeasons === null ? "—" : stats.mostSeasons}
                   </p>
-                  {stats.mostSeasonsAnime && (
+                  {stats.mostSeasonsAnime ? (
                     <p className="truncate text-[11px] text-muted-foreground" title={stats.mostSeasonsAnime.name}>
                       {stats.mostSeasonsAnime.name}
                     </p>
-                  )}
+                  ) : null}
                 </div>
                 <div>
                   <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Tier dominante</p>
