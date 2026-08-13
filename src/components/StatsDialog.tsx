@@ -35,6 +35,10 @@ type Stats = {
   dominantTierCount: number;
   topGenre: { name: string; count: number } | null;
   seasonsPerAnime: number | null;
+  tierDistribution: Array<{ tier: Tier | "none"; count: number; max: number }>;
+  topGenres: Array<{ name: string; count: number; max: number }>;
+  seasonTypeCounts: Array<{ name: string; count: number }>;
+  decadeCounts: Array<{ name: string; count: number; max: number }>;
 };
 
 export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
