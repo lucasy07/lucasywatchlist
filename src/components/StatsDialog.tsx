@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import { User } from "lucide-react";
-import type { Anime } from "@/lib/anime-storage";
-import { mediaMAL, allGenres } from "@/lib/anime-storage";
+import type { Anime, Tier } from "@/lib/anime-storage";
+import { mediaMAL, allGenres, TIER_VALUE } from "@/lib/anime-storage";
 import { useAuth } from "@/auth/AuthProvider";
-import { tierColor } from "@/components/TierPicker";
+import { tierColor, tierBg } from "@/components/TierPicker";
 import {
   Dialog,
   DialogContent,
