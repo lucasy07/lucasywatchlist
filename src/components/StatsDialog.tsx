@@ -215,11 +215,11 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                   <p className={`font-display font-bold tabular-nums ${stats.bestScore === null ? "" : "text-primary"}`}>
                     {stats.bestScore === null ? "—" : stats.bestScore.toFixed(2)}
                   </p>
-                  {stats.bestAnime && (
+                  {stats.bestAnime ? (
                     <p className="truncate text-[11px] text-muted-foreground" title={stats.bestAnime.name}>
                       {stats.bestAnime.name}
                     </p>
-                  )}
+                  ) : null}
                 </div>
                 <div>
                   <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Mais temporadas</p>
