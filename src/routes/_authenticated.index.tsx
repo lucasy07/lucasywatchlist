@@ -27,6 +27,7 @@ import {
   RefreshCw,
   Filter,
   AlertCircle,
+  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,6 +107,7 @@ import {
 import { useAuth } from "@/auth/AuthProvider";
 import { JikanSearch, type JikanPick } from "@/components/JikanSearch";
 import { TierPicker, tierColor, tierBg } from "@/components/TierPicker";
+import { StatsDialog } from "@/components/StatsDialog";
 import { SortableSeasonList } from "@/components/SortableSeasonList";
 import { SortableCardSeasons } from "@/components/SortableCardSeasons";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
@@ -260,6 +262,9 @@ function Index() {
   // Detail dialog
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailAnimeId, setDetailAnimeId] = useState<string>("");
+
+  // Stats dialog
+  const [statsOpen, setStatsOpen] = useState(false);
 
   // Check for new seasons
 
@@ -1334,11 +1339,21 @@ function Index() {
               )}
             </div>
           )}
-          <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
-            {filtersActive || search.trim() !== ""
-              ? `${ranked.length} de ${animes.length} animes`
-              : `${ranked.length} ${ranked.length === 1 ? "anime" : "animes"}`}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
+              {filtersActive || search.trim() !== ""
+                ? `${ranked.length} de ${animes.length} animes`
+                : `${ranked.length} ${ranked.length === 1 ? "anime" : "animes"}`}
+            </p>
+            <button
+              type="button"
+              onClick={() => setStatsOpen(true)}
+              aria-label="Estatísticas"
+              className="focus-ring flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-primary"
+            >
+              <BarChart3 className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         {showFilters && (
@@ -2609,6 +2624,9 @@ function Index() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Stats dialog */}
+      <StatsDialog animes={animes} open={statsOpen} onOpenChange={setStatsOpen} />
     </div>
   );
 }
