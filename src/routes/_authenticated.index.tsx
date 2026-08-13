@@ -2509,6 +2509,7 @@ function Index() {
                         type="button"
                         aria-label={`Filtrar por ${g}`}
                         onClick={() => {
+                          setDetailOpen(false);
                           setDetailAnimeId("");
                           setGenreFilter(new Set([g]));
                           setShowFilters(true);
