@@ -281,8 +281,136 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                       {stats.scoredCount} com nota
                     </p>
                   )}
-                </div>
+          </div>
+
+          {/* Tier distribution */}
+          <div className="rounded-xl border border-border/60 bg-background/30 p-4">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Distribuição por tier
+            </p>
+            <div className="flex flex-col gap-2">
+              {stats.tierDistribution.map((d) => {
+                const isNone = d.tier === "none";
+                const pct = (d.count / d.max) * 100;
+                return (
+                  <div key={d.tier} className="flex items-center gap-3">
+                    <div
+                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md font-display text-xs font-bold ${
+                        isNone
+                          ? "border border-border/60 bg-secondary text-muted-foreground"
+                          : `${tierBg(d.tier as Tier)} text-tier-foreground`
+                      }`}
+                    >
+                      {isNone ? "—" : d.tier}
+                    </div>
+                    <div className="flex-1">
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-foreground/5">
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            isNone ? "bg-muted-foreground/40" : tierBg(d.tier as Tier)
+                          }`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                    <span className="w-6 text-right text-xs tabular-nums text-muted-foreground">
+                      {d.count}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              Conta apenas animes assistidos
+            </p>
+          </div>
+
+          {/* Top genres */}
+          <div className="rounded-xl border border-border/60 bg-background/30 p-4">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Top gêneros
+            </p>
+            {stats.topGenres.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Ainda sem gêneros</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {stats.topGenres.map((g) => {
+                  const pct = (g.count / g.max) * 100;
+                  return (
+                    <div key={g.name} className="flex items-center gap-3">
+                      <span className="w-24 shrink-0 truncate text-xs text-muted-foreground" title={g.name}>
+                        {g.name}
+                      </span>
+                      <div className="flex-1">
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-foreground/5">
+                          <div
+                            className="h-full rounded-full bg-primary/60 transition-all"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className="w-6 text-right text-xs tabular-nums text-muted-foreground">
+                        {g.count}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
+            )}
+          </div>
+
+          {/* Season types */}
+          <div className="rounded-xl border border-border/60 bg-background/30 p-4">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Por tipo
+            </p>
+            {stats.seasonTypeCounts.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Ainda sem temporadas</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {stats.seasonTypeCounts.map((t) => (
+                  <div
+                    key={t.name}
+                    className="inline-flex items-center gap-1.5 rounded-md bg-foreground/5 px-2.5 py-1.5 text-xs text-muted-foreground"
+                  >
+                    <span className="truncate">{t.name}</span>
+                    <span className="font-display font-semibold tabular-nums text-foreground">{t.count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Decades */}
+          {stats.decadeCounts.length > 0 && (
+            <div className="rounded-xl border border-border/60 bg-background/30 p-4">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Por década de estreia
+              </p>
+              <div className="flex flex-col gap-2">
+                {stats.decadeCounts.map((d) => {
+                  const pct = (d.count / d.max) * 100;
+                  return (
+                    <div key={d.name} className="flex items-center gap-3">
+                      <span className="w-16 shrink-0 text-xs text-muted-foreground">{d.name}</span>
+                      <div className="flex-1">
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-foreground/5">
+                          <div
+                            className="h-full rounded-full bg-primary/60 transition-all"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className="w-6 text-right text-xs tabular-nums text-muted-foreground">
+                        {d.count}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
             </div>
 
             {/* Highlights group */}
