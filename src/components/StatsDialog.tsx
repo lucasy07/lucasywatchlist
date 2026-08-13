@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import { User } from "lucide-react";
-import type { Anime } from "@/lib/anime-storage";
-import { mediaMAL, allGenres } from "@/lib/anime-storage";
+import type { Anime, Tier } from "@/lib/anime-storage";
+import { mediaMAL, allGenres, TIER_VALUE } from "@/lib/anime-storage";
 import { useAuth } from "@/auth/AuthProvider";
-import { tierColor } from "@/components/TierPicker";
+import { tierColor, tierBg } from "@/components/TierPicker";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +35,10 @@ type Stats = {
   dominantTierCount: number;
   topGenre: { name: string; count: number } | null;
   seasonsPerAnime: number | null;
+  tierDistribution: Array<{ tier: Tier | "none"; count: number; max: number }>;
+  topGenres: Array<{ name: string; count: number; max: number }>;
+  seasonTypeCounts: Array<{ name: string; count: number }>;
+  decadeCounts: Array<{ name: string; count: number; max: number }>;
 };
 
 export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
@@ -91,6 +95,58 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
 
     const topGenre = genres[0] ?? null;
 
+    // Tier distribution among watched animes
+    const tierDistribution: Array<{ tier: Tier | "none"; count: number }> = (
+      Object.keys(TIER_VALUE) as Tier[]
+    )
+      .sort((a, b) => TIER_VALUE[b] - TIER_VALUE[a])
+      .map((tier) => {
+        const count = animes.filter((a) => a.watched && a.tier === tier).length;
+        return { tier, count };
+      });
+    const unwatchedWithoutTier = animes.filter((a) => a.watched && !a.tier).length;
+    tierDistribution.push({ tier: "none", count: unwatchedWithoutTier });
+    const maxTierCount = Math.max(...tierDistribution.map((d) => d.count), 1);
+    const tierDistributionWithMax = tierDistribution.map((d) => ({ ...d, max: maxTierCount }));
+
+    // Top genres
+    const topGenres = genres.slice(0, 8);
+    const maxGenreCount = topGenres.length > 0 ? Math.max(...topGenres.map((g) => g.count), 1) : 1;
+    const topGenresWithMax = topGenres.map((g) => ({ ...g, max: maxGenreCount }));
+
+    // Season types
+    const typeCounts = new Map<string, number>();
+    for (const a of animes) {
+      for (const s of a.seasons) {
+        const type = typeof s.type === "string" && s.type.trim() !== "" ? s.type.trim() : "Sem tipo";
+        typeCounts.set(type, (typeCounts.get(type) ?? 0) + 1);
+      }
+    }
+    const seasonTypeCounts = [...typeCounts.entries()]
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+
+    // Decades from season years
+    const decadeCounts = new Map<string, number>();
+    for (const a of animes) {
+      for (const s of a.seasons) {
+        if (typeof s.year === "number" && !Number.isNaN(s.year)) {
+          const decade = Math.floor(s.year / 10) * 10;
+          const key = `${decade}s`;
+          decadeCounts.set(key, (decadeCounts.get(key) ?? 0) + 1);
+        }
+      }
+    }
+    const decadeList = [...decadeCounts.entries()]
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => {
+        const decadeA = parseInt(a.name, 10);
+        const decadeB = parseInt(b.name, 10);
+        return decadeA - decadeB;
+      });
+    const maxDecadeCount = decadeList.length > 0 ? Math.max(...decadeList.map((d) => d.count), 1) : 1;
+    const decadeListWithMax = decadeList.map((d) => ({ ...d, max: maxDecadeCount }));
+
     return {
       total,
       watchedCount,
@@ -108,6 +164,10 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
       dominantTierCount,
       topGenre,
       seasonsPerAnime: total === 0 ? null : totalSeasons / total,
+      tierDistribution: tierDistributionWithMax,
+      topGenres: topGenresWithMax,
+      seasonTypeCounts,
+      decadeCounts: decadeListWithMax,
     };
   }, [animes]);
 
@@ -276,6 +336,134 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
               </div>
             </div>
           </div>
+
+          {/* Tier distribution */}
+          <div className="rounded-xl border border-border/60 bg-background/30 p-4">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Distribuição por tier
+            </p>
+            <div className="flex flex-col gap-2">
+              {stats.tierDistribution.map((d) => {
+                const isNone = d.tier === "none";
+                const pct = (d.count / d.max) * 100;
+                return (
+                  <div key={d.tier} className="flex items-center gap-3">
+                    <div
+                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md font-display text-xs font-bold ${
+                        isNone
+                          ? "border border-border/60 bg-secondary text-muted-foreground"
+                          : `${tierBg(d.tier as Tier)} text-tier-foreground`
+                      }`}
+                    >
+                      {isNone ? "—" : d.tier}
+                    </div>
+                    <div className="flex-1">
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-foreground/5">
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            isNone ? "bg-muted-foreground/40" : tierBg(d.tier as Tier)
+                          }`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                    <span className="w-6 text-right text-xs tabular-nums text-muted-foreground">
+                      {d.count}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              Conta apenas animes assistidos
+            </p>
+          </div>
+
+          {/* Top genres */}
+          <div className="rounded-xl border border-border/60 bg-background/30 p-4">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Top gêneros
+            </p>
+            {stats.topGenres.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Ainda sem gêneros</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {stats.topGenres.map((g) => {
+                  const pct = (g.count / g.max) * 100;
+                  return (
+                    <div key={g.name} className="flex items-center gap-3">
+                      <span className="w-24 shrink-0 truncate text-xs text-muted-foreground" title={g.name}>
+                        {g.name}
+                      </span>
+                      <div className="flex-1">
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-foreground/5">
+                          <div
+                            className="h-full rounded-full bg-primary/60 transition-all"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className="w-6 text-right text-xs tabular-nums text-muted-foreground">
+                        {g.count}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Season types */}
+          <div className="rounded-xl border border-border/60 bg-background/30 p-4">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Por tipo
+            </p>
+            {stats.seasonTypeCounts.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Ainda sem temporadas</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {stats.seasonTypeCounts.map((t) => (
+                  <div
+                    key={t.name}
+                    className="inline-flex items-center gap-1.5 rounded-md bg-foreground/5 px-2.5 py-1.5 text-xs text-muted-foreground"
+                  >
+                    <span className="truncate">{t.name}</span>
+                    <span className="font-display font-semibold tabular-nums text-foreground">{t.count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Decades */}
+          {stats.decadeCounts.length > 0 && (
+            <div className="rounded-xl border border-border/60 bg-background/30 p-4">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Por década de estreia
+              </p>
+              <div className="flex flex-col gap-2">
+                {stats.decadeCounts.map((d) => {
+                  const pct = (d.count / d.max) * 100;
+                  return (
+                    <div key={d.name} className="flex items-center gap-3">
+                      <span className="w-16 shrink-0 text-xs text-muted-foreground">{d.name}</span>
+                      <div className="flex-1">
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-foreground/5">
+                          <div
+                            className="h-full rounded-full bg-primary/60 transition-all"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className="w-6 text-right text-xs tabular-nums text-muted-foreground">
+                        {d.count}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
