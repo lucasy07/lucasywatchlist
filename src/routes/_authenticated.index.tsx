@@ -263,6 +263,9 @@ function Index() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailAnimeId, setDetailAnimeId] = useState<string>("");
 
+  // Stats dialog
+  const [statsOpen, setStatsOpen] = useState(false);
+
   // Check for new seasons
 
   type FoundSeason = {
