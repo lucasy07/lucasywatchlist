@@ -95,6 +95,56 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
 
     const topGenre = genres[0] ?? null;
 
+    // Tier distribution among watched animes
+    const tierDistribution = (Object.keys(TIER_VALUE) as Tier[])
+      .sort((a, b) => TIER_VALUE[b] - TIER_VALUE[a])
+      .map((tier) => {
+        const count = animes.filter((a) => a.watched && a.tier === tier).length;
+        return { tier, count };
+      });
+    const unwatchedWithoutTier = animes.filter((a) => a.watched && !a.tier).length;
+    tierDistribution.push({ tier: "none", count: unwatchedWithoutTier });
+    const maxTierCount = Math.max(...tierDistribution.map((d) => d.count), 1);
+    const tierDistributionWithMax = tierDistribution.map((d) => ({ ...d, max: maxTierCount }));
+
+    // Top genres
+    const topGenres = genres.slice(0, 8);
+    const maxGenreCount = topGenres.length > 0 ? Math.max(...topGenres.map((g) => g.count), 1) : 1;
+    const topGenresWithMax = topGenres.map((g) => ({ ...g, max: maxGenreCount }));
+
+    // Season types
+    const typeCounts = new Map<string, number>();
+    for (const a of animes) {
+      for (const s of a.seasons) {
+        const type = typeof s.type === "string" && s.type.trim() !== "" ? s.type.trim() : "Sem tipo";
+        typeCounts.set(type, (typeCounts.get(type) ?? 0) + 1);
+      }
+    }
+    const seasonTypeCounts = [...typeCounts.entries()]
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+
+    // Decades from season years
+    const decadeCounts = new Map<string, number>();
+    for (const a of animes) {
+      for (const s of a.seasons) {
+        if (typeof s.year === "number" && !Number.isNaN(s.year)) {
+          const decade = Math.floor(s.year / 10) * 10;
+          const key = `${decade}s`;
+          decadeCounts.set(key, (decadeCounts.get(key) ?? 0) + 1);
+        }
+      }
+    }
+    const decadeList = [...decadeCounts.entries()]
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => {
+        const decadeA = parseInt(a.name, 10);
+        const decadeB = parseInt(b.name, 10);
+        return decadeA - decadeB;
+      });
+    const maxDecadeCount = decadeList.length > 0 ? Math.max(...decadeList.map((d) => d.count), 1) : 1;
+    const decadeListWithMax = decadeList.map((d) => ({ ...d, max: maxDecadeCount }));
+
     return {
       total,
       watchedCount,
@@ -112,6 +162,10 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
       dominantTierCount,
       topGenre,
       seasonsPerAnime: total === 0 ? null : totalSeasons / total,
+      tierDistribution: tierDistributionWithMax,
+      topGenres: topGenresWithMax,
+      seasonTypeCounts,
+      decadeCounts: decadeListWithMax,
     };
   }, [animes]);
 
