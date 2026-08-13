@@ -281,6 +281,60 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                       {stats.scoredCount} com nota
                     </p>
                   )}
+                </div>
+              </div>
+            </div>
+
+            {/* Highlights group */}
+            <div className="rounded-xl border border-border/60 bg-background/30 p-4">
+              <p className="mb-3 text-[9px] uppercase tracking-widest text-muted-foreground">Destaques</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Melhor nota</p>
+                  <p className={`font-display font-bold tabular-nums ${stats.bestScore === null ? "" : "text-primary"}`}>
+                    {stats.bestScore === null ? "—" : stats.bestScore.toFixed(2)}
+                  </p>
+                  {stats.bestAnime ? (
+                    <p className="truncate text-[11px] text-muted-foreground" title={stats.bestAnime.name}>
+                      {stats.bestAnime.name}
+                    </p>
+                  ) : null}
+                </div>
+                <div>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Mais temporadas</p>
+                  <p className="font-display font-bold tabular-nums">
+                    {stats.mostSeasons === null ? "—" : stats.mostSeasons}
+                  </p>
+                  {stats.mostSeasonsAnime ? (
+                    <p className="truncate text-[11px] text-muted-foreground" title={stats.mostSeasonsAnime.name}>
+                      {stats.mostSeasonsAnime.name}
+                    </p>
+                  ) : null}
+                </div>
+                <div>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Tier dominante</p>
+                  <p className={`font-display font-bold tabular-nums ${stats.dominantTier ? tierColor(stats.dominantTier as import("@/lib/anime-storage").Tier) : ""}`}>
+                    {stats.dominantTier ?? "—"}
+                  </p>
+                  {stats.dominantTier !== null && (
+                    <p className="truncate text-[11px] text-muted-foreground">
+                      {stats.dominantTierCount} animes
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Gênero mais comum</p>
+                  <p className="font-display font-bold tabular-nums text-sm">
+                    {stats.topGenre ? stats.topGenre.name : "—"}
+                  </p>
+                  {stats.topGenre && (
+                    <p className="truncate text-[11px] text-muted-foreground">
+                      {stats.topGenre.count} animes
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Tier distribution */}
@@ -410,60 +464,6 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
               </div>
             </div>
           )}
-        </div>
-            </div>
-
-            {/* Highlights group */}
-            <div className="rounded-xl border border-border/60 bg-background/30 p-4">
-              <p className="mb-3 text-[9px] uppercase tracking-widest text-muted-foreground">Destaques</p>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Melhor nota</p>
-                  <p className={`font-display font-bold tabular-nums ${stats.bestScore === null ? "" : "text-primary"}`}>
-                    {stats.bestScore === null ? "—" : stats.bestScore.toFixed(2)}
-                  </p>
-                  {stats.bestAnime ? (
-                    <p className="truncate text-[11px] text-muted-foreground" title={stats.bestAnime.name}>
-                      {stats.bestAnime.name}
-                    </p>
-                  ) : null}
-                </div>
-                <div>
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Mais temporadas</p>
-                  <p className="font-display font-bold tabular-nums">
-                    {stats.mostSeasons === null ? "—" : stats.mostSeasons}
-                  </p>
-                  {stats.mostSeasonsAnime ? (
-                    <p className="truncate text-[11px] text-muted-foreground" title={stats.mostSeasonsAnime.name}>
-                      {stats.mostSeasonsAnime.name}
-                    </p>
-                  ) : null}
-                </div>
-                <div>
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Tier dominante</p>
-                  <p className={`font-display font-bold tabular-nums ${stats.dominantTier ? tierColor(stats.dominantTier as import("@/lib/anime-storage").Tier) : ""}`}>
-                    {stats.dominantTier ?? "—"}
-                  </p>
-                  {stats.dominantTier !== null && (
-                    <p className="truncate text-[11px] text-muted-foreground">
-                      {stats.dominantTierCount} animes
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Gênero mais comum</p>
-                  <p className="font-display font-bold tabular-nums text-sm">
-                    {stats.topGenre ? stats.topGenre.name : "—"}
-                  </p>
-                  {stats.topGenre && (
-                    <p className="truncate text-[11px] text-muted-foreground">
-                      {stats.topGenre.count} animes
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </DialogContent>
     </Dialog>
