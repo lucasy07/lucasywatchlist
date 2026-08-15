@@ -176,7 +176,7 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-[calc(100vw-2rem)] overflow-y-auto overflow-x-hidden border-border bg-card sm:max-w-lg">
+      <DialogContent className="h-full max-h-[100dvh] w-full max-w-none overflow-y-auto overflow-x-hidden rounded-none border-border bg-card sm:h-auto sm:max-h-[90vh] sm:max-w-4xl sm:rounded-lg">
         <DialogHeader>
           <DialogTitle>Estatísticas</DialogTitle>
         </DialogHeader>
@@ -241,10 +241,10 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
           {/* Records grid */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Collection group */}
-            <div className="rounded-xl border border-border/60 bg-background/30 p-4">
+            <div className="min-w-0 rounded-xl border border-border/60 bg-background/30 p-4">
               <p className="mb-3 text-[9px] uppercase tracking-widest text-muted-foreground">Coleção</p>
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="min-w-0">
                   <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Assistidos</p>
                   <p className="font-display font-bold tabular-nums">{stats.total === 0 ? "—" : stats.watchedCount}</p>
                   {stats.total > 0 && (
@@ -253,7 +253,7 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                     </p>
                   )}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Na fila</p>
                   <p className="font-display font-bold tabular-nums">{stats.total === 0 ? "—" : stats.queuedCount}</p>
                   {stats.total > 0 && (
@@ -262,7 +262,7 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                     </p>
                   )}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Temporadas</p>
                   <p className="font-display font-bold tabular-nums">{stats.totalSeasons === 0 ? "—" : stats.totalSeasons}</p>
                   {stats.seasonsPerAnime !== null && (
@@ -271,7 +271,7 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                     </p>
                   )}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Média MAL</p>
                   <p className={`font-display font-bold tabular-nums ${stats.avgMal === null ? "" : "text-primary"}`}>
                     {stats.avgMal === null ? "—" : stats.avgMal.toFixed(2)}
@@ -286,10 +286,10 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
             </div>
 
             {/* Highlights group */}
-            <div className="rounded-xl border border-border/60 bg-background/30 p-4">
+            <div className="min-w-0 rounded-xl border border-border/60 bg-background/30 p-4">
               <p className="mb-3 text-[9px] uppercase tracking-widest text-muted-foreground">Destaques</p>
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="min-w-0">
                   <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Melhor nota</p>
                   <p className={`font-display font-bold tabular-nums ${stats.bestScore === null ? "" : "text-primary"}`}>
                     {stats.bestScore === null ? "—" : stats.bestScore.toFixed(2)}
@@ -300,7 +300,7 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                     </p>
                   ) : null}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Mais temporadas</p>
                   <p className="font-display font-bold tabular-nums">
                     {stats.mostSeasons === null ? "—" : stats.mostSeasons}
@@ -311,7 +311,7 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                     </p>
                   ) : null}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Tier dominante</p>
                   <p className={`font-display font-bold tabular-nums ${stats.dominantTier ? tierColor(stats.dominantTier as import("@/lib/anime-storage").Tier) : ""}`}>
                     {stats.dominantTier ?? "—"}
@@ -322,7 +322,7 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                     </p>
                   )}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Gênero mais comum</p>
                   <p className="font-display font-bold tabular-nums text-sm">
                     {stats.topGenre ? stats.topGenre.name : "—"}
@@ -337,120 +337,34 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
             </div>
           </div>
 
-          {/* Tier distribution */}
-          <div className="rounded-xl border border-border/60 bg-background/30 p-4">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Distribuição por tier
-            </p>
-            <div className="flex flex-col gap-2">
-              {stats.tierDistribution.map((d) => {
-                const isNone = d.tier === "none";
-                const pct = (d.count / d.max) * 100;
-                return (
-                  <div key={d.tier} className="flex items-center gap-3">
-                    <div
-                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md font-display text-xs font-bold ${
-                        isNone
-                          ? "border border-border/60 bg-secondary text-muted-foreground"
-                          : `${tierBg(d.tier as Tier)} text-tier-foreground`
-                      }`}
-                    >
-                      {isNone ? "—" : d.tier}
-                    </div>
-                    <div className="flex-1">
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-foreground/5">
-                        <div
-                          className={`h-full rounded-full transition-all ${
-                            isNone ? "bg-muted-foreground/40" : tierBg(d.tier as Tier)
-                          }`}
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                    </div>
-                    <span className="w-6 text-right text-xs tabular-nums text-muted-foreground">
-                      {d.count}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-            <p className="mt-2 text-[11px] text-muted-foreground">
-              Conta apenas animes assistidos
-            </p>
-          </div>
-
-          {/* Top genres */}
-          <div className="rounded-xl border border-border/60 bg-background/30 p-4">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Top gêneros
-            </p>
-            {stats.topGenres.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Ainda sem gêneros</p>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {stats.topGenres.map((g) => {
-                  const pct = (g.count / g.max) * 100;
-                  return (
-                    <div key={g.name} className="flex items-center gap-3">
-                      <span className="w-24 shrink-0 truncate text-xs text-muted-foreground" title={g.name}>
-                        {g.name}
-                      </span>
-                      <div className="flex-1">
-                        <div className="h-2 w-full overflow-hidden rounded-full bg-foreground/5">
-                          <div
-                            className="h-full rounded-full bg-primary/60 transition-all"
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                      </div>
-                      <span className="w-6 text-right text-xs tabular-nums text-muted-foreground">
-                        {g.count}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Season types */}
-          <div className="rounded-xl border border-border/60 bg-background/30 p-4">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Por tipo
-            </p>
-            {stats.seasonTypeCounts.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Ainda sem temporadas</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {stats.seasonTypeCounts.map((t) => (
-                  <div
-                    key={t.name}
-                    className="inline-flex items-center gap-1.5 rounded-md bg-foreground/5 px-2.5 py-1.5 text-xs text-muted-foreground"
-                  >
-                    <span className="truncate">{t.name}</span>
-                    <span className="font-display font-semibold tabular-nums text-foreground">{t.count}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Decades */}
-          {stats.decadeCounts.length > 0 && (
-            <div className="rounded-xl border border-border/60 bg-background/30 p-4">
+          {/* Distribution blocks */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {/* Tier distribution */}
+            <div className="min-w-0 rounded-xl border border-border/60 bg-background/30 p-4">
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Por década de estreia
+                Distribuição por tier
               </p>
               <div className="flex flex-col gap-2">
-                {stats.decadeCounts.map((d) => {
+                {stats.tierDistribution.map((d) => {
+                  const isNone = d.tier === "none";
                   const pct = (d.count / d.max) * 100;
                   return (
-                    <div key={d.name} className="flex items-center gap-3">
-                      <span className="w-16 shrink-0 text-xs text-muted-foreground">{d.name}</span>
+                    <div key={d.tier} className="flex items-center gap-3">
+                      <div
+                        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md font-display text-xs font-bold ${
+                          isNone
+                            ? "border border-border/60 bg-secondary text-muted-foreground"
+                            : `${tierBg(d.tier as Tier)} text-tier-foreground`
+                        }`}
+                      >
+                        {isNone ? "—" : d.tier}
+                      </div>
                       <div className="flex-1">
-                        <div className="h-2 w-full overflow-hidden rounded-full bg-foreground/5">
+                        <div className="h-2.5 w-full overflow-hidden rounded-full bg-foreground/5">
                           <div
-                            className="h-full rounded-full bg-primary/60 transition-all"
+                            className={`h-full rounded-full transition-all ${
+                              isNone ? "bg-muted-foreground/40" : tierBg(d.tier as Tier)
+                            }`}
                             style={{ width: `${pct}%` }}
                           />
                         </div>
@@ -462,8 +376,97 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                   );
                 })}
               </div>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                Conta apenas animes assistidos
+              </p>
             </div>
-          )}
+
+            {/* Top genres */}
+            <div className="min-w-0 rounded-xl border border-border/60 bg-background/30 p-4">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Top gêneros
+              </p>
+              {stats.topGenres.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Ainda sem gêneros</p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {stats.topGenres.map((g) => {
+                    const pct = (g.count / g.max) * 100;
+                    return (
+                      <div key={g.name} className="flex items-center gap-3">
+                        <span className="w-24 shrink-0 truncate text-xs text-muted-foreground lg:w-28" title={g.name}>
+                          {g.name}
+                        </span>
+                        <div className="flex-1">
+                          <div className="h-2.5 w-full overflow-hidden rounded-full bg-foreground/5">
+                            <div
+                              className="h-full rounded-full bg-primary/60 transition-all"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </div>
+                        <span className="w-6 text-right text-xs tabular-nums text-muted-foreground">
+                          {g.count}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Season types */}
+            <div className="min-w-0 rounded-xl border border-border/60 bg-background/30 p-4">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Por tipo
+              </p>
+              {stats.seasonTypeCounts.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Ainda sem temporadas</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {stats.seasonTypeCounts.map((t) => (
+                    <div
+                      key={t.name}
+                      className="inline-flex items-center gap-1.5 rounded-md bg-foreground/5 px-2.5 py-1.5 text-xs text-muted-foreground"
+                    >
+                      <span className="truncate">{t.name}</span>
+                      <span className="font-display font-semibold tabular-nums text-foreground">{t.count}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Decades */}
+            {stats.decadeCounts.length > 0 && (
+              <div className="min-w-0 rounded-xl border border-border/60 bg-background/30 p-4">
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Por década de estreia
+                </p>
+                <div className="flex flex-col gap-2">
+                  {stats.decadeCounts.map((d) => {
+                    const pct = (d.count / d.max) * 100;
+                    return (
+                      <div key={d.name} className="flex items-center gap-3">
+                        <span className="w-16 shrink-0 text-xs text-muted-foreground lg:w-20">{d.name}</span>
+                        <div className="flex-1">
+                          <div className="h-2.5 w-full overflow-hidden rounded-full bg-foreground/5">
+                            <div
+                              className="h-full rounded-full bg-primary/60 transition-all"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </div>
+                        <span className="w-6 text-right text-xs tabular-nums text-muted-foreground">
+                          {d.count}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
