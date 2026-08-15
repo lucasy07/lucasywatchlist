@@ -137,6 +137,16 @@ const TIER_ROWS = (Object.keys(TIER_VALUE) as Tier[]).sort(
   (a, b) => TIER_VALUE[b] - TIER_VALUE[a],
 );
 
+const ROW_IDS = new Set<string>([...TIER_ROWS, "none"]);
+
+/** Multi-container: ponteiro manda; cards têm prioridade sobre fileiras. */
+const tierCollisionDetection: CollisionDetection = (args) => {
+  const pointer = pointerWithin(args);
+  const collisions = pointer.length > 0 ? pointer : rectIntersection(args);
+  const cards = collisions.filter((c) => !ROW_IDS.has(String(c.id)));
+  return cards.length > 0 ? cards : collisions;
+};
+
 export const Route = createFileRoute("/_authenticated/")({
   codeSplitGroupings: [["component"]],
   component: Index,
