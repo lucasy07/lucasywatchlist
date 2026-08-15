@@ -117,7 +117,9 @@ import {
   KeyboardSensor,
   PointerSensor,
   TouchSensor,
-  closestCenter,
+  pointerWithin,
+  rectIntersection,
+  type CollisionDetection,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -134,6 +136,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 const TIER_ROWS = (Object.keys(TIER_VALUE) as Tier[]).sort(
   (a, b) => TIER_VALUE[b] - TIER_VALUE[a],
 );
+
+const ROW_IDS = new Set<string>([...TIER_ROWS, "none"]);
+
+/** Multi-container: ponteiro manda; cards têm prioridade sobre fileiras. */
+const tierCollisionDetection: CollisionDetection = (args) => {
+  const pointer = pointerWithin(args);
+  const collisions = pointer.length > 0 ? pointer : rectIntersection(args);
+  const cards = collisions.filter((c) => !ROW_IDS.has(String(c.id)));
+  return cards.length > 0 ? cards : collisions;
+};
 
 export const Route = createFileRoute("/_authenticated/")({
   codeSplitGroupings: [["component"]],
@@ -752,16 +764,29 @@ function Index() {
     const dragged = prev.find((a) => a.id === animeId);
     if (!dragged) return;
 
-    const row = tierRowOrdered(prev, destTier).filter((a) => a.id !== animeId);
-    let insertAt = row.length;
-    if (overAnimeId) {
-      const idx = row.findIndex((a) => a.id === overAnimeId);
-      if (idx !== -1) insertAt = idx;
+    const tierChanged = dragged.tier !== destTier;
+
+    let row: Anime[];
+    if (!tierChanged) {
+      const current = tierRowOrdered(prev, destTier);
+      const oldIndex = current.findIndex((a) => a.id === animeId);
+      let newIndex = current.length - 1;
+      if (overAnimeId) {
+        const idx = current.findIndex((a) => a.id === overAnimeId);
+        if (idx !== -1) newIndex = idx;
+      }
+      row = oldIndex === -1 ? current : arrayMove(current, oldIndex, newIndex);
+    } else {
+      row = tierRowOrdered(prev, destTier).filter((a) => a.id !== animeId);
+      let insertAt = row.length;
+      if (overAnimeId) {
+        const idx = row.findIndex((a) => a.id === overAnimeId);
+        if (idx !== -1) insertAt = idx;
+      }
+      row.splice(insertAt, 0, dragged);
     }
-    row.splice(insertAt, 0, dragged);
 
     const positions = new Map(row.map((a, i) => [a.id, i] as const));
-    const tierChanged = dragged.tier !== destTier;
 
     setAnimes((p) =>
       p.map((a) => {
@@ -1576,7 +1601,7 @@ function Index() {
           <div key={`${scoreMode}-${viewMode}`} className="space-y-2">
             <DndContext
               sensors={tierSensors}
-              collisionDetection={closestCenter}
+              collisionDetection={tierCollisionDetection}
               onDragStart={(e: DragStartEvent) => setDraggingAnimeId(String(e.active.id))}
               onDragCancel={() => setDraggingAnimeId(null)}
               onDragEnd={(e: DragEndEvent) => {
@@ -1619,7 +1644,7 @@ function Index() {
                 </TierDropRow>
               );
             })}
-            {ranked.some((a) => a.tier === null && a.watched) && (
+            {(draggingAnimeId !== null || ranked.some((a) => a.tier === null && a.watched)) && (
               <TierDropRow
                 id="none"
                 items={ranked.filter((a) => a.tier === null && a.watched).map((a) => a.id)}

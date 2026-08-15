@@ -82,13 +82,14 @@ export function TierDropRow({
 }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   return (
-    <div ref={setNodeRef} className={`relative flex items-stretch ${className ?? ""}`}>
+    <div
+      ref={setNodeRef}
+      className={`relative flex min-h-20 items-stretch transition-colors duration-150 motion-reduce:transition-none ${
+        isOver ? "bg-primary/5 ring-1 ring-inset ring-primary/40" : ""
+      } ${className ?? ""}`}
+    >
       {label}
-      <div
-        className={`flex flex-1 flex-wrap items-center gap-2.5 p-3 transition-colors duration-150 motion-reduce:transition-none ${
-          isOver ? "bg-primary/5 ring-1 ring-inset ring-primary/40" : ""
-        }`}
-      >
+      <div className="flex flex-1 flex-wrap content-center items-center gap-2.5 p-3">
         <SortableContext items={items} strategy={rectSortingStrategy}>
           {children}
         </SortableContext>
