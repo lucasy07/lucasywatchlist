@@ -1644,7 +1644,7 @@ function Index() {
                 </TierDropRow>
               );
             })}
-            {ranked.some((a) => a.tier === null && a.watched) && (
+            {(draggingAnimeId !== null || ranked.some((a) => a.tier === null && a.watched)) && (
               <TierDropRow
                 id="none"
                 items={ranked.filter((a) => a.tier === null && a.watched).map((a) => a.id)}
