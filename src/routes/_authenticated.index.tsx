@@ -1588,7 +1588,7 @@ function Index() {
           <div key={`${scoreMode}-${viewMode}`} className="space-y-2">
             <DndContext
               sensors={tierSensors}
-              collisionDetection={closestCenter}
+              collisionDetection={tierCollisionDetection}
               onDragStart={(e: DragStartEvent) => setDraggingAnimeId(String(e.active.id))}
               onDragCancel={() => setDraggingAnimeId(null)}
               onDragEnd={(e: DragEndEvent) => {
