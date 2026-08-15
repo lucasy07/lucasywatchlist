@@ -764,16 +764,29 @@ function Index() {
     const dragged = prev.find((a) => a.id === animeId);
     if (!dragged) return;
 
-    const row = tierRowOrdered(prev, destTier).filter((a) => a.id !== animeId);
-    let insertAt = row.length;
-    if (overAnimeId) {
-      const idx = row.findIndex((a) => a.id === overAnimeId);
-      if (idx !== -1) insertAt = idx;
+    const tierChanged = dragged.tier !== destTier;
+
+    let row: Anime[];
+    if (!tierChanged) {
+      const current = tierRowOrdered(prev, destTier);
+      const oldIndex = current.findIndex((a) => a.id === animeId);
+      let newIndex = current.length - 1;
+      if (overAnimeId) {
+        const idx = current.findIndex((a) => a.id === overAnimeId);
+        if (idx !== -1) newIndex = idx;
+      }
+      row = oldIndex === -1 ? current : arrayMove(current, oldIndex, newIndex);
+    } else {
+      row = tierRowOrdered(prev, destTier).filter((a) => a.id !== animeId);
+      let insertAt = row.length;
+      if (overAnimeId) {
+        const idx = row.findIndex((a) => a.id === overAnimeId);
+        if (idx !== -1) insertAt = idx;
+      }
+      row.splice(insertAt, 0, dragged);
     }
-    row.splice(insertAt, 0, dragged);
 
     const positions = new Map(row.map((a, i) => [a.id, i] as const));
-    const tierChanged = dragged.tier !== destTier;
 
     setAnimes((p) =>
       p.map((a) => {
