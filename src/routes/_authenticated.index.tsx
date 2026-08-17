@@ -209,6 +209,7 @@ function Index() {
   const [animes, setAnimes] = useState<Anime[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [search, setSearch] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [scoreMode, setScoreMode] = useState<"mal" | "gosto">("mal");
@@ -1324,11 +1325,32 @@ function Index() {
           <div className="relative">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
+              ref={searchInputRef}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  e.preventDefault();
+                  setSearch("");
+                  searchInputRef.current?.focus();
+                }
+              }}
               placeholder="Buscar na sua coleção..."
-              className="h-11 border-border/60 bg-card pl-10 text-base placeholder:text-muted-foreground/70 focus-visible:ring-primary/40"
+              className="h-11 border-border/60 bg-card pl-10 pr-12 text-base placeholder:text-muted-foreground/70 focus-visible:ring-primary/40"
             />
+            {search !== "" && (
+              <button
+                type="button"
+                aria-label="Limpar busca"
+                onClick={() => {
+                  setSearch("");
+                  searchInputRef.current?.focus();
+                }}
+                className="focus-ring absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground sm:h-8 sm:w-8"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
       </header>
