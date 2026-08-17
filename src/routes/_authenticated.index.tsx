@@ -1523,18 +1523,6 @@ function Index() {
                 ))}
               </>
             )}
-            <button
-              type="button"
-              onClick={() => setSemDadosFilter((v) => !v)}
-              aria-pressed={semDadosFilter}
-              className={`focus-ring ml-2 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
-                semDadosFilter
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Sem dados
-            </button>
             {scoreMode !== "gosto" && (
               <>
                 <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
@@ -1564,6 +1552,18 @@ function Index() {
                 })}
               </>
             )}
+            <button
+              type="button"
+              onClick={() => setSemDadosFilter((v) => !v)}
+              aria-pressed={semDadosFilter}
+              className={`focus-ring ml-2 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
+                semDadosFilter
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Sem dados
+            </button>
           </div>
           {filtersActive && (
             <button
