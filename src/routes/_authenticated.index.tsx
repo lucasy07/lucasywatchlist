@@ -1775,7 +1775,7 @@ function Index() {
                       variant="secondary"
                       size="sm"
                       onClick={() => openAddSeason(anime.id)}
-                      className="h-8 flex-1 text-xs"
+                      className="h-8 flex-1 text-xs transition-[color,box-shadow] duration-200 hover:bg-primary/15 hover:text-primary hover:ring-1 hover:ring-primary/40 focus-visible:bg-primary/15 focus-visible:text-primary focus-visible:ring-1 focus-visible:ring-primary/40 active:bg-primary/25"
                     >
                       <Plus className="mr-1 h-3.5 w-3.5" /> Temp.
                     </Button>
