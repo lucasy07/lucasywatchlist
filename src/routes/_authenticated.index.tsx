@@ -1718,63 +1718,71 @@ function Index() {
                   style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
                 >
                 <TiltCardInner>
-                  <div className="relative aspect-[2/3] w-full overflow-hidden bg-card-elevated">
-                    {anime.imageUrl || anime.cover ? (
-                      <img
-                        src={anime.imageUrl ?? anime.cover}
-                        alt={anime.name}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-primary/40">
-                        <ImageIcon className="h-10 w-10" />
-                      </div>
-                    )}
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-                    <div
-                      className={`font-display absolute left-2 top-2 flex h-7 min-w-7 items-center justify-center rounded-full border px-2 text-xs font-bold backdrop-blur ${
-                        idx === 0
-                          ? "border-primary/60 bg-primary/20 text-primary"
-                          : "border-border/60 bg-background/70 text-foreground/80"
-                      }`}
-                    >
-                      #{idx + 1}
-                    </div>
-                    <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
-                      <div className="flex items-baseline gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
-                        <span className={`font-display text-sm font-bold tabular-nums ${primaryColor}`}>
-                          {primaryValue}
-                        </span>
-                        <span className="text-[9px] text-muted-foreground">/10</span>
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
+                  <button
+                    type="button"
+                    onClick={() => openDetail(anime.id)}
+                    aria-label={anime.name}
+                    title={anime.name}
+                    className="block w-full cursor-pointer appearance-none border-0 bg-transparent p-0 text-left"
+                  >
+                    <div className="relative aspect-[2/3] w-full overflow-hidden bg-card-elevated">
+                      {anime.imageUrl || anime.cover ? (
+                        <img
+                          src={anime.imageUrl ?? anime.cover}
+                          alt={anime.name}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-primary/40">
+                          <ImageIcon className="h-10 w-10" />
+                        </div>
+                      )}
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                      <div
+                        className={`font-display absolute left-2 top-2 flex h-7 min-w-7 items-center justify-center rounded-full border px-2 text-xs font-bold backdrop-blur ${
+                          idx === 0
+                            ? "border-primary/60 bg-primary/20 text-primary"
+                            : "border-border/60 bg-background/70 text-foreground/80"
+                        }`}
                       >
-                        <span className={`font-display font-bold ${tierColor(anime.tier)}`}>
-                          {anime.tier ?? "—"}
+                        #{idx + 1}
+                      </div>
+                      <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
+                        <div className="flex items-baseline gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
+                          <span className={`font-display text-sm font-bold tabular-nums ${primaryColor}`}>
+                            {primaryValue}
+                          </span>
+                          <span className="text-[9px] text-muted-foreground">/10</span>
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
+                        >
+                          <span className={`font-display font-bold ${tierColor(anime.tier)}`}>
+                            {anime.tier ?? "—"}
+                          </span>
+                        </Badge>
+                      </div>
+                      {anime.upcoming?.releaseDate && (
+                        <span
+                          className="absolute left-2 top-11 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground shadow-lg"
+                        >
+                          <CalendarClock className="h-3 w-3" />
+                          {formatReleaseLabel(anime.upcoming.releaseDate)}
                         </span>
-                      </Badge>
+                      )}
+                      <div className="absolute inset-x-0 bottom-0 p-3">
+                        <h3 className="font-display line-clamp-2 text-sm font-semibold leading-tight tracking-tight">
+                          {anime.name}
+                        </h3>
+                        <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                          {anime.seasons.length}{" "}
+                          {anime.seasons.length === 1 ? "temporada" : "temporadas"}
+                        </p>
+                      </div>
                     </div>
-                    {anime.upcoming?.releaseDate && (
-                      <span
-                        className="absolute left-2 top-11 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground shadow-lg"
-                      >
-                        <CalendarClock className="h-3 w-3" />
-                        {formatReleaseLabel(anime.upcoming.releaseDate)}
-                      </span>
-                    )}
-                    <div className="absolute inset-x-0 bottom-0 p-3">
-                      <h3 className="font-display line-clamp-2 text-sm font-semibold leading-tight tracking-tight">
-                        {anime.name}
-                      </h3>
-                      <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
-                        {anime.seasons.length}{" "}
-                        {anime.seasons.length === 1 ? "temporada" : "temporadas"}
-                      </p>
-                    </div>
-                  </div>
+                  </button>
 
                   <div className="flex gap-1 p-2">
                     <Button
