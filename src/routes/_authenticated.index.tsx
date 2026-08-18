@@ -486,6 +486,12 @@ function Index() {
 
 
   const watchedCount = useMemo(() => animes.filter((a) => a.watched).length, [animes]);
+  const displayedCount = useMemo(() => {
+    return scoreMode === "gosto" ? ranked.filter((a) => a.watched).length : ranked.length;
+  }, [ranked, scoreMode]);
+  const displayedTotal = useMemo(() => {
+    return scoreMode === "gosto" ? watchedCount : animes.length;
+  }, [scoreMode, watchedCount, animes.length]);
   const detailAnime = useMemo(
     () => animes.find((a) => a.id === detailAnimeId),
     [animes, detailAnimeId],
