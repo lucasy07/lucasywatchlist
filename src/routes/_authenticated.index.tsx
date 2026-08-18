@@ -486,6 +486,12 @@ function Index() {
 
 
   const watchedCount = useMemo(() => animes.filter((a) => a.watched).length, [animes]);
+  const displayedCount = useMemo(() => {
+    return scoreMode === "gosto" ? ranked.filter((a) => a.watched).length : ranked.length;
+  }, [ranked, scoreMode]);
+  const displayedTotal = useMemo(() => {
+    return scoreMode === "gosto" ? watchedCount : animes.length;
+  }, [scoreMode, watchedCount, animes.length]);
   const detailAnime = useMemo(
     () => animes.find((a) => a.id === detailAnimeId),
     [animes, detailAnimeId],
@@ -1389,8 +1395,8 @@ function Index() {
           <div className="flex items-center gap-2">
             <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
               {filtersActive || search.trim() !== ""
-                ? `${ranked.length} de ${animes.length} animes`
-                : `${ranked.length} ${ranked.length === 1 ? "anime" : "animes"}`}
+                ? `${displayedCount} de ${displayedTotal} animes`
+                : `${displayedCount} ${displayedCount === 1 ? "anime" : "animes"}`}
             </p>
             <button
               type="button"
