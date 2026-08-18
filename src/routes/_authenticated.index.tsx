@@ -1395,8 +1395,8 @@ function Index() {
           <div className="flex items-center gap-2">
             <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
               {filtersActive || search.trim() !== ""
-                ? `${ranked.length} de ${animes.length} animes`
-                : `${ranked.length} ${ranked.length === 1 ? "anime" : "animes"}`}
+                ? `${displayedCount} de ${displayedTotal} animes`
+                : `${displayedCount} ${displayedCount === 1 ? "anime" : "animes"}`}
             </p>
             <button
               type="button"
