@@ -85,6 +85,17 @@ function SortableRow({
         </div>
         <p className="text-[11px] text-muted-foreground">
           {season.year ?? "Ano —"}
+          {season.episodes !== undefined && (
+            <>
+              {" · "}
+              <span className="inline-flex items-center gap-0.5">
+                <Tv className="h-2.5 w-2.5" />
+                {typeof season.episodes === "number" && season.episodes > 0
+                  ? `${season.episodes} ep`
+                  : "— ep"}
+              </span>
+            </>
+          )}
           {typeof season.malScore === "number" && (
             <>
               {" · "}
