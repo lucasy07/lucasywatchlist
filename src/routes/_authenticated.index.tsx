@@ -94,6 +94,7 @@ import {
   formatLastChecked,
   isExcludedFromAverage,
   allGenres,
+  parseJikanDuration,
 } from "@/lib/anime-storage";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
@@ -254,7 +255,7 @@ function Index() {
   const [seasonSearch, setSeasonSearch] = useState("");
   const [seasonPick, setSeasonPick] = useState<JikanPick | null>(null);
   const [seasonDetailsLoading, setSeasonDetailsLoading] = useState(false);
-  const [seasonDetails, setSeasonDetails] = useState<{ malId: number; type: string | null; year: number | null } | null>(null);
+  const [seasonDetails, setSeasonDetails] = useState<{ malId: number; type: string | null; year: number | null; episodes: number | null; durationMin: number | null } | null>(null);
   
   
 
@@ -290,6 +291,8 @@ function Index() {
     imageUrl: string | null;
     type: string | null;
     year: number | null;
+    episodes: number | null;
+    durationMin: number | null;
   };
   type UpdatedSeason = {
     parentId: string;
@@ -557,6 +560,8 @@ function Index() {
                 status: null,
                 airedFrom: null,
                 genres: [],
+                episodes: null,
+                durationMin: null,
               },
             ];
       setChainSeasons(finalSeasons);
@@ -606,6 +611,8 @@ function Index() {
           year: s.year,
           malScore: s.malScore,
           type: s.type,
+          episodes: s.episodes,
+          durationMin: s.durationMin,
         }));
         const created = await createAnime({
           name: first.title,
@@ -678,12 +685,18 @@ function Index() {
         const y: number | null =
           data?.year ??
           (data?.aired?.from ? new Date(data.aired.from).getFullYear() : null);
-        setSeasonDetails({ malId: pick.malId, type: t, year: Number.isFinite(y as number) ? (y as number) : null });
+        setSeasonDetails({
+          malId: pick.malId,
+          type: t,
+          year: Number.isFinite(y as number) ? (y as number) : null,
+          episodes: data?.episodes ?? null,
+          durationMin: parseJikanDuration(data?.duration),
+        });
       } else {
-        setSeasonDetails({ malId: pick.malId, type: null, year: null });
+        setSeasonDetails({ malId: pick.malId, type: null, year: null, episodes: null, durationMin: null });
       }
     } catch {
-      setSeasonDetails({ malId: pick.malId, type: null, year: null });
+      setSeasonDetails({ malId: pick.malId, type: null, year: null, episodes: null, durationMin: null });
     } finally {
       setSeasonDetailsLoading(false);
     }
@@ -715,6 +728,8 @@ function Index() {
       malScore: seasonPick.score ?? null,
       year: seasonDetails?.year ?? null,
       type: seasonDetails?.type ?? null,
+      episodes: seasonDetails?.episodes ?? null,
+      durationMin: seasonDetails?.durationMin ?? null,
     };
     const newSeasons = [...target.seasons, newSeason];
     const prev = animes;
@@ -1008,6 +1023,8 @@ function Index() {
               imageUrl: s.imageUrl,
               type: s.type,
               year: s.year,
+              episodes: s.episodes,
+              durationMin: s.durationMin,
             });
           }
         }
@@ -1115,6 +1132,8 @@ function Index() {
       year: found.year,
       malScore: found.malScore,
       type: found.type,
+      episodes: found.episodes,
+      durationMin: found.durationMin,
     };
     const newSeasons = [...target.seasons, newSeason];
     setAnimes((prev) =>
