@@ -12,7 +12,62 @@ export type Season = {
   type?: string | null;
   /** Override explícito de inclusão na média. undefined = usa o default por tipo. */
   includeInAverage?: boolean;
+  /** Quantidade de episódios. undefined = nunca buscado; null = buscado e indisponível. */
+  episodes?: number | null;
+  /** Duração em minutos POR episódio. undefined = nunca buscado; null = indisponível. */
+  durationMin?: number | null;
 };
+
+/**
+ * A Jikan devolve `duration` como string livre ("24 min per ep", "1 hr 47 min").
+ * Retorna o total em minutos ou null quando desconhecido.
+ */
+export function parseJikanDuration(raw: string | null | undefined): number | null {
+  if (typeof raw !== "string") return null;
+  const s = raw.toLowerCase().trim();
+  if (!s || s.includes("unknown")) return null;
+  const hr = s.match(/(\d+)\s*(?:hr|hour)s?/);
+  const min = s.match(/(\d+)\s*(?:min|minute)s?/);
+  const sec = s.match(/(\d+)\s*(?:sec|second)s?/);
+  let total = 0;
+  if (hr) total += parseInt(hr[1], 10) * 60;
+  if (min) total += parseInt(min[1], 10);
+  if (!hr && !min && sec) total += Math.round(parseInt(sec[1], 10) / 60);
+  return total > 0 ? total : null;
+}
+
+/** Minutos totais da temporada (episódios × duração). null se dado incompleto. */
+export function seasonMinutes(season: Season): number | null {
+  const eps = season.episodes;
+  const dur = season.durationMin;
+  if (typeof eps !== "number" || typeof dur !== "number") return null;
+  if (!eps || !dur) return null;
+  return eps * dur;
+}
+
+/**
+ * Soma o tempo de TODAS as temporadas (inclui OVA/Special —
+ * `isExcludedFromAverage` vale só para média de nota).
+ */
+export function animeMinutes(anime: Anime): {
+  minutes: number;
+  episodes: number;
+  missing: number;
+} {
+  let minutes = 0;
+  let episodes = 0;
+  let missing = 0;
+  for (const s of anime.seasons) {
+    const m = seasonMinutes(s);
+    if (m === null) {
+      missing += 1;
+      continue;
+    }
+    minutes += m;
+    episodes += typeof s.episodes === "number" ? s.episodes : 0;
+  }
+  return { minutes, episodes, missing };
+}
 
 export function isExcludedFromAverage(season: Season): boolean {
   if (season.includeInAverage === true) return false;
