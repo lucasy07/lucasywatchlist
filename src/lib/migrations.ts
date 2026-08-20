@@ -5,6 +5,7 @@ import {
   updateAnimeMeta,
   updateSeasons,
   updateTier,
+  parseJikanDuration,
 } from "@/lib/anime-storage";
 
 const MIGRATIONS_KEY_PREFIX = "anime-watchlist:migrations:";
@@ -211,6 +212,48 @@ async function backfillSeasonType({ animes, onPatch, signal }: MigrationParams):
   }
 }
 
+async function backfillSeasonEpisodes({ animes, onPatch, signal }: MigrationParams): Promise<void> {
+  const targets = animes.filter((a) =>
+    a.seasons.some((s) => s.malId && s.episodes === undefined),
+  );
+  if (targets.length === 0) return;
+
+  for (const anime of targets) {
+    if (signal.aborted) return;
+    const seasons = [...anime.seasons];
+    let changed = false;
+    for (let i = 0; i < seasons.length; i++) {
+      if (signal.aborted) return;
+      const s = seasons[i];
+      if (!s.malId || s.episodes !== undefined) continue;
+      try {
+        const res = await fetch(`https://api.jikan.moe/v4/anime/${s.malId}`);
+        if (res.ok) {
+          const json = await res.json();
+          seasons[i] = {
+            ...s,
+            episodes: json?.data?.episodes ?? null,
+            durationMin: parseJikanDuration(json?.data?.duration),
+          };
+          changed = true;
+        }
+      } catch {
+        // ignore; retried in a future session
+      }
+      await sleep(400);
+    }
+    if (changed && !signal.aborted) {
+      try {
+        await updateSeasons(anime.id, seasons);
+        if (signal.aborted) return;
+        onPatch(anime.id, { seasons });
+      } catch {
+        // ignore
+      }
+    }
+  }
+}
+
 async function backfillGenres({ animes, onPatch, signal }: MigrationParams): Promise<void> {
   const targets = animes.filter((a) => a.genres == null && typeof a.malId === "number");
   if (targets.length === 0) return;
@@ -269,6 +312,8 @@ export async function runMigrations(params: MigrationParams): Promise<void> {
   await backfillImageUrl(params);
   if (params.signal.aborted) return;
   await backfillSeasonType(params);
+  if (params.signal.aborted) return;
+  await backfillSeasonEpisodes(params);
   if (params.signal.aborted) return;
   await backfillGenres(params);
   if (params.signal.aborted) return;

@@ -94,6 +94,7 @@ import {
   formatLastChecked,
   isExcludedFromAverage,
   allGenres,
+  parseJikanDuration,
 } from "@/lib/anime-storage";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
