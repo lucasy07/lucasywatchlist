@@ -2,6 +2,8 @@
 // fetches details for each related entry. Used to import an entire series
 // as one anime grouped by its seasons.
 
+import { parseJikanDuration } from "@/lib/anime-storage";
+
 export type ChainSeason = {
   malId: number;
   title: string;
@@ -12,6 +14,8 @@ export type ChainSeason = {
   status: string | null;
   airedFrom: string | null;
   genres: string[];
+  episodes: number | null;
+  durationMin: number | null;
 };
 
 type JikanRelation = {
@@ -27,6 +31,8 @@ type JikanFull = {
   year: number | null;
   score: number | null;
   aired?: { from?: string | null } | null;
+  episodes?: number | null;
+  duration?: string | null;
   images?: { jpg?: { large_image_url?: string; image_url?: string } };
   genres?: Array<{ name: string }> | null;
 };
@@ -159,6 +165,8 @@ export async function buildChain(
         type: d.type,
         status: d.status ?? null,
         airedFrom: d.aired?.from ?? null,
+        episodes: d.episodes ?? null,
+        durationMin: parseJikanDuration(d.duration),
         genres: [
           ...new Set(
             (Array.isArray(d.genres) ? d.genres : [])
