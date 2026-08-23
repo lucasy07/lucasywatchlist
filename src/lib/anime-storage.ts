@@ -69,6 +69,22 @@ export function animeMinutes(anime: Anime): {
   return { minutes, episodes, missing };
 }
 
+/** "3 d 7 h" / "14 h 20 min" / "45 min" */
+export function formatMinutes(min: number): string {
+  const total = Math.max(0, Math.round(min));
+  if (total >= 1440) {
+    const days = Math.floor(total / 1440);
+    const hours = Math.floor((total % 1440) / 60);
+    return hours > 0 ? `${days} d ${hours} h` : `${days} d`;
+  }
+  if (total >= 60) {
+    const hours = Math.floor(total / 60);
+    const rest = total % 60;
+    return rest > 0 ? `${hours} h ${rest} min` : `${hours} h`;
+  }
+  return `${total} min`;
+}
+
 export function isExcludedFromAverage(season: Season): boolean {
   if (season.includeInAverage === true) return false;
   if (season.includeInAverage === false) return true;

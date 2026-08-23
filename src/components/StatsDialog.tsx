@@ -1,7 +1,14 @@
 import { useMemo } from "react";
 import { User } from "lucide-react";
 import type { Anime, Tier } from "@/lib/anime-storage";
-import { mediaMAL, allGenres, TIER_VALUE } from "@/lib/anime-storage";
+import {
+  mediaMAL,
+  allGenres,
+  TIER_VALUE,
+  seasonMinutes,
+  animeMinutes,
+  formatMinutes,
+} from "@/lib/anime-storage";
 import { useAuth } from "@/auth/AuthProvider";
 import { tierColor, tierBg } from "@/components/TierPicker";
 import {
@@ -39,7 +46,16 @@ type Stats = {
   topGenres: Array<{ name: string; count: number; max: number }>;
   seasonTypeCounts: Array<{ name: string; count: number }>;
   decadeCounts: Array<{ name: string; count: number; max: number }>;
+  timeMinutes: number;
+  timeEpisodes: number;
+  missingSeasons: number;
+  timeTopAnimes: Array<{ name: string; minutes: number; max: number }>;
+  timeByTier: Array<{ tier: Tier; minutes: number; max: number }>;
+  timeByGenre: Array<{ name: string; minutes: number; max: number }>;
+  avgEpisodesPerSeason: number | null;
+  avgEpisodeDuration: number | null;
 };
+
 
 export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
   const { user } = useAuth();
@@ -147,6 +163,68 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
     const maxDecadeCount = decadeList.length > 0 ? Math.max(...decadeList.map((d) => d.count), 1) : 1;
     const decadeListWithMax = decadeList.map((d) => ({ ...d, max: maxDecadeCount }));
 
+    // ---- Time block (watched animes only, all season types) ----
+    const watchedAnimes = animes.filter((a) => a.watched);
+    let timeMinutes = 0;
+    let timeEpisodes = 0;
+    let missingSeasons = 0;
+    let epsSum = 0;
+    let epsSeasons = 0;
+    let weightedDurationSum = 0;
+    let weightedEpisodes = 0;
+    for (const a of watchedAnimes) {
+      for (const s of a.seasons) {
+        const m = seasonMinutes(s);
+        if (m === null) missingSeasons += 1;
+        else {
+          timeMinutes += m;
+          timeEpisodes += typeof s.episodes === "number" ? s.episodes : 0;
+        }
+        if (typeof s.episodes === "number" && s.episodes > 0) {
+          epsSum += s.episodes;
+          epsSeasons += 1;
+          if (typeof s.durationMin === "number" && s.durationMin > 0) {
+            weightedDurationSum += s.episodes * s.durationMin;
+            weightedEpisodes += s.episodes;
+          }
+        }
+      }
+    }
+
+    const topAnimeTimes = watchedAnimes
+      .map((a) => ({ name: a.name, minutes: animeMinutes(a).minutes }))
+      .filter((x) => x.minutes > 0)
+      .sort((x, y) => y.minutes - x.minutes || x.name.localeCompare(y.name))
+      .slice(0, 5);
+    const maxAnimeTime = topAnimeTimes.length > 0 ? topAnimeTimes[0].minutes : 1;
+    const timeTopAnimes = topAnimeTimes.map((x) => ({ ...x, max: maxAnimeTime }));
+
+    const tierTimes = (Object.keys(TIER_VALUE) as Tier[])
+      .sort((x, y) => TIER_VALUE[y] - TIER_VALUE[x])
+      .map((tier) => ({
+        tier,
+        minutes: watchedAnimes
+          .filter((a) => a.tier === tier)
+          .reduce((sum, a) => sum + animeMinutes(a).minutes, 0),
+      }));
+    const maxTierTime = Math.max(...tierTimes.map((t) => t.minutes), 1);
+    const timeByTier = tierTimes.map((t) => ({ ...t, max: maxTierTime }));
+
+    const genreTime = new Map<string, number>();
+    for (const a of watchedAnimes) {
+      const mins = animeMinutes(a).minutes;
+      if (mins <= 0 || !Array.isArray(a.genres)) continue;
+      for (const g of new Set(a.genres)) {
+        genreTime.set(g, (genreTime.get(g) ?? 0) + mins);
+      }
+    }
+    const genreTimeList = [...genreTime.entries()]
+      .map(([name, minutes]) => ({ name, minutes }))
+      .sort((x, y) => y.minutes - x.minutes || x.name.localeCompare(y.name))
+      .slice(0, 8);
+    const maxGenreTime = genreTimeList.length > 0 ? genreTimeList[0].minutes : 1;
+    const timeByGenre = genreTimeList.map((g) => ({ ...g, max: maxGenreTime }));
+
     return {
       total,
       watchedCount,
@@ -168,6 +246,14 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
       topGenres: topGenresWithMax,
       seasonTypeCounts,
       decadeCounts: decadeListWithMax,
+      timeMinutes,
+      timeEpisodes,
+      missingSeasons,
+      timeTopAnimes,
+      timeByTier,
+      timeByGenre,
+      avgEpisodesPerSeason: epsSeasons === 0 ? null : epsSum / epsSeasons,
+      avgEpisodeDuration: weightedEpisodes === 0 ? null : weightedDurationSum / weightedEpisodes,
     };
   }, [animes]);
 
@@ -237,6 +323,125 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
               </span>
             </div>
           </div>
+
+          {/* Time block */}
+          <div className="rounded-xl border border-border/60 bg-background/30 p-4">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Tempo
+            </p>
+            {stats.timeMinutes === 0 ? (
+              <p className="text-sm text-muted-foreground">Ainda sem dados de duração</p>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div className="min-w-0">
+                  <p className="font-display text-3xl font-bold tabular-nums text-primary">
+                    {formatMinutes(stats.timeMinutes)}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {stats.timeEpisodes} episódios assistidos
+                    {stats.avgEpisodesPerSeason !== null
+                      ? ` · ${stats.avgEpisodesPerSeason.toFixed(1)} eps por temporada`
+                      : ""}
+                  </p>
+                  {stats.avgEpisodeDuration !== null && (
+                    <p className="text-[11px] text-muted-foreground">
+                      Episódio médio de {Math.round(stats.avgEpisodeDuration)} min
+                    </p>
+                  )}
+                  {stats.missingSeasons > 0 && (
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      {stats.missingSeasons} temporadas sem dados de duração
+                    </p>
+                  )}
+
+                  {stats.timeTopAnimes.length > 0 && (
+                    <div className="mt-4 flex flex-col gap-2">
+                      <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                        Top 5 por tempo
+                      </p>
+                      {stats.timeTopAnimes.map((a) => (
+                        <div key={a.name} className="flex min-w-0 items-center gap-3">
+                          <span className="w-24 shrink-0 truncate text-xs text-muted-foreground lg:w-28" title={a.name}>
+                            {a.name}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="h-2.5 w-full overflow-hidden rounded-full bg-foreground/5">
+                              <div
+                                className="h-full rounded-full bg-primary/60 transition-all"
+                                style={{ width: `${(a.minutes / a.max) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                          <span className="shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">
+                            {formatMinutes(a.minutes)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="min-w-0 flex flex-col gap-4">
+                  <div className="flex flex-col gap-2">
+                    <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                      Tempo por tier
+                    </p>
+                    {stats.timeByTier.map((t) => (
+                      <div key={t.tier} className="flex min-w-0 items-center gap-3">
+                        <span className={`w-6 shrink-0 font-display text-xs font-bold ${tierColor(t.tier)}`}>
+                          {t.tier}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="h-2.5 w-full overflow-hidden rounded-full bg-foreground/5">
+                            <div
+                              className={`h-full rounded-full transition-all ${tierBg(t.tier)}`}
+                              style={{ width: `${(t.minutes / t.max) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                        <span className="shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">
+                          {t.minutes === 0 ? "—" : formatMinutes(t.minutes)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {stats.timeByGenre.length > 0 && (
+                    <div className="flex flex-col gap-2">
+                      <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                        Tempo por gênero
+                      </p>
+                      {stats.timeByGenre.map((g) => (
+                        <div key={g.name} className="flex min-w-0 items-center gap-3">
+                          <span className="w-24 shrink-0 truncate text-xs text-muted-foreground lg:w-28" title={g.name}>
+                            {g.name}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="h-2.5 w-full overflow-hidden rounded-full bg-foreground/5">
+                              <div
+                                className="h-full rounded-full bg-primary/60 transition-all"
+                                style={{ width: `${(g.minutes / g.max) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                          <span className="shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">
+                            {formatMinutes(g.minutes)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {stats.timeMinutes === 0 && stats.missingSeasons > 0 && (
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                {stats.missingSeasons} temporadas sem dados de duração
+              </p>
+            )}
+          </div>
+
+
 
           {/* Records grid */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
