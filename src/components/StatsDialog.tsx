@@ -46,7 +46,16 @@ type Stats = {
   topGenres: Array<{ name: string; count: number; max: number }>;
   seasonTypeCounts: Array<{ name: string; count: number }>;
   decadeCounts: Array<{ name: string; count: number; max: number }>;
+  timeMinutes: number;
+  timeEpisodes: number;
+  missingSeasons: number;
+  timeTopAnimes: Array<{ name: string; minutes: number; max: number }>;
+  timeByTier: Array<{ tier: Tier; minutes: number; max: number }>;
+  timeByGenre: Array<{ name: string; minutes: number; max: number }>;
+  avgEpisodesPerSeason: number | null;
+  avgEpisodeDuration: number | null;
 };
+
 
 export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
   const { user } = useAuth();
