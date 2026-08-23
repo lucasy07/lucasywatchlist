@@ -1,7 +1,14 @@
 import { useMemo } from "react";
 import { User } from "lucide-react";
 import type { Anime, Tier } from "@/lib/anime-storage";
-import { mediaMAL, allGenres, TIER_VALUE } from "@/lib/anime-storage";
+import {
+  mediaMAL,
+  allGenres,
+  TIER_VALUE,
+  seasonMinutes,
+  animeMinutes,
+  formatMinutes,
+} from "@/lib/anime-storage";
 import { useAuth } from "@/auth/AuthProvider";
 import { tierColor, tierBg } from "@/components/TierPicker";
 import {
