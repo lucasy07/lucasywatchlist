@@ -324,6 +324,125 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
             </div>
           </div>
 
+          {/* Time block */}
+          <div className="rounded-xl border border-border/60 bg-background/30 p-4">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Tempo
+            </p>
+            {stats.timeMinutes === 0 ? (
+              <p className="text-sm text-muted-foreground">Ainda sem dados de duração</p>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div className="min-w-0">
+                  <p className="font-display text-3xl font-bold tabular-nums text-primary">
+                    {formatMinutes(stats.timeMinutes)}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {stats.timeEpisodes} episódios assistidos
+                    {stats.avgEpisodesPerSeason !== null
+                      ? ` · ${stats.avgEpisodesPerSeason.toFixed(1)} eps por temporada`
+                      : ""}
+                  </p>
+                  {stats.avgEpisodeDuration !== null && (
+                    <p className="text-[11px] text-muted-foreground">
+                      Episódio médio de {Math.round(stats.avgEpisodeDuration)} min
+                    </p>
+                  )}
+                  {stats.missingSeasons > 0 && (
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      {stats.missingSeasons} temporadas sem dados de duração
+                    </p>
+                  )}
+
+                  {stats.timeTopAnimes.length > 0 && (
+                    <div className="mt-4 flex flex-col gap-2">
+                      <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                        Top 5 por tempo
+                      </p>
+                      {stats.timeTopAnimes.map((a) => (
+                        <div key={a.name} className="flex min-w-0 items-center gap-3">
+                          <span className="w-24 shrink-0 truncate text-xs text-muted-foreground lg:w-28" title={a.name}>
+                            {a.name}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="h-2.5 w-full overflow-hidden rounded-full bg-foreground/5">
+                              <div
+                                className="h-full rounded-full bg-primary/60 transition-all"
+                                style={{ width: `${(a.minutes / a.max) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                          <span className="shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">
+                            {formatMinutes(a.minutes)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="min-w-0 flex flex-col gap-4">
+                  <div className="flex flex-col gap-2">
+                    <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                      Tempo por tier
+                    </p>
+                    {stats.timeByTier.map((t) => (
+                      <div key={t.tier} className="flex min-w-0 items-center gap-3">
+                        <span className={`w-6 shrink-0 font-display text-xs font-bold ${tierColor(t.tier)}`}>
+                          {t.tier}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="h-2.5 w-full overflow-hidden rounded-full bg-foreground/5">
+                            <div
+                              className={`h-full rounded-full transition-all ${tierBg(t.tier)}`}
+                              style={{ width: `${(t.minutes / t.max) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                        <span className="shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">
+                          {t.minutes === 0 ? "—" : formatMinutes(t.minutes)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {stats.timeByGenre.length > 0 && (
+                    <div className="flex flex-col gap-2">
+                      <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                        Tempo por gênero
+                      </p>
+                      {stats.timeByGenre.map((g) => (
+                        <div key={g.name} className="flex min-w-0 items-center gap-3">
+                          <span className="w-24 shrink-0 truncate text-xs text-muted-foreground lg:w-28" title={g.name}>
+                            {g.name}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="h-2.5 w-full overflow-hidden rounded-full bg-foreground/5">
+                              <div
+                                className="h-full rounded-full bg-primary/60 transition-all"
+                                style={{ width: `${(g.minutes / g.max) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                          <span className="shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">
+                            {formatMinutes(g.minutes)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {stats.timeMinutes === 0 && stats.missingSeasons > 0 && (
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                {stats.missingSeasons} temporadas sem dados de duração
+              </p>
+            )}
+          </div>
+
+
+
           {/* Records grid */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Collection group */}
