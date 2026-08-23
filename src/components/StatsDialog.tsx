@@ -163,6 +163,68 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
     const maxDecadeCount = decadeList.length > 0 ? Math.max(...decadeList.map((d) => d.count), 1) : 1;
     const decadeListWithMax = decadeList.map((d) => ({ ...d, max: maxDecadeCount }));
 
+    // ---- Time block (watched animes only, all season types) ----
+    const watchedAnimes = animes.filter((a) => a.watched);
+    let timeMinutes = 0;
+    let timeEpisodes = 0;
+    let missingSeasons = 0;
+    let epsSum = 0;
+    let epsSeasons = 0;
+    let weightedDurationSum = 0;
+    let weightedEpisodes = 0;
+    for (const a of watchedAnimes) {
+      for (const s of a.seasons) {
+        const m = seasonMinutes(s);
+        if (m === null) missingSeasons += 1;
+        else {
+          timeMinutes += m;
+          timeEpisodes += typeof s.episodes === "number" ? s.episodes : 0;
+        }
+        if (typeof s.episodes === "number" && s.episodes > 0) {
+          epsSum += s.episodes;
+          epsSeasons += 1;
+          if (typeof s.durationMin === "number" && s.durationMin > 0) {
+            weightedDurationSum += s.episodes * s.durationMin;
+            weightedEpisodes += s.episodes;
+          }
+        }
+      }
+    }
+
+    const topAnimeTimes = watchedAnimes
+      .map((a) => ({ name: a.name, minutes: animeMinutes(a).minutes }))
+      .filter((x) => x.minutes > 0)
+      .sort((x, y) => y.minutes - x.minutes || x.name.localeCompare(y.name))
+      .slice(0, 5);
+    const maxAnimeTime = topAnimeTimes.length > 0 ? topAnimeTimes[0].minutes : 1;
+    const timeTopAnimes = topAnimeTimes.map((x) => ({ ...x, max: maxAnimeTime }));
+
+    const tierTimes = (Object.keys(TIER_VALUE) as Tier[])
+      .sort((x, y) => TIER_VALUE[y] - TIER_VALUE[x])
+      .map((tier) => ({
+        tier,
+        minutes: watchedAnimes
+          .filter((a) => a.tier === tier)
+          .reduce((sum, a) => sum + animeMinutes(a).minutes, 0),
+      }));
+    const maxTierTime = Math.max(...tierTimes.map((t) => t.minutes), 1);
+    const timeByTier = tierTimes.map((t) => ({ ...t, max: maxTierTime }));
+
+    const genreTime = new Map<string, number>();
+    for (const a of watchedAnimes) {
+      const mins = animeMinutes(a).minutes;
+      if (mins <= 0 || !Array.isArray(a.genres)) continue;
+      for (const g of new Set(a.genres)) {
+        genreTime.set(g, (genreTime.get(g) ?? 0) + mins);
+      }
+    }
+    const genreTimeList = [...genreTime.entries()]
+      .map(([name, minutes]) => ({ name, minutes }))
+      .sort((x, y) => y.minutes - x.minutes || x.name.localeCompare(y.name))
+      .slice(0, 8);
+    const maxGenreTime = genreTimeList.length > 0 ? genreTimeList[0].minutes : 1;
+    const timeByGenre = genreTimeList.map((g) => ({ ...g, max: maxGenreTime }));
+
     return {
       total,
       watchedCount,
