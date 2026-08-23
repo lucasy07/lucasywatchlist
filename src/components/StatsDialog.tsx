@@ -246,6 +246,14 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
       topGenres: topGenresWithMax,
       seasonTypeCounts,
       decadeCounts: decadeListWithMax,
+      timeMinutes,
+      timeEpisodes,
+      missingSeasons,
+      timeTopAnimes,
+      timeByTier,
+      timeByGenre,
+      avgEpisodesPerSeason: epsSeasons === 0 ? null : epsSum / epsSeasons,
+      avgEpisodeDuration: weightedEpisodes === 0 ? null : weightedDurationSum / weightedEpisodes,
     };
   }, [animes]);
 
