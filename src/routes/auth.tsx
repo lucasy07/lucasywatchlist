@@ -339,6 +339,35 @@ function AuthPage() {
 
 
             <form onSubmit={handleSubmit} className="auth-form grid" noValidate>
+              {mode === "signup" && (
+                <div className="grid gap-2">
+                  <Label
+                    htmlFor="username"
+                    className="text-xs uppercase tracking-[0.14em] text-muted-foreground"
+                  >
+                    Nome de usuário
+                  </Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    autoComplete="username"
+                    maxLength={20}
+                    value={username}
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                      clearFieldError("username");
+                    }}
+                    aria-invalid={!!errors.username}
+                    aria-describedby={errors.username ? "username-error" : undefined}
+                    className="h-11 min-h-11 rounded-none border-0 border-b-[1.5px] border-border-interactive bg-transparent px-0 shadow-none transition-colors focus-visible:border-b-2 focus-visible:border-b-primary focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 aria-invalid:border-b-destructive focus-visible:aria-invalid:border-b-destructive"
+                  />
+                  {errors.username && (
+                    <p id="username-error" role="alert" className="text-xs text-destructive">
+                      {errors.username}
+                    </p>
+                  )}
+                </div>
+              )}
               <div className="grid gap-2">
                 <Label
                   htmlFor="email"
