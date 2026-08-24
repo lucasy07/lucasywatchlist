@@ -203,6 +203,8 @@ async function backfillSeasonType({ animes, onPatch, signal }: MigrationParams):
     if (changed && !signal.aborted) {
       try {
         await updateSeasons(anime.id, seasons);
+        // Keep the shared snapshot in sync so later backfills don't write stale seasons back.
+        anime.seasons = seasons;
         if (signal.aborted) return;
         onPatch(anime.id, { seasons });
       } catch {
@@ -245,6 +247,8 @@ async function backfillSeasonEpisodes({ animes, onPatch, signal }: MigrationPara
     if (changed && !signal.aborted) {
       try {
         await updateSeasons(anime.id, seasons);
+        // Keep the shared snapshot in sync so later backfills don't write stale seasons back.
+        anime.seasons = seasons;
         if (signal.aborted) return;
         onPatch(anime.id, { seasons });
       } catch {
