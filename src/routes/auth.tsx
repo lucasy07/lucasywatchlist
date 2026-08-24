@@ -62,12 +62,13 @@ function AuthPage() {
     }
   }, [loading, session, navigate]);
 
-  function clearFieldError(field: "email" | "password" | "confirmPassword") {
+  function clearFieldError(field: "username" | "email" | "password" | "confirmPassword") {
     setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
   }
 
   function switchMode(next: "signin" | "signup" | "reset") {
     setMode(next);
+    setUsername("");
     setConfirmPassword("");
     setErrors({});
     setServerError(null);
@@ -78,6 +79,14 @@ function AuthPage() {
 
   function validate() {
     const next: typeof errors = {};
+    if (mode === "signup") {
+      const u = username.trim();
+      if (!u) next.username = "Informe um nome de usuário.";
+      else if (u.length < 3 || u.length > 20)
+        next.username = "O nome de usuário deve ter de 3 a 20 caracteres.";
+      else if (!USERNAME_RE.test(u))
+        next.username = "Use apenas letras, números, ponto, hífen e underscore.";
+    }
     if (!email.trim()) next.email = "Informe seu e-mail.";
     else if (!EMAIL_RE.test(email.trim())) next.email = "Formato de e-mail inválido.";
     if (mode !== "reset") {
