@@ -23,6 +23,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const USERNAME_RE = /^[A-Za-z0-9._-]+$/;
 
 function translateAuthError(raw: string): string {
   const m = raw.toLowerCase();
