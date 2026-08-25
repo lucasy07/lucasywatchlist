@@ -1336,14 +1336,8 @@ function Index() {
                 </span>
               )}
             </button>
-            <button
-              onClick={() => signOut()}
-              className="focus-ring flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center rounded-lg border border-border/60 bg-card text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive"
-              aria-label="Sair"
-              title={user?.email ?? "Sair"}
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
+            <ProfileMenu />
+
           </div>
         </div>
         <div className="mx-auto max-w-5xl px-4 pb-4 sm:px-6">
