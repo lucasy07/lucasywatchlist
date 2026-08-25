@@ -18,7 +18,6 @@ import {
   LayoutGrid,
   List as ListIcon,
   CalendarClock,
-  LogOut,
   Check,
   RotateCcw,
 
@@ -205,7 +204,7 @@ function scoreColor(n: number | null): string {
 
 
 function Index() {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { setStep } = useBootProgress();
 
   const [animes, setAnimes] = useState<Anime[]>([]);
