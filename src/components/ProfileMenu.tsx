@@ -191,11 +191,11 @@ export function ProfileMenu() {
           <button
             type="button"
             aria-label="Menu do perfil"
-            className="focus-ring flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center rounded-lg border border-border/60 bg-card transition-colors hover:border-primary/50"
+            className="focus-ring h-11 w-11 sm:h-9 sm:w-9 rounded-full ring-1 ring-border/60 transition-colors hover:ring-primary/50"
           >
-            <Avatar className="h-7 w-7 sm:h-6 sm:w-6">
-              {avatarSrc && <AvatarImage src={avatarSrc} alt={profile?.username ?? "Perfil"} />}
-              <AvatarFallback className="text-xs">{initial}</AvatarFallback>
+            <Avatar className="h-full w-full">
+              {avatarSrc && <AvatarImage src={avatarSrc} alt={profile?.username ?? "Perfil"} className="object-cover" />}
+              <AvatarFallback className="text-sm sm:text-xs">{initial}</AvatarFallback>
             </Avatar>
           </button>
         </DropdownMenuTrigger>
