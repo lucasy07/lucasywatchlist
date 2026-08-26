@@ -1,4 +1,5 @@
-import { defineConfig, loadEnv } from "vitest/config";
+import { defineConfig } from "vitest/config";
+import { loadEnv } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 const fileEnv = loadEnv("development", process.cwd(), "");
