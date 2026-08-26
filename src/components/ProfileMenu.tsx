@@ -128,18 +128,7 @@ export function ProfileMenu() {
     setPreview(objectUrl);
     try {
       const blob = await resizeToWebp(file);
-      const path = `${user.id}/avatar.webp`;
-      const { error: upErr } = await supabase.storage
-        .from("avatars")
-        .upload(path, blob, { upsert: true, contentType: "image/webp" });
-      if (upErr) throw upErr;
-
-      const { error: dbErr } = await supabase
-        .from("profiles")
-        .update({ avatar_url: `${path}?v=${Date.now()}` })
-        .eq("id", user.id);
-      if (dbErr) throw dbErr;
-
+      await uploadAvatar(supabase, user.id, blob);
       await refreshProfile();
       toast.success("Foto de perfil atualizada!");
     } catch (e) {
@@ -156,12 +145,7 @@ export function ProfileMenu() {
     if (!window.confirm("Remover sua foto de perfil?")) return;
     setUploading(true);
     try {
-      await supabase.storage.from("avatars").remove([`${user.id}/avatar.webp`]);
-      const { error: dbErr } = await supabase
-        .from("profiles")
-        .update({ avatar_url: null })
-        .eq("id", user.id);
-      if (dbErr) throw dbErr;
+      await removeAvatar(supabase, user.id);
       await refreshProfile();
       toast.success("Foto removida.");
     } catch (e) {
@@ -170,6 +154,7 @@ export function ProfileMenu() {
       setUploading(false);
     }
   }
+
 
   async function save() {
     const u = value.trim();
