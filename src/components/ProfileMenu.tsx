@@ -3,6 +3,8 @@ import { Loader2, LogOut, Pencil, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
+import { removeAvatar, uploadAvatar } from "@/lib/avatar-upload";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
