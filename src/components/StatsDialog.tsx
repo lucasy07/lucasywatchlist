@@ -10,6 +10,7 @@ import {
   formatMinutes,
 } from "@/lib/anime-storage";
 import { useAuth } from "@/auth/AuthProvider";
+import { useAvatarSrc } from "@/hooks/use-avatar-src";
 import { tierColor, tierBg } from "@/components/TierPicker";
 import {
   Dialog,
@@ -18,6 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type StatsDialogProps = {
   animes: Anime[];
@@ -58,7 +60,8 @@ type Stats = {
 
 
 export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const avatarSrc = useAvatarSrc(profile?.avatar_url);
 
   // All calculations are based on the entire collection, never the filtered view.
   const stats = useMemo<Stats>(() => {
@@ -258,7 +261,8 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
   }, [animes]);
 
   const createdAt = user?.created_at ? new Date(user.created_at) : null;
-  const emailInitial = user?.email ? user.email.charAt(0).toUpperCase() : null;
+  const displayName = profile?.username ?? user?.email ?? "—";
+  const nameInitial = (profile?.username?.[0] ?? user?.email?.[0] ?? null)?.toUpperCase();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -272,11 +276,17 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
           <div className="rounded-xl border border-border/60 bg-background/30 p-4">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <div className="flex min-w-0 flex-1 items-center gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-primary/40 bg-primary/15 font-display text-lg font-bold text-primary">
-                  {emailInitial ?? <User className="h-5 w-5" />}
-                </div>
+                <Avatar className="h-12 w-12 shrink-0 rounded-full ring-1 ring-primary/40">
+                  {avatarSrc && <AvatarImage src={avatarSrc} alt={displayName} className="object-cover" />}
+                  <AvatarFallback className="bg-primary/15 text-lg font-bold text-primary">
+                    {nameInitial ?? <User className="h-5 w-5" />}
+                  </AvatarFallback>
+                </Avatar>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-display text-base font-semibold">
+                    {displayName}
+                  </p>
+                  <p className="truncate text-[11px] text-muted-foreground">
                     {user?.email ?? "—"}
                   </p>
                   <p className="text-[11px] text-muted-foreground">
