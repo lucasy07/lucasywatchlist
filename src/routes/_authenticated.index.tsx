@@ -220,6 +220,8 @@ function Index() {
   const [semDadosFilter, setSemDadosFilter] = useState(false);
   const [watchedFilter, setWatchedFilter] = useState<"todos" | "nao" | "sim">("nao");
   const [draggingAnimeId, setDraggingAnimeId] = useState<string | null>(null);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tierSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
