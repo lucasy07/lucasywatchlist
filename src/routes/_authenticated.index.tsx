@@ -646,6 +646,9 @@ function Index() {
         setAnimes((prev) => [...prev, created]);
         resetAddAnime();
         setAnimeDialogOpen(false);
+        if (scoreMode !== "gosto" && animeMatchesFilters(created)) {
+          setTimeout(() => revealAnime(created.id), 0);
+        }
         toast.success(
           `"${first.title}" adicionado com ${seasons.length} temporada${seasons.length === 1 ? "" : "s"}`,
         );
@@ -662,6 +665,9 @@ function Index() {
       setAnimes((prev) => [...prev, created]);
       resetAddAnime();
       setAnimeDialogOpen(false);
+      if (scoreMode !== "gosto" && animeMatchesFilters(created)) {
+        setTimeout(() => revealAnime(created.id), 0);
+      }
       toast.success(`"${name}" adicionado`);
     } catch (err) {
       console.error(err);
