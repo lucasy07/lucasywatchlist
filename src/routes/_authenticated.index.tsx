@@ -1700,7 +1700,14 @@ function Index() {
                   }
                 >
                   {items.map((anime, idx) => (
-                    <DraggableCover key={anime.id} anime={anime} idx={idx} onOpen={openDetail} />
+                    <DraggableCover
+                      key={anime.id}
+                      id={`anime-${anime.id}`}
+                      anime={anime}
+                      idx={idx}
+                      onOpen={openDetail}
+                      highlighted={highlightId === anime.id}
+                    />
                   ))}
                 </TierDropRow>
               );
