@@ -404,33 +404,33 @@ function Index() {
     [genreFilter],
   );
 
-  const ranked = useMemo(() => {
+  function animeMatchesFilters(a: Anime) {
     const q = search.toLowerCase().trim();
-    const wantedTypes = new Set(
-      [...typeFilter].map((t) => t.toLowerCase()),
-    );
+    if (scoreMode !== "gosto") {
+      if (watchedFilter === "nao" && a.watched) return false;
+      if (watchedFilter === "sim" && !a.watched) return false;
+    }
+    if (!a.name.toLowerCase().includes(q)) return false;
+    if (tierFilter.size > 0 && (a.tier === null || !tierFilter.has(a.tier))) return false;
+    const wantedTypes = new Set([...typeFilter].map((t) => t.toLowerCase()));
+    if (
+      wantedTypes.size > 0 &&
+      !a.seasons.some((s) => s.type && wantedTypes.has(s.type.toLowerCase()))
+    ) {
+      return false;
+    }
     const wantedGenres = [...genreFilter].map((g) => g.toLowerCase());
-    const filtered = animes.filter((a) => {
-      if (scoreMode !== "gosto") {
-        if (watchedFilter === "nao" && a.watched) return false;
-        if (watchedFilter === "sim" && !a.watched) return false;
-      }
-      if (!a.name.toLowerCase().includes(q)) return false;
-      if (tierFilter.size > 0 && (a.tier === null || !tierFilter.has(a.tier))) return false;
-      if (
-        wantedTypes.size > 0 &&
-        !a.seasons.some((s) => s.type && wantedTypes.has(s.type.toLowerCase()))
-      ) {
-        return false;
-      }
-      if (wantedGenres.length > 0) {
-        const have = new Set((a.genres ?? []).map((g) => g.toLowerCase()));
-        if (have.size === 0) return false;
-        if (!wantedGenres.every((g) => have.has(g))) return false;
-      }
-      if (semDadosFilter && !(a.tier === null || mediaMAL(a.seasons) === null)) return false;
-      return true;
-    });
+    if (wantedGenres.length > 0) {
+      const have = new Set((a.genres ?? []).map((g) => g.toLowerCase()));
+      if (have.size === 0) return false;
+      if (!wantedGenres.every((g) => have.has(g))) return false;
+    }
+    if (semDadosFilter && !(a.tier === null || mediaMAL(a.seasons) === null)) return false;
+    return true;
+  }
+
+  const ranked = useMemo(() => {
+    const filtered = animes.filter(animeMatchesFilters);
     if (scoreMode === "gosto") {
       return [...filtered].sort((a, b) => {
         const va = a.tier === null ? -1 : TIER_VALUE[a.tier];
@@ -454,6 +454,24 @@ function Index() {
       return mb - ma;
     });
   }, [animes, search, scoreMode, tierFilter, typeFilter, genreFilter, semDadosFilter, watchedFilter]);
+
+  function revealAnime(id: string) {
+    const el = document.getElementById(`anime-${id}`);
+    if (!el) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ block: "center", behavior: reduced ? "auto" : "smooth" });
+    setHighlightId(id);
+    if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
+    highlightTimeoutRef.current = setTimeout(() => {
+      setHighlightId((current) => (current === id ? null : current));
+    }, 2500);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
+    };
+  }, []);
 
   const watchedFilterActive = scoreMode !== "gosto" && watchedFilter !== "nao";
   const filtersActive =
