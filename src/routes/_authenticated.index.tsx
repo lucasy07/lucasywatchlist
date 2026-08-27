@@ -1761,7 +1761,12 @@ function Index() {
               return (
                 <li
                   key={anime.id}
-                  className="animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none [transform-style:preserve-3d]"
+                  id={`anime-${anime.id}`}
+                  className={`animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none [transform-style:preserve-3d] ${
+                    highlightId === anime.id
+                      ? "ring-2 ring-primary shadow-[var(--shadow-elegant)] animate-pulse motion-reduce:animate-none"
+                      : ""
+                  }`}
                   style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
                 >
                 <TiltCardInner>
