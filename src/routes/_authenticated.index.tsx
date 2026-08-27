@@ -220,6 +220,8 @@ function Index() {
   const [semDadosFilter, setSemDadosFilter] = useState(false);
   const [watchedFilter, setWatchedFilter] = useState<"todos" | "nao" | "sim">("nao");
   const [draggingAnimeId, setDraggingAnimeId] = useState<string | null>(null);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tierSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
@@ -402,33 +404,33 @@ function Index() {
     [genreFilter],
   );
 
-  const ranked = useMemo(() => {
+  function animeMatchesFilters(a: Anime) {
     const q = search.toLowerCase().trim();
-    const wantedTypes = new Set(
-      [...typeFilter].map((t) => t.toLowerCase()),
-    );
+    if (scoreMode !== "gosto") {
+      if (watchedFilter === "nao" && a.watched) return false;
+      if (watchedFilter === "sim" && !a.watched) return false;
+    }
+    if (!a.name.toLowerCase().includes(q)) return false;
+    if (tierFilter.size > 0 && (a.tier === null || !tierFilter.has(a.tier))) return false;
+    const wantedTypes = new Set([...typeFilter].map((t) => t.toLowerCase()));
+    if (
+      wantedTypes.size > 0 &&
+      !a.seasons.some((s) => s.type && wantedTypes.has(s.type.toLowerCase()))
+    ) {
+      return false;
+    }
     const wantedGenres = [...genreFilter].map((g) => g.toLowerCase());
-    const filtered = animes.filter((a) => {
-      if (scoreMode !== "gosto") {
-        if (watchedFilter === "nao" && a.watched) return false;
-        if (watchedFilter === "sim" && !a.watched) return false;
-      }
-      if (!a.name.toLowerCase().includes(q)) return false;
-      if (tierFilter.size > 0 && (a.tier === null || !tierFilter.has(a.tier))) return false;
-      if (
-        wantedTypes.size > 0 &&
-        !a.seasons.some((s) => s.type && wantedTypes.has(s.type.toLowerCase()))
-      ) {
-        return false;
-      }
-      if (wantedGenres.length > 0) {
-        const have = new Set((a.genres ?? []).map((g) => g.toLowerCase()));
-        if (have.size === 0) return false;
-        if (!wantedGenres.every((g) => have.has(g))) return false;
-      }
-      if (semDadosFilter && !(a.tier === null || mediaMAL(a.seasons) === null)) return false;
-      return true;
-    });
+    if (wantedGenres.length > 0) {
+      const have = new Set((a.genres ?? []).map((g) => g.toLowerCase()));
+      if (have.size === 0) return false;
+      if (!wantedGenres.every((g) => have.has(g))) return false;
+    }
+    if (semDadosFilter && !(a.tier === null || mediaMAL(a.seasons) === null)) return false;
+    return true;
+  }
+
+  const ranked = useMemo(() => {
+    const filtered = animes.filter(animeMatchesFilters);
     if (scoreMode === "gosto") {
       return [...filtered].sort((a, b) => {
         const va = a.tier === null ? -1 : TIER_VALUE[a.tier];
@@ -452,6 +454,24 @@ function Index() {
       return mb - ma;
     });
   }, [animes, search, scoreMode, tierFilter, typeFilter, genreFilter, semDadosFilter, watchedFilter]);
+
+  function revealAnime(id: string) {
+    const el = document.getElementById(`anime-${id}`);
+    if (!el) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ block: "center", behavior: reduced ? "auto" : "smooth" });
+    setHighlightId(id);
+    if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
+    highlightTimeoutRef.current = setTimeout(() => {
+      setHighlightId((current) => (current === id ? null : current));
+    }, 2500);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
+    };
+  }, []);
 
   const watchedFilterActive = scoreMode !== "gosto" && watchedFilter !== "nao";
   const filtersActive =
@@ -626,6 +646,9 @@ function Index() {
         setAnimes((prev) => [...prev, created]);
         resetAddAnime();
         setAnimeDialogOpen(false);
+        if (scoreMode !== "gosto" && animeMatchesFilters(created)) {
+          setTimeout(() => revealAnime(created.id), 0);
+        }
         toast.success(
           `"${first.title}" adicionado com ${seasons.length} temporada${seasons.length === 1 ? "" : "s"}`,
         );
@@ -642,6 +665,9 @@ function Index() {
       setAnimes((prev) => [...prev, created]);
       resetAddAnime();
       setAnimeDialogOpen(false);
+      if (scoreMode !== "gosto" && animeMatchesFilters(created)) {
+        setTimeout(() => revealAnime(created.id), 0);
+      }
       toast.success(`"${name}" adicionado`);
     } catch (err) {
       console.error(err);
@@ -1680,7 +1706,14 @@ function Index() {
                   }
                 >
                   {items.map((anime, idx) => (
-                    <DraggableCover key={anime.id} anime={anime} idx={idx} onOpen={openDetail} />
+                    <DraggableCover
+                      key={anime.id}
+                      id={`anime-${anime.id}`}
+                      anime={anime}
+                      idx={idx}
+                      onOpen={openDetail}
+                      highlighted={highlightId === anime.id}
+                    />
                   ))}
                 </TierDropRow>
               );
@@ -1702,7 +1735,14 @@ function Index() {
                 {ranked
                   .filter((a) => a.tier === null && a.watched)
                   .map((anime, idx) => (
-                    <DraggableCover key={anime.id} anime={anime} idx={idx} onOpen={openDetail} />
+                    <DraggableCover
+                      key={anime.id}
+                      id={`anime-${anime.id}`}
+                      anime={anime}
+                      idx={idx}
+                      onOpen={openDetail}
+                      highlighted={highlightId === anime.id}
+                    />
                   ))}
               </TierDropRow>
             )}
@@ -1727,7 +1767,12 @@ function Index() {
               return (
                 <li
                   key={anime.id}
-                  className="animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none [transform-style:preserve-3d]"
+                  id={`anime-${anime.id}`}
+                  className={`animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none [transform-style:preserve-3d] ${
+                    highlightId === anime.id
+                      ? "ring-2 ring-primary shadow-[var(--shadow-elegant)] animate-pulse motion-reduce:animate-none"
+                      : ""
+                  }`}
                   style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
                 >
                 <TiltCardInner>
@@ -1866,7 +1911,12 @@ function Index() {
               return (
                 <li
                   key={anime.id}
-                  className="group relative overflow-hidden rounded-2xl border border-border/60 transition-all animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)]"
+                  id={`anime-${anime.id}`}
+                  className={`group relative overflow-hidden rounded-2xl border border-border/60 transition-all animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)] ${
+                    highlightId === anime.id
+                      ? "ring-2 ring-primary shadow-[var(--shadow-elegant)] animate-pulse motion-reduce:animate-none"
+                      : ""
+                  }`}
                   style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)", animationDelay: `${Math.min(idx, 12) * 30}ms` }}
                 >
                   <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5">
