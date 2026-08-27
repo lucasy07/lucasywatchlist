@@ -1905,7 +1905,12 @@ function Index() {
               return (
                 <li
                   key={anime.id}
-                  className="group relative overflow-hidden rounded-2xl border border-border/60 transition-all animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)]"
+                  id={`anime-${anime.id}`}
+                  className={`group relative overflow-hidden rounded-2xl border border-border/60 transition-all animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)] ${
+                    highlightId === anime.id
+                      ? "ring-2 ring-primary shadow-[var(--shadow-elegant)] animate-pulse motion-reduce:animate-none"
+                      : ""
+                  }`}
                   style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)", animationDelay: `${Math.min(idx, 12) * 30}ms` }}
                 >
                   <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5">
