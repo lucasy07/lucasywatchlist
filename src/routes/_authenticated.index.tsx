@@ -2622,7 +2622,7 @@ function Index() {
           if (!open) setDetailAnimeId("");
         }}
       >
-        <DialogContent className="max-h-[90vh] max-w-[calc(100vw-2rem)] overflow-y-auto overflow-x-hidden border-border bg-card">
+        <DialogContent className="max-h-[90vh] max-w-[calc(100vw-2rem)] sm:max-w-2xl overflow-y-auto overflow-x-hidden border-border bg-card">
           <DialogHeader>
             <DialogTitle>Detalhes do anime</DialogTitle>
             
