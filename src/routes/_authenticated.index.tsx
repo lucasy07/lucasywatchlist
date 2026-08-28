@@ -429,6 +429,15 @@ function Index() {
     return true;
   }
 
+  function compareByMAL(a: Anime, b: Anime) {
+    const ma = mediaMAL(a.seasons);
+    const mb = mediaMAL(b.seasons);
+    if (ma === null && mb === null) return 0;
+    if (ma === null) return 1;
+    if (mb === null) return -1;
+    return mb - ma;
+  }
+
   const ranked = useMemo(() => {
     const filtered = animes.filter(animeMatchesFilters);
     if (scoreMode === "gosto") {
@@ -445,14 +454,7 @@ function Index() {
       });
     }
 
-    return [...filtered].sort((a, b) => {
-      const ma = mediaMAL(a.seasons);
-      const mb = mediaMAL(b.seasons);
-      if (ma === null && mb === null) return 0;
-      if (ma === null) return 1;
-      if (mb === null) return -1;
-      return mb - ma;
-    });
+    return [...filtered].sort(compareByMAL);
   }, [animes, search, scoreMode, tierFilter, typeFilter, genreFilter, semDadosFilter, watchedFilter]);
 
   function revealAnime(id: string) {
