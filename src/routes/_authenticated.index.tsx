@@ -2274,11 +2274,14 @@ function Index() {
                 <p className="text-xs text-muted-foreground">
                   {selectedChainIds.size} de {chainSeasons.length} selecionada{chainSeasons.length === 1 ? "" : "s"}
                 </p>
-                <ul className="max-h-56 space-y-1 overflow-y-auto rounded-md border border-border p-2">
+                <ul className="max-h-72 overflow-y-auto rounded-md border border-border p-2">
                   {chainSeasons.map((s) => {
                     const checked = selectedChainIds.has(s.malId);
                     return (
-                      <li key={s.malId} className="flex items-center gap-2">
+                      <li
+                        key={s.malId}
+                        className="flex items-start gap-2 rounded-md px-2 py-2 hover:bg-muted/40"
+                      >
                         <Checkbox
                           id={`chain-${s.malId}`}
                           checked={checked}
@@ -2290,20 +2293,21 @@ function Index() {
                               return next;
                             });
                           }}
+                          className="mt-1"
                         />
                         <label
                           htmlFor={`chain-${s.malId}`}
-                          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-sm"
+                          className="min-w-0 flex-1 cursor-pointer text-sm"
                         >
-                          <span className="min-w-0 flex-1 truncate">{s.title}</span>
-                          {s.year != null && (
-                            <span className="text-xs text-muted-foreground">{s.year}</span>
-                          )}
-                          {s.type && (
-                            <Badge variant="outline" className="px-1.5 py-0 text-[10px]">
-                              {s.type}
-                            </Badge>
-                          )}
+                          <span className="block">{s.title}</span>
+                          <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+                            {s.year != null && <span>{s.year}</span>}
+                            {s.type && (
+                              <Badge variant="outline" className="px-1.5 py-0 text-[10px]">
+                                {s.type}
+                              </Badge>
+                            )}
+                          </div>
                         </label>
                       </li>
                     );
