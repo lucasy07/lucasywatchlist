@@ -664,6 +664,7 @@ function Index() {
         }
         toast.success(
           `"${first.title}" adicionado com ${seasons.length} temporada${seasons.length === 1 ? "" : "s"}`,
+          { description: addedAnimeDescription(created) },
         );
         return;
       }
@@ -681,7 +682,9 @@ function Index() {
       if (scoreMode !== "gosto" && animeMatchesFilters(created)) {
         setTimeout(() => revealAnime(created.id), 0);
       }
-      toast.success(`"${name}" adicionado`);
+      toast.success(`"${name}" adicionado`, {
+        description: addedAnimeDescription(created),
+      });
     } catch (err) {
       console.error(err);
       toast.error("Falha ao adicionar anime");
