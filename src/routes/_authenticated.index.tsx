@@ -469,15 +469,34 @@ function Index() {
     }, 2500);
   }
 
-  function addedAnimeDescription(created: Anime): string {
+  function addedAnimeToastOptions(created: Anime): {
+    description: string;
+    action?: { label: string; onClick: () => void };
+  } {
     if (scoreMode === "gosto") {
-      return "Sem tier e não assistido — marque como assistido para ele entrar na tierlist";
+      return {
+        description: "Sem tier e não assistido — marque como assistido para ele entrar na tierlist",
+        action: { label: "Ver", onClick: () => openDetail(created.id) },
+      };
+    }
+    if (!animeMatchesFilters(created)) {
+      return {
+        description: "Escondido pelos filtros ativos",
+        action: {
+          label: "Ver",
+          onClick: () => {
+            setSearch("");
+            clearFilters();
+            setTimeout(() => revealAnime(created.id), 0);
+          },
+        },
+      };
     }
     if (mediaMAL(created.seasons) === null) {
-      return "Sem nota do MAL ainda — vai para o fim da lista";
+      return { description: "Sem nota do MAL ainda — vai para o fim da lista" };
     }
     const position = [...animes, created].sort(compareByMAL).findIndex((a) => a.id === created.id) + 1;
-    return `#${position} por nota MAL`;
+    return { description: `#${position} por nota MAL` };
   }
 
   useEffect(() => {
