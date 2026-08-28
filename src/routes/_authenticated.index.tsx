@@ -429,6 +429,15 @@ function Index() {
     return true;
   }
 
+  function compareByMAL(a: Anime, b: Anime) {
+    const ma = mediaMAL(a.seasons);
+    const mb = mediaMAL(b.seasons);
+    if (ma === null && mb === null) return 0;
+    if (ma === null) return 1;
+    if (mb === null) return -1;
+    return mb - ma;
+  }
+
   const ranked = useMemo(() => {
     const filtered = animes.filter(animeMatchesFilters);
     if (scoreMode === "gosto") {
@@ -445,14 +454,7 @@ function Index() {
       });
     }
 
-    return [...filtered].sort((a, b) => {
-      const ma = mediaMAL(a.seasons);
-      const mb = mediaMAL(b.seasons);
-      if (ma === null && mb === null) return 0;
-      if (ma === null) return 1;
-      if (mb === null) return -1;
-      return mb - ma;
-    });
+    return [...filtered].sort(compareByMAL);
   }, [animes, search, scoreMode, tierFilter, typeFilter, genreFilter, semDadosFilter, watchedFilter]);
 
   function revealAnime(id: string) {
@@ -465,6 +467,17 @@ function Index() {
     highlightTimeoutRef.current = setTimeout(() => {
       setHighlightId((current) => (current === id ? null : current));
     }, 2500);
+  }
+
+  function addedAnimeDescription(created: Anime): string {
+    if (scoreMode === "gosto") {
+      return "Sem tier e não assistido — marque como assistido para ele entrar na tierlist";
+    }
+    if (mediaMAL(created.seasons) === null) {
+      return "Sem nota do MAL ainda — vai para o fim da lista";
+    }
+    const position = [...animes, created].sort(compareByMAL).findIndex((a) => a.id === created.id) + 1;
+    return `#${position} por nota MAL`;
   }
 
   useEffect(() => {
@@ -651,6 +664,7 @@ function Index() {
         }
         toast.success(
           `"${first.title}" adicionado com ${seasons.length} temporada${seasons.length === 1 ? "" : "s"}`,
+          { description: addedAnimeDescription(created) },
         );
         return;
       }
@@ -668,7 +682,9 @@ function Index() {
       if (scoreMode !== "gosto" && animeMatchesFilters(created)) {
         setTimeout(() => revealAnime(created.id), 0);
       }
-      toast.success(`"${name}" adicionado`);
+      toast.success(`"${name}" adicionado`, {
+        description: addedAnimeDescription(created),
+      });
     } catch (err) {
       console.error(err);
       toast.error("Falha ao adicionar anime");
