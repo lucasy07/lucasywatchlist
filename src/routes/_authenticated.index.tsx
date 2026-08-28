@@ -469,6 +469,17 @@ function Index() {
     }, 2500);
   }
 
+  function addedAnimeDescription(created: Anime): string {
+    if (scoreMode === "gosto") {
+      return "Sem tier e não assistido — marque como assistido para ele entrar na tierlist";
+    }
+    if (mediaMAL(created.seasons) === null) {
+      return "Sem nota do MAL ainda — vai para o fim da lista";
+    }
+    const position = [...animes, created].sort(compareByMAL).findIndex((a) => a.id === created.id) + 1;
+    return `#${position} por nota MAL`;
+  }
+
   useEffect(() => {
     return () => {
       if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
