@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Loader2, LogOut, Pencil, Trash2, Upload } from "lucide-react";
+import { BarChart3, Loader2, LogOut, Pencil, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
