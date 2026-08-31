@@ -26,7 +26,6 @@ import {
   RefreshCw,
   Filter,
   AlertCircle,
-  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1395,7 +1394,7 @@ function Index() {
                 </span>
               )}
             </button>
-            <ProfileMenu />
+            <ProfileMenu onOpenStats={() => setStatsOpen(true)} />
 
           </div>
         </div>
@@ -1464,21 +1463,11 @@ function Index() {
               )}
             </div>
           )}
-          <div className="flex items-center gap-2">
-            <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
-              {filtersActive || search.trim() !== ""
-                ? `${displayedCount} de ${displayedTotal} animes`
-                : `${displayedCount} ${displayedCount === 1 ? "anime" : "animes"}`}
-            </p>
-            <button
-              type="button"
-              onClick={() => setStatsOpen(true)}
-              aria-label="Estatísticas"
-              className="focus-ring flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-primary"
-            >
-              <BarChart3 className="h-4 w-4" />
-            </button>
-          </div>
+          <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
+            {filtersActive || search.trim() !== ""
+              ? `${displayedCount} de ${displayedTotal} animes`
+              : `${displayedCount} ${displayedCount === 1 ? "anime" : "animes"}`}
+          </p>
         </div>
 
         {showFilters && (

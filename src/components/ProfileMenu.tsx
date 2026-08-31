@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Loader2, LogOut, Pencil, Trash2, Upload } from "lucide-react";
+import { BarChart3, Loader2, LogOut, Pencil, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,7 +59,7 @@ async function resizeToWebp(file: File): Promise<Blob> {
   }
 }
 
-export function ProfileMenu() {
+export function ProfileMenu({ onOpenStats }: { onOpenStats: () => void }) {
   const { user, profile, refreshProfile, signOut } = useAuth();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
@@ -165,22 +165,24 @@ export function ProfileMenu() {
           <button
             type="button"
             aria-label="Menu do perfil"
-            className="focus-ring h-11 w-11 sm:h-9 sm:w-9 rounded-full ring-1 ring-border/60 transition-colors hover:ring-primary/50"
+            className="focus-ring inline-flex h-11 items-center gap-2 rounded-full ring-1 ring-border/60 transition-colors hover:ring-primary/50 sm:h-9"
           >
-            <Avatar className="h-full w-full">
+            <Avatar className="h-11 w-11 shrink-0 sm:h-9 sm:w-9">
               {avatarSrc && <AvatarImage src={avatarSrc} alt={profile?.username ?? "Perfil"} className="object-cover" />}
               <AvatarFallback className="text-sm sm:text-xs">{initial}</AvatarFallback>
             </Avatar>
+            {profile?.username && (
+              <span className="hidden max-w-[8rem] truncate pr-3 text-sm font-medium text-foreground sm:inline">
+                {profile.username}
+              </span>
+            )}
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
-          <div className="px-2 py-1.5">
-            <p className="truncate text-sm font-medium text-foreground">
-              {profile?.username ?? "Sem nome de usuário"}
-            </p>
-            <p className="truncate text-xs text-muted-foreground">{email}</p>
-          </div>
-          <DropdownMenuSeparator />
+          <DropdownMenuItem className="min-h-11 sm:min-h-0" onSelect={() => onOpenStats()}>
+            <BarChart3 className="mr-2 h-4 w-4" />
+            Estatísticas
+          </DropdownMenuItem>
           <DropdownMenuItem className="min-h-11 sm:min-h-0" onSelect={() => setOpen(true)}>
             <Pencil className="mr-2 h-4 w-4" />
             Editar perfil
