@@ -198,7 +198,7 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
       .map((a) => ({ name: a.name, minutes: animeMinutes(a).minutes }))
       .filter((x) => x.minutes > 0)
       .sort((x, y) => y.minutes - x.minutes || x.name.localeCompare(y.name))
-      .slice(0, 5);
+      .slice(0, 10);
     const maxAnimeTime = topAnimeTimes.length > 0 ? topAnimeTimes[0].minutes : 1;
     const timeTopAnimes = topAnimeTimes.map((x) => ({ ...x, max: maxAnimeTime }));
 
@@ -367,11 +367,11 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                   {stats.timeTopAnimes.length > 0 && (
                     <div className="mt-4 flex flex-col gap-2">
                       <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
-                        Top 5 por tempo
+                        Top 10 por tempo
                       </p>
                       {stats.timeTopAnimes.map((a) => (
                         <div key={a.name} className="flex min-w-0 items-center gap-3">
-                          <span className="w-24 shrink-0 truncate text-xs text-muted-foreground lg:w-28" title={a.name}>
+                          <span className="w-32 shrink-0 truncate text-xs text-muted-foreground lg:w-44" title={a.name}>
                             {a.name}
                           </span>
                           <div className="min-w-0 flex-1">
