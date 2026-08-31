@@ -59,7 +59,7 @@ async function resizeToWebp(file: File): Promise<Blob> {
   }
 }
 
-export function ProfileMenu() {
+export function ProfileMenu({ onOpenStats }: { onOpenStats: () => void }) {
   const { user, profile, refreshProfile, signOut } = useAuth();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
