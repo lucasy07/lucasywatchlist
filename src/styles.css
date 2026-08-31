@@ -55,6 +55,8 @@
   --color-tier-d: var(--tier-d);
   --color-tier-e: var(--tier-e);
   --color-tier-foreground: var(--tier-foreground);
+  --color-award: var(--award);
+  --color-award-foreground: var(--award-foreground);
   --font-sans: "Zen Kaku Gothic New", ui-sans-serif, system-ui, sans-serif;
   --font-display: "M PLUS Rounded 1c", ui-sans-serif, system-ui, sans-serif;
 }
@@ -89,6 +91,8 @@
   --accent-foreground: #1C1E28;
   --destructive: #E0603F;
   --destructive-foreground: #1C1E28;
+  --award: #E8B65A;
+  --award-foreground: #1C1E28;
   --border: #333748;
   --border-strong: #424759;
   --input: #242733;
