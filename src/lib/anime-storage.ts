@@ -105,6 +105,12 @@ export function tierFromAverage(avg: number): Tier {
   return "D";
 }
 
+export const AWARD_GENRE = "Award Winning";
+
+export function isAwardWinning(anime: Anime): boolean {
+  return Array.isArray(anime.genres) && anime.genres.some((g) => g.trim().toLowerCase() === AWARD_GENRE.toLowerCase());
+}
+
 export type UpcomingSeason = {
   title: string;
   /** ISO date string (YYYY-MM-DD) */

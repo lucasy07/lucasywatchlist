@@ -26,6 +26,7 @@ import {
   RefreshCw,
   Filter,
   AlertCircle,
+  Award,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,6 +94,8 @@ import {
   isExcludedFromAverage,
   allGenres,
   parseJikanDuration,
+  AWARD_GENRE,
+  isAwardWinning,
 } from "@/lib/anime-storage";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
@@ -1985,23 +1988,42 @@ function Index() {
                           {formatReleaseLabel(anime.upcoming.releaseDate)}
                         </span>
                       )}
-                      {anime.genres && anime.genres.length > 0 && (
+                      {(isAwardWinning(anime) || (anime.genres && anime.genres.length > 0)) && (
                         <div className="mt-2 flex flex-wrap gap-1">
-                          {anime.genres.map((g) => {
-                            const on = genreFilterLower.has(g.toLowerCase());
-                            return (
-                              <span
-                                key={g}
-                                className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium ${
-                                  on
-                                    ? "bg-primary/15 text-primary"
-                                    : "bg-foreground/5 text-muted-foreground"
-                                }`}
-                              >
-                                {g}
-                              </span>
-                            );
-                          })}
+                          {isAwardWinning(anime) && (
+                            <button
+                              type="button"
+                              aria-label="Filtrar por Premiado"
+                              title="Premiado no MAL"
+                              onClick={() => {
+                                setGenreFilter(new Set([AWARD_GENRE]));
+                                setShowFilters(true);
+                              }}
+                              className="focus-ring inline-flex items-center gap-1 rounded-md bg-award px-1.5 py-0.5 text-[10px] font-medium text-award-foreground transition-colors hover:brightness-110"
+                            >
+                              <Award className="h-3 w-3" />
+                              Premiado
+                            </button>
+                          )}
+                          {anime.genres
+                            ?.filter(
+                              (g) => g.trim().toLowerCase() !== AWARD_GENRE.toLowerCase(),
+                            )
+                            .map((g) => {
+                              const on = genreFilterLower.has(g.toLowerCase());
+                              return (
+                                <span
+                                  key={g}
+                                  className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium ${
+                                    on
+                                      ? "bg-primary/15 text-primary"
+                                      : "bg-foreground/5 text-muted-foreground"
+                                  }`}
+                                >
+                                  {g}
+                                </span>
+                              );
+                            })}
                         </div>
                       )}
 
@@ -2668,22 +2690,42 @@ function Index() {
                   <p className="text-sm text-muted-foreground">Nenhum gênero no MAL</p>
                 ) : (
                   <div className="flex flex-wrap gap-1.5">
-                    {detailAnime.genres.map((g) => (
+                    {isAwardWinning(detailAnime) && (
                       <button
-                        key={g}
+                        key={AWARD_GENRE}
                         type="button"
-                        aria-label={`Filtrar por ${g}`}
+                        aria-label="Filtrar por Premiado"
+                        title="Premiado no MAL"
                         onClick={() => {
                           setDetailOpen(false);
                           setDetailAnimeId("");
-                          setGenreFilter(new Set([g]));
+                          setGenreFilter(new Set([AWARD_GENRE]));
                           setShowFilters(true);
                         }}
-                        className="focus-ring rounded-md bg-foreground/5 px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-primary/15 hover:text-primary"
+                        className="focus-ring inline-flex items-center gap-1 rounded-md bg-award px-2 py-1 text-[11px] font-medium text-award-foreground transition-colors hover:brightness-110"
                       >
-                        {g}
+                        <Award className="h-3 w-3" />
+                        Premiado
                       </button>
-                    ))}
+                    )}
+                    {detailAnime.genres
+                      .filter((g) => g.trim().toLowerCase() !== AWARD_GENRE.toLowerCase())
+                      .map((g) => (
+                        <button
+                          key={g}
+                          type="button"
+                          aria-label={`Filtrar por ${g}`}
+                          onClick={() => {
+                            setDetailOpen(false);
+                            setDetailAnimeId("");
+                            setGenreFilter(new Set([g]));
+                            setShowFilters(true);
+                          }}
+                          className="focus-ring rounded-md bg-foreground/5 px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-primary/15 hover:text-primary"
+                        >
+                          {g}
+                        </button>
+                      ))}
                   </div>
                 )}
               </div>
