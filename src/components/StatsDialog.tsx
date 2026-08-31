@@ -347,11 +347,14 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                   <p className="font-display text-3xl font-bold tabular-nums text-primary">
                     {formatMinutes(stats.timeMinutes)}
                   </p>
-                  <p className="text-[11px] text-muted-foreground">
-                    {stats.timeEpisodes} episódios assistidos
-                    {stats.avgEpisodesPerSeason !== null
-                      ? ` · ${stats.avgEpisodesPerSeason.toFixed(1)} eps por temporada`
-                      : ""}
+                  <p className="inline-flex items-baseline gap-1 text-[11px] text-muted-foreground">
+                    <span className="font-display text-sm font-bold tabular-nums text-foreground">
+                      {stats.timeEpisodes}
+                    </span>
+                    episódios assistidos
+                    {stats.avgEpisodesPerSeason !== null && (
+                      <span>· {stats.avgEpisodesPerSeason.toFixed(1)} eps por temporada</span>
+                    )}
                   </p>
                   {stats.avgEpisodeDuration !== null && (
                     <p className="text-[11px] text-muted-foreground">
