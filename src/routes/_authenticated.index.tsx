@@ -1466,7 +1466,7 @@ function Index() {
           <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
             {filtersActive || search.trim() !== ""
               ? `${displayedCount} de ${displayedTotal} animes`
-              : `${displayedCount} ${displayedCount === 1 ? "anime" : "animes`}`}
+              : `${displayedCount} ${displayedCount === 1 ? "anime" : "animes"}`}
           </p>
         </div>
 
