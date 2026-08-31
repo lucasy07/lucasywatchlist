@@ -1394,7 +1394,7 @@ function Index() {
                 </span>
               )}
             </button>
-            <ProfileMenu />
+            <ProfileMenu onOpenStats={() => setStatsOpen(true)} />
 
           </div>
         </div>
