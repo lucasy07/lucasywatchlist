@@ -1333,7 +1333,21 @@ function Index() {
         <div className="mx-auto flex h-[72px] sm:h-[88px] max-w-5xl items-center justify-between gap-4 px-4 sm:px-6">
           <h1 className="min-w-0 shrink-0">
             <span className="sr-only">Umi Watchlist</span>
-            <BrandLockup size="sm" className="h-11 sm:h-16" />
+            <button
+              type="button"
+              aria-label="Voltar ao topo e limpar filtros"
+              className="focus-ring cursor-pointer -m-2 p-2 transition-opacity hover:opacity-75"
+              onClick={() => {
+                const tinhaAlgo = search.trim() !== "" || filtersActive;
+                setSearch("");
+                clearFilters();
+                const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+                window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+                if (tinhaAlgo) toast.success("Busca e filtros limpos");
+              }}
+            >
+              <BrandLockup size="sm" className="h-11 sm:h-16" />
+            </button>
           </h1>
           <div className="flex items-center gap-2 sm:gap-3">
             {scoreMode !== "gosto" && (
