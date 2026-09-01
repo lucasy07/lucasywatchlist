@@ -1639,9 +1639,11 @@ function Index() {
             <button
               type="button"
               onClick={clearFilters}
-              className="focus-ring shrink-0 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border border-border/60 bg-card text-xs font-medium text-muted-foreground transition-colors hover:text-destructive"
+              aria-label="Limpar filtros"
+              className="focus-ring inline-flex items-center gap-1.5 shrink-0 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border border-destructive/40 bg-destructive/10 text-xs font-medium text-destructive transition-colors hover:bg-destructive/20 hover:border-destructive/60"
             >
-              Limpar
+              <X className="h-3.5 w-3.5" />
+              Limpar ({filtersActiveCount})
             </button>
           )}
         </div>
