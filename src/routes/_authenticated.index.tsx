@@ -1831,7 +1831,7 @@ function Index() {
                       >
                         #{idx + 1}
                       </div>
-                      <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
+                      <div className={`absolute right-2 flex flex-col items-end gap-1 ${isAwardWinning(anime) ? "top-11" : "top-2"}`}>
                         <div className="flex items-baseline gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
                           <span className={`font-display text-sm font-bold tabular-nums ${primaryColor}`}>
                             {primaryValue}
@@ -1847,6 +1847,15 @@ function Index() {
                           </span>
                         </Badge>
                       </div>
+                      {isAwardWinning(anime) && (
+                        <div
+                          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-award text-award-foreground"
+                          title="Premiado no MAL"
+                          aria-label="Premiado no MAL"
+                        >
+                          <Award className="h-3.5 w-3.5" />
+                        </div>
+                      )}
                       {anime.upcoming?.releaseDate && (
                         <span
                           className="absolute left-2 top-11 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground shadow-lg"
