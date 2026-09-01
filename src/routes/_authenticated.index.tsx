@@ -1850,8 +1850,8 @@ function Index() {
                       {isAwardWinning(anime) && (
                         <div
                           className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-award text-award-foreground"
-                          title="Premiado no MAL"
-                          aria-label="Premiado no MAL"
+                          title="Award Winning (MAL)"
+                          aria-label="Award Winning (MAL)"
                         >
                           <Award className="h-3.5 w-3.5" />
                         </div>
@@ -2002,8 +2002,8 @@ function Index() {
                           {isAwardWinning(anime) && (
                             <button
                               type="button"
-                              aria-label="Filtrar por Premiado"
-                              title="Premiado no MAL"
+                              aria-label="Filtrar por Award Winning"
+                              title="Award Winning (MAL)"
                               onClick={() => {
                                 setGenreFilter(new Set([AWARD_GENRE]));
                                 setShowFilters(true);
@@ -2011,7 +2011,7 @@ function Index() {
                               className="focus-ring inline-flex items-center gap-1 rounded-md bg-award px-1.5 py-0.5 text-[10px] font-medium text-award-foreground transition-colors hover:brightness-110"
                             >
                               <Award className="h-3 w-3" />
-                              Premiado
+                              Award Winning
                             </button>
                           )}
                           {anime.genres
@@ -2703,8 +2703,8 @@ function Index() {
                       <button
                         key={AWARD_GENRE}
                         type="button"
-                        aria-label="Filtrar por Premiado"
-                        title="Premiado no MAL"
+                        aria-label="Filtrar por Award Winning"
+                        title="Award Winning (MAL)"
                         onClick={() => {
                           setDetailOpen(false);
                           setDetailAnimeId("");
@@ -2714,7 +2714,7 @@ function Index() {
                         className="focus-ring inline-flex items-center gap-1 rounded-md bg-award px-2 py-1 text-[11px] font-medium text-award-foreground transition-colors hover:brightness-110"
                       >
                         <Award className="h-3 w-3" />
-                        Premiado
+                        Award Winning
                       </button>
                     )}
                     {detailAnime.genres
