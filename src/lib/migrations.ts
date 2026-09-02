@@ -258,6 +258,55 @@ async function backfillSeasonEpisodes({ animes, onPatch, signal }: MigrationPara
   }
 }
 
+async function backfillSeasonImage({ animes, onPatch, signal }: MigrationParams): Promise<void> {
+  const targets = animes.filter((a) =>
+    a.seasons.some((s) => s.malId && s.imageUrl === undefined),
+  );
+  if (targets.length === 0) return;
+
+  for (const anime of targets) {
+    if (signal.aborted) return;
+    const seasons = [...anime.seasons];
+    let changed = false;
+    for (let i = 0; i < seasons.length; i++) {
+      if (signal.aborted) return;
+      const s = seasons[i];
+      if (!s.malId || s.imageUrl !== undefined) continue;
+      try {
+        const res = await fetch(`https://api.jikan.moe/v4/anime/${s.malId}`);
+        if (res.ok) {
+          const json = await res.json();
+          const patch: Partial<Season> = {};
+          patch.imageUrl =
+            json?.data?.images?.jpg?.large_image_url ??
+            json?.data?.images?.jpg?.image_url ??
+            null;
+          if (s.episodes === undefined) {
+            patch.episodes = json?.data?.episodes ?? null;
+            patch.durationMin = parseJikanDuration(json?.data?.duration);
+          }
+          seasons[i] = { ...s, ...patch };
+          changed = true;
+        }
+      } catch {
+        // ignore; retried in a future session
+      }
+      await sleep(400);
+    }
+    if (changed && !signal.aborted) {
+      try {
+        await updateSeasons(anime.id, seasons);
+        // Keep the shared snapshot in sync so later backfills don't write stale seasons back.
+        anime.seasons = seasons;
+        if (signal.aborted) return;
+        onPatch(anime.id, { seasons });
+      } catch {
+        // ignore
+      }
+    }
+  }
+}
+
 async function backfillGenres({ animes, onPatch, signal }: MigrationParams): Promise<void> {
   const targets = animes.filter((a) => a.genres == null && typeof a.malId === "number");
   if (targets.length === 0) return;
@@ -318,6 +367,8 @@ export async function runMigrations(params: MigrationParams): Promise<void> {
   await backfillSeasonType(params);
   if (params.signal.aborted) return;
   await backfillSeasonEpisodes(params);
+  if (params.signal.aborted) return;
+  await backfillSeasonImage(params);
   if (params.signal.aborted) return;
   await backfillGenres(params);
   if (params.signal.aborted) return;
