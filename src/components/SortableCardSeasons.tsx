@@ -1,4 +1,4 @@
-import { GripVertical, Star, Trash2 } from "lucide-react";
+import { GripVertical, Star, Trash2, Tv } from "lucide-react";
 import { SeasonThumb } from "@/components/SeasonThumb";
 import {
   DndContext,
