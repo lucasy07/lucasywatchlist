@@ -113,6 +113,7 @@ import { ProfileMenu } from "@/components/ProfileMenu";
 import { StatsDialog } from "@/components/StatsDialog";
 import { SortableSeasonList } from "@/components/SortableSeasonList";
 import { SortableCardSeasons } from "@/components/SortableCardSeasons";
+import { SeasonThumb } from "@/components/SeasonThumb";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import {
   DndContext,
@@ -2765,40 +2766,41 @@ function Index() {
                 {detailAnime.seasons.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Nenhuma temporada</p>
                 ) : (
-                  <ul className="grid gap-2">
-                    {detailAnime.seasons.map((s) => (
-                      <li
-                        key={s.id}
-                        className="flex items-start justify-between gap-3 rounded-lg border border-border/60 bg-background/30 px-3 py-2"
-                      >
-                        <div className="min-w-0 flex-1">
-                          <p className="line-clamp-2 break-words text-sm font-medium" title={s.name}>
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(84px,1fr))] gap-3">
+                    {detailAnime.seasons.map((s) => {
+                      const excluded = isExcludedFromAverage(s);
+                      return (
+                        <div
+                          key={s.id}
+                          className={`flex flex-col gap-1 ${excluded ? "opacity-60" : ""}`}
+                        >
+                          <SeasonThumb
+                            season={s}
+                            className="aspect-[2/3] w-full rounded"
+                            alt={s.name}
+                          />
+                          <p
+                            className="line-clamp-2 text-xs font-medium leading-tight"
+                            title={s.name}
+                          >
                             {s.name}
                           </p>
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <p className="text-[11px] text-muted-foreground">
-                              {[s.type, s.year].filter(Boolean).join(" • ")}
-                            </p>
-                            {isExcludedFromAverage(s) && (
-                              <Badge
-                                variant="outline"
-                                title="Não entra no cálculo da média"
-                                className="border-border/50 bg-muted/40 text-muted-foreground px-1.5 py-0 text-[9px] font-normal tracking-normal"
-                              >
-                                fora da média
-                              </Badge>
+                          <p className="text-[10px] text-muted-foreground">
+                            {[
+                              s.type,
+                              s.year,
+                              typeof s.malScore === "number" && `MAL ${s.malScore.toFixed(2)}`,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                            {excluded && (
+                              <span className="block">fora da média</span>
                             )}
-                          </div>
+                          </p>
                         </div>
-                        <div className="flex shrink-0 flex-col items-end">
-                          <span className="text-[10px] text-muted-foreground">MAL</span>
-                          <span className="font-display text-sm font-bold tabular-nums">
-                            {s.malScore !== null && s.malScore !== undefined ? s.malScore.toFixed(2) : "—"}
-                          </span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
             </div>
