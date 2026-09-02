@@ -667,6 +667,7 @@ function Index() {
           type: s.type,
           episodes: s.episodes,
           durationMin: s.durationMin,
+          imageUrl: s.imageUrl ?? null,
         }));
         const created = await createAnime({
           name: first.title,
@@ -791,6 +792,7 @@ function Index() {
       type: seasonDetails?.type ?? null,
       episodes: seasonDetails?.episodes ?? null,
       durationMin: seasonDetails?.durationMin ?? null,
+      imageUrl: seasonPick.imageUrl ?? null,
     };
     const newSeasons = [...target.seasons, newSeason];
     const prev = animes;
@@ -1195,6 +1197,7 @@ function Index() {
       type: found.type,
       episodes: found.episodes,
       durationMin: found.durationMin,
+      imageUrl: found.imageUrl ?? null,
     };
     const newSeasons = [...target.seasons, newSeason];
     setAnimes((prev) =>
