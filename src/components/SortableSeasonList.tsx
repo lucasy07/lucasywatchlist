@@ -1,4 +1,5 @@
 import { GripVertical, Trash2 } from "lucide-react";
+import { SeasonThumb } from "@/components/SeasonThumb";
 import {
   DndContext,
   type DragEndEvent,
@@ -61,6 +62,7 @@ function SortableSeasonItem({
         >
           <GripVertical className="h-4 w-4" />
         </button>
+        <SeasonThumb season={season} className="h-[42px] w-[30px] rounded" />
         <Input
           value={season.name}
           onChange={(e) => update({ name: e.target.value })}
