@@ -1,4 +1,5 @@
-import { GripVertical, Star, Trash2, Tv } from "lucide-react";
+import { GripVertical, Star, Trash2 } from "lucide-react";
+import { SeasonThumb } from "@/components/SeasonThumb";
 import {
   DndContext,
   type DragEndEvent,
@@ -56,7 +57,7 @@ function SortableRow({
       >
         <GripVertical className="h-4 w-4" />
       </button>
-      <Tv className="h-4 w-4 shrink-0 text-muted-foreground" />
+      <SeasonThumb season={season} className="h-[42px] w-[30px] rounded" />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-1.5">
           <p className="truncate text-sm">{season.name}</p>
