@@ -16,6 +16,8 @@ export type Season = {
   episodes?: number | null;
   /** Duração em minutos POR episódio. undefined = nunca buscado; null = indisponível. */
   durationMin?: number | null;
+  /** URL da capa no CDN do MAL. undefined = nunca buscado; null = buscado e indisponível. */
+  imageUrl?: string | null;
 };
 
 /**
