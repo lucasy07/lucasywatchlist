@@ -264,6 +264,24 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
   const displayName = profile?.username ?? user?.email ?? "—";
   const nameInitial = (profile?.username?.[0] ?? user?.email?.[0] ?? null)?.toUpperCase();
 
+  const MINUTES_PER_LEVEL = 1440;
+
+  function formatCompactMinutes(min: number): string {
+    if (min < 1000) return String(Math.round(min));
+    return `${(Math.round(min / 100) / 10).toFixed(1)}k`;
+  }
+
+  const level = Math.floor(stats.timeMinutes / MINUTES_PER_LEVEL) + 1;
+  const minutesIntoLevel = stats.timeMinutes % MINUTES_PER_LEVEL;
+  const levelPercent = stats.timeMinutes === 0 ? 0 : (minutesIntoLevel / MINUTES_PER_LEVEL) * 100;
+  const levelTitle = (() => {
+    let base = `Nível ${level} — ${formatMinutes(minutesIntoLevel)} de ${formatMinutes(MINUTES_PER_LEVEL)} assistidas neste nível`;
+    if (stats.missingSeasons > 0) {
+      base += ` · ${stats.missingSeasons} temporadas sem dados de duração ficam de fora da contagem`;
+    }
+    return base;
+  })();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="h-full max-h-[100dvh] w-full max-w-none overflow-y-auto overflow-x-hidden rounded-none border-border bg-card sm:h-auto sm:max-h-[90vh] sm:max-w-4xl sm:rounded-lg">
@@ -276,21 +294,18 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
           <div className="rounded-xl border border-border/60 bg-background/30 p-4">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <div className="flex min-w-0 flex-1 items-center gap-3">
-                <Avatar className="h-12 w-12 shrink-0 rounded-full ring-1 ring-primary/40">
+                <Avatar className="h-16 w-16 shrink-0 rounded-full ring-1 ring-primary/40">
                   {avatarSrc && <AvatarImage src={avatarSrc} alt={displayName} className="object-cover" />}
                   <AvatarFallback className="bg-primary/15 text-lg font-bold text-primary">
                     {nameInitial ?? <User className="h-5 w-5" />}
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-display text-base font-semibold">
+                  <p className="truncate font-display text-2xl font-semibold">
                     {displayName}
                   </p>
-                  <p className="truncate text-[11px] text-muted-foreground">
-                    {user?.email ?? "—"}
-                  </p>
                   <p className="text-[11px] text-muted-foreground">
-                    Conta criada em{" "}
+                    entrou em{" "}
                     {createdAt && !Number.isNaN(createdAt.getTime())
                       ? createdAt.toLocaleDateString("pt-BR", {
                           day: "2-digit",
@@ -315,21 +330,31 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                   <p className="font-display font-bold tabular-nums">{stats.genresCount}</p>
                   <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Gêneros</p>
                 </div>
+                <div className="text-center">
+                  <p className="font-display font-bold tabular-nums">{stats.watchedCount}</p>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Assistidos</p>
+                </div>
               </div>
             </div>
 
             <div className="mt-4 flex items-center gap-3">
-              <span className="font-display font-bold tabular-nums text-primary">
-                {stats.watchedPercent}%
+              <span className="font-display text-2xl font-bold tabular-nums">
+                {level}
               </span>
-              <div className="flex-1">
+              <div
+                className="flex-1"
+                title={levelTitle}
+                aria-label={levelTitle}
+              >
                 <Progress
-                  value={stats.total === 0 ? 0 : stats.watchedPercent}
+                  value={levelPercent}
                   className="bg-foreground/7"
                 />
               </div>
-              <span className="text-[11px] text-muted-foreground">
-                {stats.watchedCount} / {stats.total} assistidos
+              <span className="text-[11px] tabular-nums text-muted-foreground">
+                {stats.timeMinutes === 0
+                  ? "sem dados de duração"
+                  : `${formatCompactMinutes(minutesIntoLevel)} / ${formatCompactMinutes(MINUTES_PER_LEVEL)}`}
               </span>
             </div>
           </div>
