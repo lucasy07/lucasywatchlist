@@ -160,8 +160,9 @@ export function ProfileMenu({ onOpenStats }: { onOpenStats: () => void }) {
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
+
           <button
             type="button"
             aria-label="Menu do perfil"
