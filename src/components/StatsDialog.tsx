@@ -264,6 +264,24 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
   const displayName = profile?.username ?? user?.email ?? "—";
   const nameInitial = (profile?.username?.[0] ?? user?.email?.[0] ?? null)?.toUpperCase();
 
+  const MINUTES_PER_LEVEL = 1440;
+
+  function formatCompactMinutes(min: number): string {
+    if (min < 1000) return String(Math.round(min));
+    return `${(Math.round(min / 100) / 10).toFixed(1)}k`;
+  }
+
+  const level = Math.floor(stats.timeMinutes / MINUTES_PER_LEVEL) + 1;
+  const minutesIntoLevel = stats.timeMinutes % MINUTES_PER_LEVEL;
+  const levelPercent = stats.timeMinutes === 0 ? 0 : (minutesIntoLevel / MINUTES_PER_LEVEL) * 100;
+  const levelTitle = (() => {
+    let base = `Nível ${level} — ${formatMinutes(minutesIntoLevel)} de ${formatMinutes(MINUTES_PER_LEVEL)} assistidas neste nível`;
+    if (stats.missingSeasons > 0) {
+      base += ` · ${stats.missingSeasons} temporadas sem dados de duração ficam de fora da contagem`;
+    }
+    return base;
+  })();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="h-full max-h-[100dvh] w-full max-w-none overflow-y-auto overflow-x-hidden rounded-none border-border bg-card sm:h-auto sm:max-h-[90vh] sm:max-w-4xl sm:rounded-lg">
