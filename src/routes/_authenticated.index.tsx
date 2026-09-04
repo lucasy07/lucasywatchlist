@@ -2407,47 +2407,60 @@ function Index() {
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label>Capa</Label>
-              <input
-                ref={editCoverInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleEditCoverPick}
-                className="hidden"
-              />
-              <div className="flex items-start gap-3">
-                {editCover ? (
-                  <div className="relative h-32 w-24 overflow-hidden rounded-lg border border-border">
-                    <img src={editCover} alt="Capa" className="h-full w-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => setEditCover(undefined)}
-                      className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-background/80 text-foreground hover:bg-destructive hover:text-destructive-foreground"
-                      aria-label="Remover capa"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
+              {(() => {
+                const editAnime = animes.find((a) => a.id === editAnimeId);
+                const currentCover = editCover ?? editAnime?.imageUrl;
+                const coverLabel = editCover
+                  ? (editSeasons.find((s) => s.imageUrl === editCover)?.name ?? "Atual")
+                  : "Padrão";
+                const hasAnySeasonImage = editSeasons.some((s) => s.imageUrl);
+                return (
+                  <div className="flex items-start gap-3">
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="relative h-32 w-24 overflow-hidden rounded-lg border border-border bg-secondary">
+                        {currentCover ? (
+                          <img src={currentCover} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-primary/40">
+                            <ImageIcon className="h-10 w-10" />
+                          </div>
+                        )}
+                      </div>
+                      <span className="max-w-[6rem] truncate text-[11px] text-muted-foreground">
+                        {coverLabel}
+                      </span>
+                    </div>
+                    {hasAnySeasonImage ? (
+                      <div className="grid flex-1 grid-cols-[repeat(auto-fill,minmax(64px,1fr))] gap-2">
+                        {editSeasons.map((season) => {
+                          const hasImage = !!season.imageUrl;
+                          const selected = !!editCover && editCover === season.imageUrl;
+                          return (
+                            <button
+                              key={season.id}
+                              type="button"
+                              disabled={!hasImage}
+                              onClick={() => hasImage && setEditCover(season.imageUrl!)}
+                              aria-label={season.name}
+                              className={`relative overflow-hidden rounded-md focus-ring transition-all ${
+                                selected ? "ring-2 ring-primary" : "ring-1 ring-border/50"
+                              } ${!hasImage ? "cursor-not-allowed opacity-60" : "hover:ring-primary/50"}`}
+                            >
+                              <div className="aspect-[2/3] w-full">
+                                <SeasonThumb season={season} className="h-full w-full" alt="" />
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="self-center text-sm text-muted-foreground">
+                        Nenhuma temporada tem capa para escolher.
+                      </p>
+                    )}
                   </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => editCoverInputRef.current?.click()}
-                    className="flex h-32 w-24 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border bg-secondary/40 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
-                  >
-                    <ImagePlus className="h-5 w-5" />
-                    Adicionar
-                  </button>
-                )}
-                {editCover && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => editCoverInputRef.current?.click()}
-                  >
-                    Trocar
-                  </Button>
-                )}
-              </div>
+                );
+              })()}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="edit-anime-name">Nome</Label>
