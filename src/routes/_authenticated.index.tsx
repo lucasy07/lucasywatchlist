@@ -1786,7 +1786,7 @@ function Index() {
                     <div className="relative aspect-[2/3] w-full overflow-hidden bg-card-elevated">
                       {anime.cover || anime.imageUrl ? (
                         <img
-                          src={anime.cover ?? anime.imageUrl}
+                          src={anime.cover ?? anime.imageUrl ?? undefined}
                           alt={anime.name}
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                           loading="lazy"
@@ -1945,7 +1945,7 @@ function Index() {
                     <div className="relative self-stretch min-h-[120px] w-20 shrink-0 overflow-hidden rounded-lg bg-card-elevated ring-1 ring-border/40 sm:min-h-[168px] sm:w-28">
                       {anime.cover || anime.imageUrl ? (
                         <img
-                          src={anime.cover ?? anime.imageUrl}
+                          src={anime.cover ?? anime.imageUrl ?? undefined}
                           alt={anime.name}
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                           loading="lazy"
@@ -2644,7 +2644,7 @@ function Index() {
               <div className="flex gap-4">
                 {detailAnime.cover || detailAnime.imageUrl ? (
                   <img
-                    src={detailAnime.cover ?? detailAnime.imageUrl}
+                    src={detailAnime.cover ?? detailAnime.imageUrl ?? undefined}
                     alt={detailAnime.name}
                     className="aspect-[2/3] w-28 shrink-0 rounded-lg object-cover ring-1 ring-border/50"
                   />
