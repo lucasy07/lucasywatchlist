@@ -2415,46 +2415,70 @@ function Index() {
                   : "Padrão";
                 const hasAnySeasonImage = editSeasons.some((s) => s.imageUrl);
                 return (
-                  <div className="flex items-start gap-3">
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="relative h-32 w-24 overflow-hidden rounded-lg border border-border bg-secondary">
+                  <div>
+                    {/* Bloco 1: capa em uso */}
+                    <div className="flex items-start gap-3">
+                      <div className="relative h-40 w-28 shrink-0 overflow-hidden rounded-lg border border-border bg-secondary">
                         {currentCover ? (
-                          <img src={currentCover} alt="" className="h-full w-full object-cover" />
+                          <img
+                            src={currentCover}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-primary/40">
                             <ImageIcon className="h-10 w-10" />
                           </div>
                         )}
+                        <span className="absolute left-1.5 top-1.5 rounded-md border border-border bg-card px-2 py-0.5 text-[10px] text-foreground">
+                          Capa atual
+                        </span>
                       </div>
-                      <span className="max-w-[6rem] truncate text-[11px] text-muted-foreground">
-                        {coverLabel}
-                      </span>
+                      <div className="flex min-w-0 flex-1 flex-col gap-1 pt-1">
+                        <span className="text-sm font-medium text-foreground">
+                          {coverLabel}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          Aparece na lista, no grid e na tierlist.
+                        </span>
+                      </div>
                     </div>
+
+                    {/* Bloco 2: alternativas */}
                     {hasAnySeasonImage ? (
-                      <div className="grid flex-1 grid-cols-[repeat(auto-fill,minmax(64px,1fr))] gap-2">
-                        {editSeasons.map((season) => {
-                          const hasImage = !!season.imageUrl;
-                          const selected = !!editCover && editCover === season.imageUrl;
-                          return (
-                            <button
-                              key={season.id}
-                              type="button"
-                              disabled={!hasImage}
-                              onClick={() => hasImage && setEditCover(season.imageUrl!)}
-                              aria-label={season.name}
-                              className={`relative overflow-hidden rounded-md focus-ring transition-all ${
-                                selected ? "ring-2 ring-primary" : "ring-1 ring-border/50"
-                              } ${!hasImage ? "cursor-not-allowed opacity-60" : "hover:ring-primary/50"}`}
-                            >
-                              <div className="aspect-[2/3] w-full">
-                                <SeasonThumb season={season} className="h-full w-full" alt="" />
-                              </div>
-                            </button>
-                          );
-                        })}
+                      <div className="mt-4 rounded-lg bg-secondary/40 p-3">
+                        <p className="mb-2 text-xs text-muted-foreground">
+                          Trocar por outra temporada
+                        </p>
+                        <div className="grid grid-cols-[repeat(auto-fill,minmax(52px,1fr))] gap-2">
+                          {editSeasons.map((season) => {
+                            const hasImage = !!season.imageUrl;
+                            const selected = !!editCover && editCover === season.imageUrl;
+                            return (
+                              <button
+                                key={season.id}
+                                type="button"
+                                disabled={!hasImage}
+                                onClick={() => hasImage && setEditCover(season.imageUrl!)}
+                                aria-label={season.name}
+                                className={`relative min-h-[44px] overflow-hidden rounded-md focus-ring transition-opacity motion-reduce:transition-none ${
+                                  selected
+                                    ? "opacity-100 ring-2 ring-primary"
+                                    : hasImage
+                                      ? "opacity-60 ring-1 ring-border/50 hover:opacity-100 focus-visible:opacity-100"
+                                      : "cursor-not-allowed opacity-40 ring-1 ring-border/50"
+                                }`}
+                              >
+                                <div className="aspect-[2/3] w-full">
+                                  <SeasonThumb season={season} className="h-full w-full" alt="" />
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                     ) : (
-                      <p className="self-center text-sm text-muted-foreground">
+                      <p className="mt-4 text-sm text-muted-foreground">
                         Nenhuma temporada tem capa para escolher.
                       </p>
                     )}
