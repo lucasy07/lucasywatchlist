@@ -1784,9 +1784,9 @@ function Index() {
                     className="block w-full cursor-pointer appearance-none border-0 bg-transparent p-0 text-left"
                   >
                     <div className="relative aspect-[2/3] w-full overflow-hidden bg-card-elevated">
-                      {anime.imageUrl || anime.cover ? (
+                      {anime.cover || anime.imageUrl ? (
                         <img
-                          src={anime.imageUrl ?? anime.cover}
+                          src={anime.cover ?? anime.imageUrl}
                           alt={anime.name}
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                           loading="lazy"
@@ -1943,9 +1943,9 @@ function Index() {
                       #{idx + 1}
                     </div>
                     <div className="relative self-stretch min-h-[120px] w-20 shrink-0 overflow-hidden rounded-lg bg-card-elevated ring-1 ring-border/40 sm:min-h-[168px] sm:w-28">
-                      {anime.imageUrl || anime.cover ? (
+                      {anime.cover || anime.imageUrl ? (
                         <img
-                          src={anime.imageUrl ?? anime.cover}
+                          src={anime.cover ?? anime.imageUrl}
                           alt={anime.name}
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                           loading="lazy"
@@ -2629,9 +2629,9 @@ function Index() {
           {detailAnime ? (
             <div className="grid gap-4">
               <div className="flex gap-4">
-                {detailAnime.imageUrl || detailAnime.cover ? (
+                {detailAnime.cover || detailAnime.imageUrl ? (
                   <img
-                    src={detailAnime.imageUrl ?? detailAnime.cover}
+                    src={detailAnime.cover ?? detailAnime.imageUrl}
                     alt={detailAnime.name}
                     className="aspect-[2/3] w-28 shrink-0 rounded-lg object-cover ring-1 ring-border/50"
                   />
