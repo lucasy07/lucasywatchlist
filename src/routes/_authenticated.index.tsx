@@ -13,7 +13,6 @@ import {
   ChevronUp,
   Tv,
   Sparkles,
-  ImagePlus,
   X,
   LayoutGrid,
   List as ListIcon,
@@ -156,31 +155,6 @@ export const Route = createFileRoute("/_authenticated/")({
   component: Index,
 });
 
-async function fileToBase64(file: File, maxSize = 512): Promise<string> {
-  const dataUrl = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const ratio = Math.min(1, maxSize / Math.max(img.width, img.height));
-      const w = Math.round(img.width * ratio);
-      const h = Math.round(img.height * ratio);
-      const canvas = document.createElement("canvas");
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return resolve(dataUrl);
-      ctx.drawImage(img, 0, 0, w, h);
-      resolve(canvas.toDataURL("image/jpeg", 0.85));
-    };
-    img.onerror = reject;
-    img.src = dataUrl;
-  });
-}
 
 function TiltCardInner({ children }: { children: React.ReactNode }) {
   const tilt = useTilt();
@@ -275,7 +249,6 @@ function Index() {
   const [editCover, setEditCover] = useState<string | undefined>(undefined);
   const [editSeasons, setEditSeasons] = useState<Season[]>([]);
   const [editTier, setEditTier] = useState<Tier | null>(null);
-  const editCoverInputRef = useRef<HTMLInputElement>(null);
 
 
   // Detail dialog
@@ -1252,24 +1225,6 @@ function Index() {
   function openDetail(animeId: string) {
     setDetailAnimeId(animeId);
     setDetailOpen(true);
-  }
-
-  async function handleEditCoverPick(e: React.ChangeEvent<HTMLInputElement>) {
-
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast.error("Selecione uma imagem");
-      return;
-    }
-    try {
-      const b64 = await fileToBase64(file);
-      setEditCover(b64);
-    } catch {
-      toast.error("Falha ao processar imagem");
-    } finally {
-      if (editCoverInputRef.current) editCoverInputRef.current.value = "";
-    }
   }
 
   function updateEditSeason(id: string, patch: Partial<Season>) {
