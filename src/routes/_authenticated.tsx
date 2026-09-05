@@ -18,12 +18,6 @@ const LABELS = [
 function AuthenticatedLayout() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
-  const { step, setStep, done } = useBootPacer();
-  const [overlayGone, setOverlayGone] = useState(false);
-
-  useEffect(() => {
-    if (!loading && session) setStep(1);
-  }, [loading, session, setStep]);
 
   useEffect(() => {
     if (!loading && !session) {
@@ -31,17 +25,31 @@ function AuthenticatedLayout() {
     }
   }, [loading, session, navigate]);
 
+  // Enquanto a sessão não resolve (ou não existe): tela neutra, nunca o tubarão.
+  if (loading || !session) {
+    return <div className="min-h-screen bg-background" />;
+  }
+
+  // Com sessão: monta a experiência de boot. Não depende da identidade do
+  // objeto session — refresh de token não remonta o BootedShell.
+  return <BootedShell />;
+}
+
+function BootedShell() {
+  const { step, setStep, done } = useBootPacer();
+  const [overlayGone, setOverlayGone] = useState(false);
+
   useEffect(() => {
-    if (!done) return;
+    setStep(1);
+  }, [setStep]);
+
+  useEffect(() => {
+    if (!done || overlayGone) return;
     const t = setTimeout(() => setOverlayGone(true), 350);
     return () => clearTimeout(t);
-  }, [done]);
+  }, [done, overlayGone]);
 
   const value = useMemo(() => ({ step, setStep }), [step, setStep]);
-
-  if (loading || !session) {
-    return <BootSplash progress={0} label="restaurando sessão" />;
-  }
 
   return (
     <BootProgressProvider value={value}>
