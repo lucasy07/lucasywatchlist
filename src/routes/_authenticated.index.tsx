@@ -199,6 +199,8 @@ function Index() {
   const [draggingAnimeId, setDraggingAnimeId] = useState<string | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [watchedFlashId, setWatchedFlashId] = useState<string | null>(null);
+  const watchedFlashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tierSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
@@ -442,7 +444,7 @@ function Index() {
     if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
     highlightTimeoutRef.current = setTimeout(() => {
       setHighlightId((current) => (current === id ? null : current));
-    }, 2500);
+    }, 1200);
   }
 
   function addedAnimeToastOptions(created: Anime): {
@@ -478,6 +480,7 @@ function Index() {
   useEffect(() => {
     return () => {
       if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
+      if (watchedFlashTimeoutRef.current) clearTimeout(watchedFlashTimeoutRef.current);
     };
   }, []);
 
@@ -541,6 +544,30 @@ function Index() {
       toast.error("Falha ao atualizar");
       setAnimes(prev);
     }
+  }
+
+  function handleWatchedToggle(id: string, next: boolean) {
+    if (next) {
+      setWatchedFlashId(id);
+      if (watchedFlashTimeoutRef.current) clearTimeout(watchedFlashTimeoutRef.current);
+      watchedFlashTimeoutRef.current = setTimeout(() => {
+        setWatchedFlashId((current) => (current === id ? null : current));
+      }, 500);
+    }
+    void toggleWatched(id, next);
+  }
+
+  function WatchedIcon({ watched, className = "h-4 w-4" }: { watched: boolean; className?: string }) {
+    return (
+      <span className={`relative inline-block shrink-0 ${className}`} aria-hidden="true">
+        <Check
+          className={`watched-icon absolute inset-0 h-full w-full ${watched ? "watched-icon-hidden-check" : "watched-icon-visible"}`}
+        />
+        <RotateCcw
+          className={`watched-icon absolute inset-0 h-full w-full ${watched ? "watched-icon-visible" : "watched-icon-hidden-undo"}`}
+        />
+      </span>
+    );
   }
 
   function resetAddAnime() {
@@ -1770,9 +1797,9 @@ function Index() {
                   id={`anime-${anime.id}`}
                   className={`animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none [transform-style:preserve-3d] ${
                     highlightId === anime.id
-                      ? "ring-2 ring-primary shadow-[var(--shadow-elegant)] animate-pulse motion-reduce:animate-none"
+                      ? "card-flash"
                       : ""
-                  }`}
+                  } ${watchedFlashId === anime.id ? "watched-card-flash" : ""}`}
                   style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
                 >
                 <TiltCardInner>
@@ -1884,16 +1911,12 @@ function Index() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => toggleWatched(anime.id, !anime.watched)}
+                      onClick={() => handleWatchedToggle(anime.id, !anime.watched)}
                       className={`h-8 w-8 hover:text-primary ${anime.watched ? "text-primary" : "text-muted-foreground"}`}
                       aria-label={anime.watched ? "Desmarcar assistido" : "Marcar como assistido"}
                       title={anime.watched ? "Desmarcar assistido" : "Marcar como assistido"}
                     >
-                      {anime.watched ? (
-                        <RotateCcw className="h-3.5 w-3.5" />
-                      ) : (
-                        <Check className="h-3.5 w-3.5" />
-                      )}
+                      <WatchedIcon watched={anime.watched} className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       variant="ghost"
@@ -1923,9 +1946,9 @@ function Index() {
                   id={`anime-${anime.id}`}
                   className={`group relative overflow-hidden rounded-2xl border border-border/60 transition-all animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)] ${
                     highlightId === anime.id
-                      ? "ring-2 ring-primary shadow-[var(--shadow-elegant)] animate-pulse motion-reduce:animate-none"
+                      ? "card-flash"
                       : ""
-                  }`}
+                  } ${watchedFlashId === anime.id ? "watched-card-flash" : ""}`}
                   style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)", animationDelay: `${Math.min(idx, 12) * 30}ms` }}
                 >
                   <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5">
@@ -2107,14 +2130,11 @@ function Index() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => toggleWatched(anime.id, !anime.watched)}
+                          onClick={() => handleWatchedToggle(anime.id, !anime.watched)}
                           className="flex-1"
                         >
-                          {anime.watched ? (
-                            <><RotateCcw className="mr-1 h-4 w-4" /> Desmarcar</>
-                          ) : (
-                            <><Check className="mr-1 h-4 w-4" /> Assistido</>
-                          )}
+                          <WatchedIcon watched={anime.watched} />
+                          {anime.watched ? "Desmarcar" : "Assistido"}
                         </Button>
                         <Button
                           variant="outline"
@@ -2818,13 +2838,10 @@ function Index() {
             {detailAnime && (
               <Button
                 variant="outline"
-                onClick={() => toggleWatched(detailAnime.id, !detailAnime.watched)}
+                onClick={() => handleWatchedToggle(detailAnime.id, !detailAnime.watched)}
               >
-                {detailAnime.watched ? (
-                  <><RotateCcw className="mr-1 h-4 w-4" /> Desmarcar</>
-                ) : (
-                  <><Check className="mr-1 h-4 w-4" /> Assistido</>
-                )}
+                <WatchedIcon watched={detailAnime.watched} />
+                {detailAnime.watched ? "Desmarcar" : "Assistido"}
               </Button>
             )}
             <Button
