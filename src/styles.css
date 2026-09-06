@@ -250,6 +250,38 @@
   }
 }
 
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: var(--card-elevated);
+}
+
+.skeleton-shimmer::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--primary) 12%, transparent),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s linear infinite;
+  animation-delay: var(--skeleton-delay, 0ms);
+}
+
 .card-flash {
   animation: card-flash 1100ms cubic-bezier(.34, 1.3, .64, 1);
 }
@@ -289,5 +321,10 @@
 
   .watched-icon {
     transition: none;
+  }
+
+  .skeleton-shimmer::after {
+    display: none;
+    animation: none;
   }
 }
