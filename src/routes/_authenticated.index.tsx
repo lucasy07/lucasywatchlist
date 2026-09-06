@@ -2870,9 +2870,24 @@ function RankingSkeleton({
   scoreMode: "mal" | "gosto";
   viewMode: "grid" | "list";
 }) {
-  if (scoreMode === "gosto") {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setVisible(true), 180);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  if (!visible) {
     return (
       <div role="status" aria-busy="true">
+        <span className="sr-only">Carregando…</span>
+      </div>
+    );
+  }
+
+  if (scoreMode === "gosto") {
+    return (
+      <div role="status" aria-busy="true" className="animate-in fade-in-0 duration-150 motion-reduce:animate-none">
         <span className="sr-only">Carregando…</span>
         <div className="overflow-hidden rounded-xl border border-border/60">
           {TIER_ROWS.map((t) => (
@@ -2892,6 +2907,7 @@ function RankingSkeleton({
                     key={i}
                     aria-hidden
                     className="aspect-[2/3] w-20 rounded-lg"
+                    style={{ "--skeleton-delay": `${Math.min(i, 8) * 90}ms` } as React.CSSProperties}
                   />
                 ))}
               </div>
@@ -2904,11 +2920,14 @@ function RankingSkeleton({
 
   if (viewMode === "grid") {
     return (
-      <div role="status" aria-busy="true">
+      <div role="status" aria-busy="true" className="animate-in fade-in-0 duration-150 motion-reduce:animate-none">
         <span className="sr-only">Carregando…</span>
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <li key={i}>
+            <li
+              key={i}
+              style={{ "--skeleton-delay": `${Math.min(i, 8) * 90}ms` } as React.CSSProperties}
+            >
               <div
                 className="overflow-hidden rounded-2xl border border-border/60"
                 style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
@@ -2933,14 +2952,18 @@ function RankingSkeleton({
   }
 
   return (
-    <div role="status" aria-busy="true">
+    <div role="status" aria-busy="true" className="animate-in fade-in-0 duration-150 motion-reduce:animate-none">
       <span className="sr-only">Carregando…</span>
       <ul className="grid gap-4">
         {Array.from({ length: 3 }).map((_, i) => (
           <li
             key={i}
             className="overflow-hidden rounded-2xl border border-border/60"
-            style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)" }}
+            style={{
+              background: "var(--gradient-card)",
+              boxShadow: "var(--shadow-card)",
+              "--skeleton-delay": `${Math.min(i, 8) * 90}ms`,
+            } as React.CSSProperties}
           >
             <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5">
               <Skeleton aria-hidden className="h-10 w-8 sm:h-14 sm:w-10" />
