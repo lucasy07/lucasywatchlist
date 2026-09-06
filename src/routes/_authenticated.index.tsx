@@ -134,6 +134,7 @@ import { buildChain, type ChainSeason } from "@/lib/jikan-chain";
 import { runMigrations } from "@/lib/migrations";
 import { EmptyState } from "@/components/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SegmentedToggle } from "@/components/SegmentedToggle";
 
 
 const TIER_ROWS = (Object.keys(TIER_VALUE) as Tier[]).sort(
@@ -1337,41 +1338,31 @@ function Index() {
           </h1>
           <div className="flex items-center gap-2 sm:gap-3">
             {scoreMode !== "gosto" && (
-            <div className="flex items-center rounded-lg border border-border/60 bg-card p-0.5">
-              <button
-                onClick={() => setViewMode("list")}
-                className={`focus-ring flex h-11 w-11 sm:h-8 sm:w-8 items-center justify-center rounded-md transition-colors ${viewMode === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                aria-label="Visualização em lista"
-                aria-pressed={viewMode === "list"}
-              >
-                <ListIcon className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`focus-ring flex h-11 w-11 sm:h-8 sm:w-8 items-center justify-center rounded-md transition-colors ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                aria-label="Visualização em grade"
-                aria-pressed={viewMode === "grid"}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </button>
-            </div>
+              <SegmentedToggle
+                options={[
+                  {
+                    value: "list",
+                    ariaLabel: "Visualização em lista",
+                    content: <ListIcon className="h-4 w-4" />,
+                  },
+                  {
+                    value: "grid",
+                    ariaLabel: "Visualização em grade",
+                    content: <LayoutGrid className="h-4 w-4" />,
+                  },
+                ]}
+                value={viewMode}
+                onChange={setViewMode}
+              />
             )}
-            <div className="flex items-center rounded-lg border border-border/60 bg-card p-0.5">
-              <button
-                onClick={() => setScoreMode("mal")}
-                className={`focus-ring flex h-11 sm:h-8 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors ${scoreMode === "mal" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                aria-pressed={scoreMode === "mal"}
-              >
-                MAL
-              </button>
-              <button
-                onClick={() => setScoreMode("gosto")}
-                className={`focus-ring flex h-11 sm:h-8 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors ${scoreMode === "gosto" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                aria-pressed={scoreMode === "gosto"}
-              >
-                Meu gosto
-              </button>
-            </div>
+            <SegmentedToggle
+              options={[
+                { value: "mal", ariaLabel: "Ordenar por nota do MAL", content: "MAL" },
+                { value: "gosto", ariaLabel: "Ordenar pelo meu gosto", content: "Meu gosto" },
+              ]}
+              value={scoreMode}
+              onChange={setScoreMode}
+            />
             <button
               type="button"
               onClick={() => setShowFilters((v) => !v)}
