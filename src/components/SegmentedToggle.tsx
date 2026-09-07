@@ -23,7 +23,8 @@ export function SegmentedToggle<T extends string>({
   const activeIndex = options.findIndex((option) => option.value === value);
 
   useEffect(() => {
-    setTransitionsEnabled(true);
+    const frame = window.requestAnimationFrame(() => setTransitionsEnabled(true));
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   return (
@@ -46,7 +47,7 @@ export function SegmentedToggle<T extends string>({
             onClick={() => onChange(option.value)}
             aria-label={option.ariaLabel}
             aria-pressed={active}
-            className={`focus-ring relative z-10 flex h-11 min-w-11 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors duration-200 hover:bg-transparent motion-reduce:transition-none sm:h-8 sm:min-w-8 [&:has(>svg)]:w-11 [&:has(>svg)]:px-0 sm:[&:has(>svg)]:w-8 ${
+            className={`focus-ring relative z-10 flex h-11 min-w-11 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors duration-[180ms] hover:bg-transparent motion-reduce:transition-none sm:h-8 sm:min-w-8 [&:has(>svg)]:w-11 [&:has(>svg)]:px-0 sm:[&:has(>svg)]:w-8 ${
               active
                 ? "text-primary-foreground hover:text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground"
