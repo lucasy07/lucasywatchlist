@@ -205,6 +205,14 @@ function Index() {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [scoreMode, setScoreMode] = useState<"mal" | "gosto">("mal");
+  const [displayMode, setDisplayMode] = useState<{
+    scoreMode: "mal" | "gosto";
+    viewMode: "list" | "grid";
+  }>({ scoreMode: "mal", viewMode: "list" });
+  const [rankingTransition, setRankingTransition] = useState<"entering" | "exiting">("entering");
+  const rankingTransitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestModeRef = useRef({ scoreMode, viewMode });
+  const didInitialAnimate = useRef(false);
   const [tierFilter, setTierFilter] = useState<Set<Tier>>(() => new Set());
   const [typeFilter, setTypeFilter] = useState<Set<string>>(() => new Set());
   const [genreFilter, setGenreFilter] = useState<Set<string>>(() => new Set());
@@ -359,6 +367,49 @@ function Index() {
   }, [scoreMode, hydrated]);
 
   useEffect(() => {
+    const nextMode = { scoreMode, viewMode };
+    latestModeRef.current = nextMode;
+    if (rankingTransitionTimeoutRef.current) {
+      clearTimeout(rankingTransitionTimeoutRef.current);
+      rankingTransitionTimeoutRef.current = null;
+    }
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!hydrated || reducedMotion) {
+      setDisplayMode(nextMode);
+      setRankingTransition("entering");
+      return;
+    }
+
+    if (
+      displayMode.scoreMode === nextMode.scoreMode &&
+      displayMode.viewMode === nextMode.viewMode
+    ) {
+      setRankingTransition("entering");
+      return;
+    }
+
+    if (draggingAnimeId !== null) {
+      setRankingTransition("entering");
+      return;
+    }
+
+    setRankingTransition("exiting");
+    rankingTransitionTimeoutRef.current = setTimeout(() => {
+      setDisplayMode(latestModeRef.current);
+      setRankingTransition("entering");
+      rankingTransitionTimeoutRef.current = null;
+    }, 120);
+
+    return () => {
+      if (rankingTransitionTimeoutRef.current) {
+        clearTimeout(rankingTransitionTimeoutRef.current);
+        rankingTransitionTimeoutRef.current = null;
+      }
+    };
+  }, [scoreMode, viewMode, hydrated, draggingAnimeId, displayMode.scoreMode, displayMode.viewMode]);
+
+  useEffect(() => {
     if (!hydrated) return;
     localStorage.setItem("anime-ranker:v1:watchedFilter", watchedFilter);
   }, [watchedFilter, hydrated]);
@@ -396,9 +447,9 @@ function Index() {
     [genreFilter],
   );
 
-  function animeMatchesFilters(a: Anime) {
+  function animeMatchesFilters(a: Anime, mode: "mal" | "gosto" = scoreMode) {
     const q = search.toLowerCase().trim();
-    if (scoreMode !== "gosto") {
+    if (mode !== "gosto") {
       if (watchedFilter === "nao" && a.watched) return false;
       if (watchedFilter === "sim" && !a.watched) return false;
     }
@@ -431,7 +482,7 @@ function Index() {
   }
 
   const ranked = useMemo(() => {
-    const filtered = animes.filter(animeMatchesFilters);
+    const filtered = animes.filter((anime) => animeMatchesFilters(anime));
     if (scoreMode === "gosto") {
       return [...filtered].sort((a, b) => {
         const va = a.tier === null ? -1 : TIER_VALUE[a.tier];
@@ -448,6 +499,30 @@ function Index() {
 
     return [...filtered].sort(compareByMAL);
   }, [animes, search, scoreMode, tierFilter, typeFilter, genreFilter, semDadosFilter, watchedFilter]);
+
+  const displayedRanked = useMemo(() => {
+    const filtered = animes.filter((anime) => animeMatchesFilters(anime, displayMode.scoreMode));
+    if (displayMode.scoreMode === "gosto") {
+      return [...filtered].sort((a, b) => {
+        const va = a.tier === null ? -1 : TIER_VALUE[a.tier];
+        const vb = b.tier === null ? -1 : TIER_VALUE[b.tier];
+        if (vb !== va) return vb - va;
+        const pa = a.tierPosition;
+        const pb = b.tierPosition;
+        if (pa == null && pb == null) return 0;
+        if (pa == null) return 1;
+        if (pb == null) return -1;
+        return pa - pb;
+      });
+    }
+    return [...filtered].sort(compareByMAL);
+  }, [animes, search, displayMode.scoreMode, tierFilter, typeFilter, genreFilter, semDadosFilter, watchedFilter]);
+
+  const animateRankingItems = hydrated && !didInitialAnimate.current;
+
+  useEffect(() => {
+    if (hydrated && displayedRanked.length > 0) didInitialAnimate.current = true;
+  }, [hydrated, displayedRanked.length]);
 
   function revealAnime(id: string) {
     const el = document.getElementById(`anime-${id}`);
@@ -1643,9 +1718,16 @@ function Index() {
 
 
 
+        <div
+          className={`motion-reduce:transform-none motion-reduce:opacity-100 motion-reduce:transition-none ${
+            rankingTransition === "exiting"
+              ? "translate-y-1 opacity-0 transition-[opacity,transform] duration-[120ms] ease-in"
+              : "translate-y-0 opacity-100 transition-[opacity,transform] duration-[180ms] ease-out"
+          }`}
+        >
         {!hydrated ? (
           <RankingSkeleton scoreMode={scoreMode} viewMode={viewMode} />
-        ) : ranked.length === 0 && filtersActive ? (
+        ) : displayedRanked.length === 0 && filtersActive ? (
           <EmptyState
             icon={Filter}
             title="Nenhum anime com esses filtros."
@@ -1656,13 +1738,13 @@ function Index() {
               </Button>
             }
           />
-        ) : ranked.length === 0 && animes.length > 0 ? (
+        ) : displayedRanked.length === 0 && animes.length > 0 ? (
           <EmptyState
             icon={Search}
             title="Nenhum resultado"
             description="Tente buscar por outro nome."
           />
-        ) : ranked.length === 0 ? (
+        ) : displayedRanked.length === 0 ? (
           <EmptyState
             icon={Sparkles}
             title="Comece seu ranking"
@@ -1675,7 +1757,7 @@ function Index() {
           />
 
 
-        ) : scoreMode === "gosto" ? (
+        ) : displayMode.scoreMode === "gosto" ? (
           watchedCount === 0 ? (
             <EmptyState
               icon={Sparkles}
@@ -1683,7 +1765,7 @@ function Index() {
               description="Marque animes como assistidos para vê-los na sua tierlist."
             />
           ) : (
-          <div key={`${scoreMode}-${viewMode}`} className="space-y-2">
+          <div className="space-y-2">
             <DndContext
               sensors={tierSensors}
               collisionDetection={tierCollisionDetection}
@@ -1708,7 +1790,7 @@ function Index() {
             >
             <div className="overflow-hidden rounded-xl border border-border/60">
             {TIER_ROWS.map((t) => {
-              const items = ranked.filter((a) => a.tier === t && a.watched);
+              const items = displayedRanked.filter((a) => a.tier === t && a.watched);
               const hasItems = items.length > 0;
               return (
                 <TierDropRow
@@ -1736,10 +1818,10 @@ function Index() {
                 </TierDropRow>
               );
             })}
-            {(draggingAnimeId !== null || ranked.some((a) => a.tier === null && a.watched)) && (
+            {(draggingAnimeId !== null || displayedRanked.some((a) => a.tier === null && a.watched)) && (
               <TierDropRow
                 id="none"
-                items={ranked.filter((a) => a.tier === null && a.watched).map((a) => a.id)}
+                items={displayedRanked.filter((a) => a.tier === null && a.watched).map((a) => a.id)}
                 className="min-h-32 border-t border-border/60"
                 label={
                   <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
@@ -1750,7 +1832,7 @@ function Index() {
                   </div>
                 }
               >
-                {ranked
+                {displayedRanked
                   .filter((a) => a.tier === null && a.watched)
                   .map((anime, idx) => (
                     <DraggableCover
@@ -1776,9 +1858,9 @@ function Index() {
           </div>
 
           )
-        ) : viewMode === "grid" ? (
-          <ul key={`${scoreMode}-${viewMode}`} className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-            {ranked.map((anime, idx) => {
+        ) : displayMode.viewMode === "grid" ? (
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+            {displayedRanked.map((anime, idx) => {
               const malAvg = mediaMAL(anime.seasons);
               const primaryValue = malAvg != null ? malAvg.toFixed(2) : "—";
               const primaryColor = malAvg != null ? rankColor(malAvg) : "text-muted-foreground";
@@ -1786,12 +1868,12 @@ function Index() {
                 <li
                   key={anime.id}
                   id={`anime-${anime.id}`}
-                  className={`animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none [transform-style:preserve-3d] ${
+                  className={`${animateRankingItems ? "animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none" : ""} [transform-style:preserve-3d] ${
                     highlightId === anime.id
                       ? "card-flash"
                       : ""
                   } ${watchedFlashId === anime.id ? "watched-card-flash" : ""}`}
-                  style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
+                  style={animateRankingItems ? { animationDelay: `${Math.min(idx, 12) * 30}ms` } : undefined}
                 >
                 <TiltCardInner>
                   <button
@@ -1925,8 +2007,8 @@ function Index() {
             })}
           </ul>
         ) : (
-          <ul key={`${scoreMode}-${viewMode}`} className="grid gap-4">
-            {ranked.map((anime, idx) => {
+          <ul className="grid gap-4">
+            {displayedRanked.map((anime, idx) => {
               const malAvg = mediaMAL(anime.seasons);
               const primaryValue = malAvg != null ? malAvg.toFixed(2) : "—";
               const primaryColor = malAvg != null ? rankColor(malAvg) : "text-muted-foreground";
@@ -1935,12 +2017,12 @@ function Index() {
                 <li
                   key={anime.id}
                   id={`anime-${anime.id}`}
-                  className={`group relative overflow-hidden rounded-2xl border border-border/60 transition-all animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)] ${
+                  className={`group relative overflow-hidden rounded-2xl border border-border/60 transition-all ${animateRankingItems ? "animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none" : ""} hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)] ${
                     highlightId === anime.id
                       ? "card-flash"
                       : ""
                   } ${watchedFlashId === anime.id ? "watched-card-flash" : ""}`}
-                  style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)", animationDelay: `${Math.min(idx, 12) * 30}ms` }}
+                  style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)", ...(animateRankingItems ? { animationDelay: `${Math.min(idx, 12) * 30}ms` } : {}) }}
                 >
                   <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5">
                     <div
@@ -2154,6 +2236,7 @@ function Index() {
             })}
           </ul>
         )}
+        </div>
       </main>
 
       {/* Floating Action Button */}
