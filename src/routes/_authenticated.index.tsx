@@ -389,7 +389,10 @@ function Index() {
       return;
     }
 
-    if (draggingAnimeId !== null) return;
+    if (draggingAnimeId !== null) {
+      setRankingTransition("entering");
+      return;
+    }
 
     setRankingTransition("exiting");
     rankingTransitionTimeoutRef.current = setTimeout(() => {
