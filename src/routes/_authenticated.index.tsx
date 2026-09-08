@@ -205,6 +205,14 @@ function Index() {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [scoreMode, setScoreMode] = useState<"mal" | "gosto">("mal");
+  const [displayMode, setDisplayMode] = useState<{
+    scoreMode: "mal" | "gosto";
+    viewMode: "list" | "grid";
+  }>({ scoreMode: "mal", viewMode: "list" });
+  const [rankingTransition, setRankingTransition] = useState<"entering" | "exiting">("entering");
+  const rankingTransitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestModeRef = useRef({ scoreMode, viewMode });
+  const didInitialAnimate = useRef(false);
   const [tierFilter, setTierFilter] = useState<Set<Tier>>(() => new Set());
   const [typeFilter, setTypeFilter] = useState<Set<string>>(() => new Set());
   const [genreFilter, setGenreFilter] = useState<Set<string>>(() => new Set());
@@ -359,6 +367,46 @@ function Index() {
   }, [scoreMode, hydrated]);
 
   useEffect(() => {
+    const nextMode = { scoreMode, viewMode };
+    latestModeRef.current = nextMode;
+    if (rankingTransitionTimeoutRef.current) {
+      clearTimeout(rankingTransitionTimeoutRef.current);
+      rankingTransitionTimeoutRef.current = null;
+    }
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!hydrated || reducedMotion) {
+      setDisplayMode(nextMode);
+      setRankingTransition("entering");
+      return;
+    }
+
+    if (
+      displayMode.scoreMode === nextMode.scoreMode &&
+      displayMode.viewMode === nextMode.viewMode
+    ) {
+      setRankingTransition("entering");
+      return;
+    }
+
+    if (draggingAnimeId !== null) return;
+
+    setRankingTransition("exiting");
+    rankingTransitionTimeoutRef.current = setTimeout(() => {
+      setDisplayMode(latestModeRef.current);
+      setRankingTransition("entering");
+      rankingTransitionTimeoutRef.current = null;
+    }, 120);
+
+    return () => {
+      if (rankingTransitionTimeoutRef.current) {
+        clearTimeout(rankingTransitionTimeoutRef.current);
+        rankingTransitionTimeoutRef.current = null;
+      }
+    };
+  }, [scoreMode, viewMode, hydrated, draggingAnimeId, displayMode.scoreMode, displayMode.viewMode]);
+
+  useEffect(() => {
     if (!hydrated) return;
     localStorage.setItem("anime-ranker:v1:watchedFilter", watchedFilter);
   }, [watchedFilter, hydrated]);
@@ -396,9 +444,9 @@ function Index() {
     [genreFilter],
   );
 
-  function animeMatchesFilters(a: Anime) {
+  function animeMatchesFilters(a: Anime, mode: "mal" | "gosto" = scoreMode) {
     const q = search.toLowerCase().trim();
-    if (scoreMode !== "gosto") {
+    if (mode !== "gosto") {
       if (watchedFilter === "nao" && a.watched) return false;
       if (watchedFilter === "sim" && !a.watched) return false;
     }
@@ -448,6 +496,30 @@ function Index() {
 
     return [...filtered].sort(compareByMAL);
   }, [animes, search, scoreMode, tierFilter, typeFilter, genreFilter, semDadosFilter, watchedFilter]);
+
+  const displayedRanked = useMemo(() => {
+    const filtered = animes.filter((anime) => animeMatchesFilters(anime, displayMode.scoreMode));
+    if (displayMode.scoreMode === "gosto") {
+      return [...filtered].sort((a, b) => {
+        const va = a.tier === null ? -1 : TIER_VALUE[a.tier];
+        const vb = b.tier === null ? -1 : TIER_VALUE[b.tier];
+        if (vb !== va) return vb - va;
+        const pa = a.tierPosition;
+        const pb = b.tierPosition;
+        if (pa == null && pb == null) return 0;
+        if (pa == null) return 1;
+        if (pb == null) return -1;
+        return pa - pb;
+      });
+    }
+    return [...filtered].sort(compareByMAL);
+  }, [animes, search, displayMode.scoreMode, tierFilter, typeFilter, genreFilter, semDadosFilter, watchedFilter]);
+
+  const animateRankingItems = hydrated && !didInitialAnimate.current;
+
+  useEffect(() => {
+    if (hydrated && displayedRanked.length > 0) didInitialAnimate.current = true;
+  }, [hydrated, displayedRanked.length]);
 
   function revealAnime(id: string) {
     const el = document.getElementById(`anime-${id}`);
