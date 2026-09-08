@@ -309,7 +309,40 @@
   transform: scale(.7) rotate(18deg);
 }
 
+::view-transition-group(*) {
+  animation-duration: 280ms;
+  animation-timing-function: cubic-bezier(.2, .7, .3, 1);
+}
+
+::view-transition-old(*) {
+  animation: 280ms cubic-bezier(.2, .7, .3, 1) both view-transition-old-card;
+}
+
+::view-transition-new(*) {
+  animation: 280ms cubic-bezier(.2, .7, .3, 1) both view-transition-new-card;
+}
+
+@keyframes view-transition-old-card {
+  to {
+    opacity: 0;
+    transform: scale(.96);
+  }
+}
+
+@keyframes view-transition-new-card {
+  from {
+    opacity: 0;
+    transform: scale(.98);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0s;
+  }
+
   .card-flash {
     animation: none;
     box-shadow: var(--shadow-elegant), 0 0 0 2px var(--primary);
