@@ -135,6 +135,7 @@ import { runMigrations } from "@/lib/migrations";
 import { EmptyState } from "@/components/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SegmentedToggle } from "@/components/SegmentedToggle";
+import { withViewTransition } from "@/lib/view-transition";
 
 
 const TIER_ROWS = (Object.keys(TIER_VALUE) as Tier[]).sort(
@@ -518,6 +519,12 @@ function Index() {
     return [...filtered].sort(compareByMAL);
   }, [animes, search, displayMode.scoreMode, tierFilter, typeFilter, genreFilter, semDadosFilter, watchedFilter]);
 
+  const visibleRankingItemCount =
+    displayMode.scoreMode === "gosto"
+      ? displayedRanked.filter((anime) => anime.watched).length
+      : displayedRanked.length;
+  const enableItemViewTransitions = visibleRankingItemCount <= 60;
+
   const animateRankingItems = hydrated && !didInitialAnimate.current;
 
   useEffect(() => {
@@ -579,32 +586,44 @@ function Index() {
   const filtersActiveCount =
     tierFilter.size + typeFilter.size + genreFilter.size + (semDadosFilter ? 1 : 0) + (watchedFilterActive ? 1 : 0);
   function clearFilters() {
-    setTierFilter(new Set());
-    setTypeFilter(new Set());
-    setGenreFilter(new Set());
-    setSemDadosFilter(false);
-    setWatchedFilter("nao");
+    withViewTransition(() => {
+      setTierFilter(new Set());
+      setTypeFilter(new Set());
+      setGenreFilter(new Set());
+      setSemDadosFilter(false);
+      setWatchedFilter("nao");
+    });
   }
   function toggleTier(t: Tier) {
-    setTierFilter((prev) => {
-      const n = new Set(prev);
-      if (n.has(t)) n.delete(t); else n.add(t);
-      return n;
+    withViewTransition(() => {
+      setTierFilter((prev) => {
+        const n = new Set(prev);
+        if (n.has(t)) n.delete(t); else n.add(t);
+        return n;
+      });
     });
   }
   function toggleType(t: string) {
-    setTypeFilter((prev) => {
-      const n = new Set(prev);
-      if (n.has(t)) n.delete(t); else n.add(t);
-      return n;
+    withViewTransition(() => {
+      setTypeFilter((prev) => {
+        const n = new Set(prev);
+        if (n.has(t)) n.delete(t); else n.add(t);
+        return n;
+      });
     });
   }
   function toggleGenre(g: string) {
-    setGenreFilter((prev) => {
-      const n = new Set(prev);
-      if (n.has(g)) n.delete(g); else n.add(g);
-      return n;
+    withViewTransition(() => {
+      setGenreFilter((prev) => {
+        const n = new Set(prev);
+        if (n.has(g)) n.delete(g); else n.add(g);
+        return n;
+      });
     });
+  }
+
+  function selectGenreFilter(genre: string) {
+    withViewTransition(() => setGenreFilter(new Set([genre])));
   }
 
 
@@ -890,7 +909,9 @@ function Index() {
 
   async function setAnimeTier(animeId: string, tier: Tier | null) {
     const prev = animes;
-    setAnimes((p) => p.map((a) => (a.id === animeId ? { ...a, tier, tierPosition: null } : a)));
+    withViewTransition(() => {
+      setAnimes((p) => p.map((a) => (a.id === animeId ? { ...a, tier, tierPosition: null } : a)));
+    });
     try {
       await updateTier(animeId, tier);
     } catch (err) {
@@ -974,7 +995,7 @@ function Index() {
 
   async function deleteAnime(id: string) {
     const prev = animes;
-    setAnimes((p) => p.filter((a) => a.id !== id));
+    withViewTransition(() => setAnimes((p) => p.filter((a) => a.id !== id)));
     try {
       await deleteAnimeRow(id);
       toast.success("Anime removido");
@@ -1636,7 +1657,7 @@ function Index() {
                       <div className="border-t border-border/60 p-2">
                         <button
                           type="button"
-                          onClick={() => setGenreFilter(new Set())}
+                          onClick={() => withViewTransition(() => setGenreFilter(new Set()))}
                           className="focus-ring w-full rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-destructive"
                         >
                           Limpar gêneros
@@ -1674,7 +1695,7 @@ function Index() {
                     <button
                       key={opt.v}
                       type="button"
-                      onClick={() => setWatchedFilter(opt.v)}
+                      onClick={() => withViewTransition(() => setWatchedFilter(opt.v))}
                       aria-pressed={active}
                       className={`focus-ring h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
                         active
@@ -1690,7 +1711,7 @@ function Index() {
             )}
             <button
               type="button"
-              onClick={() => setSemDadosFilter((v) => !v)}
+              onClick={() => withViewTransition(() => setSemDadosFilter((v) => !v))}
               aria-pressed={semDadosFilter}
               className={`focus-ring ml-2 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
                 semDadosFilter
@@ -1806,14 +1827,19 @@ function Index() {
                   }
                 >
                   {items.map((anime, idx) => (
-                    <DraggableCover
+                    <li
                       key={anime.id}
-                      id={`anime-${anime.id}`}
-                      anime={anime}
-                      idx={idx}
-                      onOpen={openDetail}
-                      highlighted={highlightId === anime.id}
-                    />
+                      className="list-none"
+                      style={{ viewTransitionName: enableItemViewTransitions ? `anime-${anime.id}` : undefined }}
+                    >
+                      <DraggableCover
+                        id={`anime-${anime.id}`}
+                        anime={anime}
+                        idx={idx}
+                        onOpen={openDetail}
+                        highlighted={highlightId === anime.id}
+                      />
+                    </li>
                   ))}
                 </TierDropRow>
               );
@@ -1835,14 +1861,19 @@ function Index() {
                 {displayedRanked
                   .filter((a) => a.tier === null && a.watched)
                   .map((anime, idx) => (
-                    <DraggableCover
+                    <li
                       key={anime.id}
-                      id={`anime-${anime.id}`}
-                      anime={anime}
-                      idx={idx}
-                      onOpen={openDetail}
-                      highlighted={highlightId === anime.id}
-                    />
+                      className="list-none"
+                      style={{ viewTransitionName: enableItemViewTransitions ? `anime-${anime.id}` : undefined }}
+                    >
+                      <DraggableCover
+                        id={`anime-${anime.id}`}
+                        anime={anime}
+                        idx={idx}
+                        onOpen={openDetail}
+                        highlighted={highlightId === anime.id}
+                      />
+                    </li>
                   ))}
               </TierDropRow>
             )}
@@ -1873,7 +1904,10 @@ function Index() {
                       ? "card-flash"
                       : ""
                   } ${watchedFlashId === anime.id ? "watched-card-flash" : ""}`}
-                  style={animateRankingItems ? { animationDelay: `${Math.min(idx, 12) * 30}ms` } : undefined}
+                  style={{
+                    viewTransitionName: enableItemViewTransitions ? `anime-${anime.id}` : undefined,
+                    ...(animateRankingItems ? { animationDelay: `${Math.min(idx, 12) * 30}ms` } : {}),
+                  }}
                 >
                 <TiltCardInner>
                   <button
@@ -2022,7 +2056,12 @@ function Index() {
                       ? "card-flash"
                       : ""
                   } ${watchedFlashId === anime.id ? "watched-card-flash" : ""}`}
-                  style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)", ...(animateRankingItems ? { animationDelay: `${Math.min(idx, 12) * 30}ms` } : {}) }}
+                  style={{
+                    viewTransitionName: enableItemViewTransitions ? `anime-${anime.id}` : undefined,
+                    background: "var(--gradient-card)",
+                    boxShadow: "var(--shadow-card)",
+                    ...(animateRankingItems ? { animationDelay: `${Math.min(idx, 12) * 30}ms` } : {}),
+                  }}
                 >
                   <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5">
                     <div
@@ -2076,7 +2115,7 @@ function Index() {
                               aria-label="Filtrar por Award Winning"
                               title="Award Winning (MAL)"
                               onClick={() => {
-                                setGenreFilter(new Set([AWARD_GENRE]));
+                                selectGenreFilter(AWARD_GENRE);
                                 setShowFilters(true);
                               }}
                               className="focus-ring inline-flex items-center gap-1 rounded-md bg-award px-1.5 py-0.5 text-[10px] font-medium text-award-foreground transition-colors hover:brightness-110"
@@ -2814,7 +2853,7 @@ function Index() {
                         onClick={() => {
                           setDetailOpen(false);
                           setDetailAnimeId("");
-                          setGenreFilter(new Set([AWARD_GENRE]));
+                          selectGenreFilter(AWARD_GENRE);
                           setShowFilters(true);
                         }}
                         className="focus-ring inline-flex items-center gap-1 rounded-md bg-award px-2 py-1 text-[11px] font-medium text-award-foreground transition-colors hover:brightness-110"
@@ -2833,7 +2872,7 @@ function Index() {
                           onClick={() => {
                             setDetailOpen(false);
                             setDetailAnimeId("");
-                            setGenreFilter(new Set([g]));
+                            selectGenreFilter(g);
                             setShowFilters(true);
                           }}
                           className="focus-ring rounded-md bg-foreground/5 px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-primary/15 hover:text-primary"
