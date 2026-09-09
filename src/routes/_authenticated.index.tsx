@@ -2571,16 +2571,10 @@ function Index() {
                             <ImageIcon className="h-10 w-10" />
                           </div>
                         )}
-                        <span className="absolute left-1.5 top-1.5 rounded-md border border-border bg-card px-2 py-0.5 text-[10px] text-foreground">
-                          Capa atual
-                        </span>
                       </div>
-                      <div className="flex min-w-0 flex-1 flex-col gap-1 pt-1">
+                      <div className="flex min-w-0 flex-1 flex-col pt-1">
                         <span className="text-sm font-medium text-foreground">
                           {coverLabel}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          Aparece na lista, no grid e na tierlist.
                         </span>
                       </div>
                     </div>
