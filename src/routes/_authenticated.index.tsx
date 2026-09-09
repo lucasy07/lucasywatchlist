@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useBootProgress } from "@/boot/BootProgress";
 
 import { BrandLockup } from "@/components/BrandLockup";
@@ -1740,10 +1741,10 @@ function Index() {
 
 
         <div
-          className={`motion-reduce:transform-none motion-reduce:opacity-100 motion-reduce:transition-none ${
+          className={`motion-reduce:opacity-100 motion-reduce:transition-none ${
             rankingTransition === "exiting"
-              ? "translate-y-1 opacity-0 transition-[opacity,transform] duration-[120ms] ease-in"
-              : "translate-y-0 opacity-100 transition-[opacity,transform] duration-[180ms] ease-out"
+              ? "opacity-0 transition-opacity duration-[120ms] ease-in"
+              : "opacity-100 transition-opacity duration-[180ms] ease-out"
           }`}
         >
         {!hydrated ? (
@@ -1878,13 +1879,20 @@ function Index() {
               </TierDropRow>
             )}
           </div>
-            <DragOverlay>
-              {draggingAnime ? (
-                <div className="group w-20 scale-105 rounded-lg ring-2 ring-primary/50">
-                  <CoverArt anime={draggingAnime} />
-                </div>
-              ) : null}
-            </DragOverlay>
+            {(() => {
+              const overlay = (
+                <DragOverlay>
+                  {draggingAnime ? (
+                    <div className="group w-20 scale-105 rounded-lg ring-2 ring-primary/50">
+                      <CoverArt anime={draggingAnime} />
+                    </div>
+                  ) : null}
+                </DragOverlay>
+              );
+              return typeof document !== "undefined"
+                ? createPortal(overlay, document.body)
+                : overlay;
+            })()}
             </DndContext>
           </div>
 
