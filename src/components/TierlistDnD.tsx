@@ -35,12 +35,14 @@ export function DraggableCover({
   onOpen,
   id,
   highlighted,
+  viewTransitionName,
 }: {
   anime: Anime;
   idx: number;
   onOpen: (id: string) => void;
   id?: string;
   highlighted?: boolean;
+  viewTransitionName?: string;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: anime.id,
