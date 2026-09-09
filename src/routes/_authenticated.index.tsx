@@ -1878,13 +1878,20 @@ function Index() {
               </TierDropRow>
             )}
           </div>
-            <DragOverlay>
-              {draggingAnime ? (
-                <div className="group w-20 scale-105 rounded-lg ring-2 ring-primary/50">
-                  <CoverArt anime={draggingAnime} />
-                </div>
-              ) : null}
-            </DragOverlay>
+            {(() => {
+              const overlay = (
+                <DragOverlay>
+                  {draggingAnime ? (
+                    <div className="group w-20 scale-105 rounded-lg ring-2 ring-primary/50">
+                      <CoverArt anime={draggingAnime} />
+                    </div>
+                  ) : null}
+                </DragOverlay>
+              );
+              return typeof document !== "undefined"
+                ? createPortal(overlay, document.body)
+                : overlay;
+            })()}
             </DndContext>
           </div>
 
