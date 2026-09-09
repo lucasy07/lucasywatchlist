@@ -1419,15 +1419,11 @@ function Index() {
             <span className="sr-only">Umi Watchlist</span>
             <button
               type="button"
-              aria-label="Voltar ao topo e limpar filtros"
+              aria-label="Voltar ao topo"
               className="focus-ring cursor-pointer -m-2 p-2 transition-opacity hover:opacity-75"
               onClick={() => {
-                const tinhaAlgo = search.trim() !== "" || filtersActive;
-                setSearch("");
-                clearFilters();
                 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
                 window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
-                if (tinhaAlgo) toast.success("Busca e filtros limpos");
               }}
             >
               <BrandLockup size="sm" className="h-11 sm:h-16" />
