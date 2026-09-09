@@ -68,6 +68,7 @@ export function DraggableCover({
         animationDelay: `${Math.min(idx, 12) * 30}ms`,
         transform: CSS.Transform.toString(transform),
         transition,
+        viewTransitionName: isDragging ? undefined : viewTransitionName,
       }}
     >
       <CoverArt anime={anime} />
