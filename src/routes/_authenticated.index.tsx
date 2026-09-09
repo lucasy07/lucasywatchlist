@@ -1740,10 +1740,10 @@ function Index() {
 
 
         <div
-          className={`motion-reduce:transform-none motion-reduce:opacity-100 motion-reduce:transition-none ${
+          className={`motion-reduce:opacity-100 motion-reduce:transition-none ${
             rankingTransition === "exiting"
-              ? "translate-y-1 opacity-0 transition-[opacity,transform] duration-[120ms] ease-in"
-              : "translate-y-0 opacity-100 transition-[opacity,transform] duration-[180ms] ease-out"
+              ? "opacity-0 transition-opacity duration-[120ms] ease-in"
+              : "opacity-100 transition-opacity duration-[180ms] ease-out"
           }`}
         >
         {!hydrated ? (
