@@ -2067,7 +2067,16 @@ function Index() {
                     ...(animateRankingItems ? { animationDelay: `${Math.min(idx, 12) * 30}ms` } : {}),
                   }}
                 >
-                  <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5">
+                  <div
+                    className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5"
+                    onDoubleClick={(e) => {
+                      if ((e.target as HTMLElement).closest("button, a, input")) return;
+                      toggleExpand(anime.id);
+                    }}
+                    onMouseDown={(e) => {
+                      if (e.detail > 1) e.preventDefault();
+                    }}
+                  >
                     <div
                       className={`font-display flex h-10 w-8 shrink-0 items-center justify-center text-sm font-bold sm:h-14 sm:w-10 sm:text-xl ${
                         idx === 0
