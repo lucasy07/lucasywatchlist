@@ -159,13 +159,21 @@ export const Route = createFileRoute("/_authenticated/")({
 });
 
 
-function TiltCardInner({ children }: { children: React.ReactNode }) {
+function TiltCardInner({
+  children,
+  tierS = false,
+}: {
+  children: React.ReactNode;
+  tierS?: boolean;
+}) {
   const tilt = useTilt();
   return (
     <div
       onMouseMove={tilt.onMouseMove}
       onMouseLeave={tilt.onMouseLeave}
-      className="group relative overflow-hidden rounded-2xl border border-border/60 transition-[border-color,box-shadow] duration-200 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)]"
+      className={`group relative overflow-hidden rounded-2xl border ${
+        tierS ? "border-tier-s/70 ring-1 ring-inset ring-tier-s/40" : "border-border/60"
+      } transition-[border-color,box-shadow] duration-200 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)]`}
       style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)", transformOrigin: "center" }}
     >
       {children}
@@ -1925,7 +1933,7 @@ function Index() {
                     ...(animateRankingItems ? { animationDelay: `${Math.min(idx, 12) * 30}ms` } : {}),
                   }}
                 >
-                <TiltCardInner>
+                <TiltCardInner tierS={anime.tier === "S"}>
                   <button
                     type="button"
                     onClick={() => openDetail(anime.id)}
@@ -2079,6 +2087,12 @@ function Index() {
                     ...(animateRankingItems ? { animationDelay: `${Math.min(idx, 12) * 30}ms` } : {}),
                   }}
                 >
+                  {anime.tier === "S" && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-y-0 left-0 w-[6px] bg-tier-s"
+                    />
+                  )}
                   <div
                     className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5"
                     onDoubleClick={(e) => {
