@@ -225,6 +225,7 @@ function Index() {
   const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [watchedFlashId, setWatchedFlashId] = useState<string | null>(null);
   const watchedFlashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [tierPromptAnimeId, setTierPromptAnimeId] = useState<string | null>(null);
   const tierSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
