@@ -2990,6 +2990,7 @@ function Index() {
 
       {/* Tier prompt: ask right after marking an unclassified anime as watched */}
       <Dialog
+        modal={false}
         open={tierPromptAnimeId !== null}
         onOpenChange={(open) => {
           if (!open) setTierPromptAnimeId(null);
