@@ -2988,6 +2988,37 @@ function Index() {
         </DialogContent>
       </Dialog>
 
+      {/* Tier prompt: ask right after marking an unclassified anime as watched */}
+      <Dialog
+        open={tierPromptAnimeId !== null}
+        onOpenChange={(open) => {
+          if (!open) setTierPromptAnimeId(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Qual tier?</DialogTitle>
+            <DialogDescription>
+              {animes.find((a) => a.id === tierPromptAnimeId)?.name ?? ""} foi marcado como
+              assistido.
+            </DialogDescription>
+          </DialogHeader>
+          <TierPicker
+            value={null}
+            onChange={(t) => {
+              const id = tierPromptAnimeId;
+              if (t && id) setAnimeTier(id, t);
+              setTierPromptAnimeId(null);
+            }}
+          />
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setTierPromptAnimeId(null)}>
+              Pular
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Stats dialog */}
       <StatsDialog animes={animes} open={statsOpen} onOpenChange={setStatsOpen} />
     </div>
