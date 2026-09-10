@@ -665,7 +665,18 @@ function Index() {
       }, 500);
     }
     void toggleWatched(id, next);
+    if (next) {
+      const target = animes.find((a) => a.id === id);
+      if (target && target.tier === null) setTierPromptAnimeId(id);
+    }
   }
+
+  // Close the tier prompt if the anime disappears or is un-watched (e.g. "Desfazer").
+  useEffect(() => {
+    if (tierPromptAnimeId === null) return;
+    const target = animes.find((a) => a.id === tierPromptAnimeId);
+    if (!target || !target.watched) setTierPromptAnimeId(null);
+  }, [animes, tierPromptAnimeId]);
 
   function resetAddAnime() {
     chainAbortRef.current?.abort();
