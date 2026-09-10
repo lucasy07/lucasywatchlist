@@ -336,6 +336,16 @@
   }
 }
 
+/* O snapshot root (html) não tem nome próprio e é pego pelos seletores
+   universais acima. Zerar a duração aqui, mantendo o bloco depois dos (*)
+   para vencer por ordem, evita que header, barra de filtros e FAB façam
+   fade + scale junto com os cards. */
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0s;
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),
