@@ -225,6 +225,7 @@ function Index() {
   const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [watchedFlashId, setWatchedFlashId] = useState<string | null>(null);
   const watchedFlashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [tierPromptAnimeId, setTierPromptAnimeId] = useState<string | null>(null);
   const tierSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
@@ -664,7 +665,18 @@ function Index() {
       }, 500);
     }
     void toggleWatched(id, next);
+    if (next) {
+      const target = animes.find((a) => a.id === id);
+      if (target && target.tier === null) setTierPromptAnimeId(id);
+    }
   }
+
+  // Close the tier prompt if the anime disappears or is un-watched (e.g. "Desfazer").
+  useEffect(() => {
+    if (tierPromptAnimeId === null) return;
+    const target = animes.find((a) => a.id === tierPromptAnimeId);
+    if (!target || !target.watched) setTierPromptAnimeId(null);
+  }, [animes, tierPromptAnimeId]);
 
   function resetAddAnime() {
     chainAbortRef.current?.abort();
@@ -2971,6 +2983,38 @@ function Index() {
               }}
             >
               <Pencil className="mr-1 h-4 w-4" /> Editar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Tier prompt: ask right after marking an unclassified anime as watched */}
+      <Dialog
+        modal={false}
+        open={tierPromptAnimeId !== null}
+        onOpenChange={(open) => {
+          if (!open) setTierPromptAnimeId(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Qual tier?</DialogTitle>
+            <DialogDescription>
+              {animes.find((a) => a.id === tierPromptAnimeId)?.name ?? ""} foi marcado como
+              assistido.
+            </DialogDescription>
+          </DialogHeader>
+          <TierPicker
+            value={null}
+            onChange={(t) => {
+              const id = tierPromptAnimeId;
+              if (t && id) setAnimeTier(id, t);
+              setTierPromptAnimeId(null);
+            }}
+          />
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setTierPromptAnimeId(null)}>
+              Pular
             </Button>
           </DialogFooter>
         </DialogContent>
