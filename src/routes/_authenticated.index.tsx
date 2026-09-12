@@ -234,6 +234,7 @@ function Index() {
   const [watchedFlashId, setWatchedFlashId] = useState<string | null>(null);
   const watchedFlashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [tierPromptAnimeId, setTierPromptAnimeId] = useState<string | null>(null);
+  const [pendingTierPromptId, setPendingTierPromptId] = useState<string | null>(null);
   const tierSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
@@ -675,16 +676,38 @@ function Index() {
     void toggleWatched(id, next);
     if (next) {
       const target = animes.find((a) => a.id === id);
-      if (target && target.tier === null) setTierPromptAnimeId(id);
+      if (target && target.tier === null) {
+        if (detailOpen) {
+          setPendingTierPromptId(id);
+          setDetailOpen(false);
+        } else {
+          setTierPromptAnimeId(id);
+        }
+      }
     }
   }
 
-  // Close the tier prompt if the anime disappears or is un-watched (e.g. "Desfazer").
+  // Drop open or queued prompts if the anime disappears or is un-watched (e.g. "Desfazer").
   useEffect(() => {
-    if (tierPromptAnimeId === null) return;
-    const target = animes.find((a) => a.id === tierPromptAnimeId);
-    if (!target || !target.watched) setTierPromptAnimeId(null);
-  }, [animes, tierPromptAnimeId]);
+    if (tierPromptAnimeId !== null) {
+      const target = animes.find((a) => a.id === tierPromptAnimeId);
+      if (!target || !target.watched) setTierPromptAnimeId(null);
+    }
+    if (pendingTierPromptId !== null) {
+      const pendingTarget = animes.find((a) => a.id === pendingTierPromptId);
+      if (!pendingTarget || !pendingTarget.watched) setPendingTierPromptId(null);
+    }
+  }, [animes, pendingTierPromptId, tierPromptAnimeId]);
+
+  // Wait for the detail dialog's closing animation before opening the modal tier prompt.
+  useEffect(() => {
+    if (detailOpen || pendingTierPromptId === null) return;
+    const timeout = setTimeout(() => {
+      setTierPromptAnimeId(pendingTierPromptId);
+      setPendingTierPromptId(null);
+    }, 220);
+    return () => clearTimeout(timeout);
+  }, [detailOpen, pendingTierPromptId]);
 
   function resetAddAnime() {
     chainAbortRef.current?.abort();
@@ -3004,7 +3027,6 @@ function Index() {
 
       {/* Tier prompt: ask right after marking an unclassified anime as watched */}
       <Dialog
-        modal={false}
         open={tierPromptAnimeId !== null}
         onOpenChange={(open) => {
           if (!open) setTierPromptAnimeId(null);
