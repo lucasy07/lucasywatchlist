@@ -1302,6 +1302,7 @@ function Index() {
       toast.error("Sem vínculo ao MAL");
       return;
     }
+    setCheckAborted(null);
     setCheckingId(animeId);
     let result: { available: FoundSeason[]; upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }>; updated: UpdatedSeason[] };
     try {
