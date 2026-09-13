@@ -1269,9 +1269,11 @@ function Index() {
     scanAbortRef.current = ac;
     let result: { available: FoundSeason[]; upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }>; updated: UpdatedSeason[]; aborted: boolean; scanned: number };
     try {
-      result = await scanTargets(targets, (current, total) =>
-        setCheckProgress({ current, total }),
-      , ac.signal);
+      result = await scanTargets(
+        targets,
+        (current, total) => setCheckProgress({ current, total }),
+        ac.signal,
+      );
     } finally {
       setChecking(false);
       setCheckProgress(null);
