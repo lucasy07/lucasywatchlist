@@ -2,6 +2,7 @@ import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Image as ImageIcon } from "lucide-react";
+import type { CSSProperties } from "react";
 import type { Anime } from "@/lib/anime-storage";
 
 export function CoverArt({ anime }: { anime: Anime }) {
@@ -85,23 +86,26 @@ export function TierDropRow({
   children,
   className,
   label,
+  style,
 }: {
   id: string;
   items: string[];
   children: React.ReactNode;
   className?: string;
   label: React.ReactNode;
+  style?: CSSProperties;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   return (
     <div
       ref={setNodeRef}
+      style={style}
       className={`relative flex min-h-20 items-stretch transition-colors duration-150 motion-reduce:transition-none ${
         isOver ? "bg-primary/5 ring-1 ring-inset ring-primary/40" : ""
       } ${className ?? ""}`}
     >
-      {label}
-      <div className="flex flex-1 flex-wrap content-center items-center gap-2.5 p-3">
+      <div className="relative z-10 flex">{label}</div>
+      <div className="relative z-10 flex flex-1 flex-wrap content-center items-center gap-2.5 p-3">
         <SortableContext items={items} strategy={rectSortingStrategy}>
           {children}
         </SortableContext>
