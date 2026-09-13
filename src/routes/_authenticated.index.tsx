@@ -2085,12 +2085,12 @@ function Index() {
                     ...(animateRankingItems ? { animationDelay: `${Math.min(idx, 12) * 30}ms` } : {}),
                   }}
                 >
-                  {anime.tier === "S" && (
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-y-0 left-0 w-[6px] bg-tier-s"
-                    />
-                  )}
+                  <span
+                    aria-hidden="true"
+                    className={`pointer-events-none absolute inset-y-0 left-0 w-[6px] bg-tier-s transition-opacity duration-200 motion-reduce:transition-none ${
+                      anime.tier === "S" ? "opacity-100" : "opacity-0"
+                    }`}
+                  />
                   <div
                     className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5"
                     onDoubleClick={(e) => {
@@ -2192,7 +2192,10 @@ function Index() {
                         <span className="text-[10px] text-muted-foreground">/10</span>
                       </div>
                       <Badge variant="outline" className="gap-1 border-primary/30 px-1.5 py-0 text-[10px] text-foreground/80">
-                        <span className={`font-display font-bold ${tierColor(anime.tier)}`}>
+                        <span
+                          key={anime.tier ?? "none"}
+                          className={`tier-badge-pop font-display font-bold transition-colors duration-200 motion-reduce:transition-none ${tierColor(anime.tier)}`}
+                        >
                           {anime.tier ?? "—"}
                         </span>
                       </Badge>
