@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useBootProgress } from "@/boot/BootProgress";
 
@@ -229,6 +229,7 @@ function Index() {
   const [semDadosFilter, setSemDadosFilter] = useState(false);
   const [watchedFilter, setWatchedFilter] = useState<"todos" | "nao" | "sim">("nao");
   const [draggingAnimeId, setDraggingAnimeId] = useState<string | null>(null);
+  const [tierWaveRun, setTierWaveRun] = useState(0);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [watchedFlashId, setWatchedFlashId] = useState<string | null>(null);
@@ -1470,6 +1471,9 @@ function Index() {
               onClick={() => {
                 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
                 window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+                if (displayMode.scoreMode === "gosto" && draggingAnimeId === null && !reduced) {
+                  setTierWaveRun((run) => run + 1);
+                }
               }}
             >
               <BrandLockup size="sm" className="h-11 sm:h-16" />
@@ -1865,15 +1869,20 @@ function Index() {
               }}
             >
             <div className="overflow-hidden rounded-xl border border-border/60">
-            {TIER_ROWS.map((t) => {
+            {TIER_ROWS.map((t, rowIndex) => {
               const items = displayedRanked.filter((a) => a.tier === t && a.watched);
               const hasItems = items.length > 0;
+              const waveVariant = tierWaveRun > 0 ? (tierWaveRun % 2 === 0 ? "b" : "a") : null;
               return (
                 <TierDropRow
                   key={t}
                   id={t}
                   items={items.map((a) => a.id)}
-                  className={`border-b border-border/60 last:border-b-0 ${hasItems ? "min-h-32" : "min-h-20"}`}
+                  className={`border-b border-border/60 last:border-b-0 ${hasItems ? "min-h-32" : "min-h-20"} ${waveVariant ? `tier-wave-row-${waveVariant}` : ""}`}
+                  style={{
+                    "--wave-tint": `var(--tier-${t.toLowerCase()})`,
+                    "--wave-delay": `${rowIndex * 70}ms`,
+                  } as CSSProperties}
                   label={
                     <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
                       <div className={`absolute inset-y-0 left-0 w-1.5 ${tierBg(t)}`} />
@@ -1884,8 +1893,11 @@ function Index() {
                   {items.map((anime, idx) => (
                     <li
                       key={anime.id}
-                      className="list-none"
-                      style={{ viewTransitionName: enableItemViewTransitions ? `anime-${anime.id}` : undefined }}
+                      className={`list-none ${waveVariant ? `tier-wave-card-${waveVariant}` : ""}`}
+                      style={{
+                        viewTransitionName: enableItemViewTransitions ? `anime-${anime.id}` : undefined,
+                        "--wave-delay": `${rowIndex * 70}ms`,
+                      } as CSSProperties}
                     >
                       <DraggableCover
                         id={`anime-${anime.id}`}
@@ -1903,7 +1915,11 @@ function Index() {
               <TierDropRow
                 id="none"
                 items={displayedRanked.filter((a) => a.tier === null && a.watched).map((a) => a.id)}
-                className="min-h-32 border-t border-border/60"
+                className={`min-h-32 border-t border-border/60 ${tierWaveRun > 0 ? `tier-wave-row-${tierWaveRun % 2 === 0 ? "b" : "a"}` : ""}`}
+                style={{
+                  "--wave-tint": "var(--muted-foreground)",
+                  "--wave-delay": `${TIER_ROWS.length * 70}ms`,
+                } as CSSProperties}
                 label={
                   <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
                     <div className="absolute inset-y-0 left-0 w-1.5 bg-muted-foreground/30" />
@@ -1918,8 +1934,11 @@ function Index() {
                   .map((anime, idx) => (
                     <li
                       key={anime.id}
-                      className="list-none"
-                      style={{ viewTransitionName: enableItemViewTransitions ? `anime-${anime.id}` : undefined }}
+                      className={`list-none ${tierWaveRun > 0 ? `tier-wave-card-${tierWaveRun % 2 === 0 ? "b" : "a"}` : ""}`}
+                      style={{
+                        viewTransitionName: enableItemViewTransitions ? `anime-${anime.id}` : undefined,
+                        "--wave-delay": `${TIER_ROWS.length * 70}ms`,
+                      } as CSSProperties}
                     >
                       <DraggableCover
                         id={`anime-${anime.id}`}

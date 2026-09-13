@@ -261,6 +261,26 @@
   }
 }
 
+@keyframes tier-wave-row-a {
+  0%, 100% { opacity: 0; }
+  28%, 62% { opacity: 1; }
+}
+
+@keyframes tier-wave-row-b {
+  0%, 100% { opacity: 0; }
+  28%, 62% { opacity: 1; }
+}
+
+@keyframes tier-wave-card-a {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+
+@keyframes tier-wave-card-b {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+
 @keyframes skeleton-shimmer {
   from {
     background-position: -200% 0;
@@ -303,6 +323,45 @@
 
 .tier-badge-pop {
   animation: tier-badge-pop 180ms cubic-bezier(.34, 1.3, .64, 1);
+}
+
+.tier-wave-row-a::after,
+.tier-wave-row-b::after {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background-color: color-mix(in oklab, var(--wave-tint) 18%, transparent);
+  opacity: 0;
+  animation-duration: 620ms;
+  animation-delay: var(--wave-delay, 0ms);
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+}
+
+.tier-wave-row-a::after {
+  animation-name: tier-wave-row-a;
+}
+
+.tier-wave-row-b::after {
+  animation-name: tier-wave-row-b;
+}
+
+.tier-wave-card-a,
+.tier-wave-card-b {
+  animation-duration: 620ms;
+  animation-delay: var(--wave-delay, 0ms);
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+}
+
+.tier-wave-card-a {
+  animation-name: tier-wave-card-a;
+}
+
+.tier-wave-card-b {
+  animation-name: tier-wave-card-b;
 }
 
 .watched-icon {
@@ -378,6 +437,13 @@
   }
 
   .tier-badge-pop {
+    animation: none;
+  }
+
+  .tier-wave-row-a::after,
+  .tier-wave-row-b::after,
+  .tier-wave-card-a,
+  .tier-wave-card-b {
     animation: none;
   }
 
