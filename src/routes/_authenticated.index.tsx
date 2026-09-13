@@ -230,8 +230,6 @@ function Index() {
   const [watchedFilter, setWatchedFilter] = useState<"todos" | "nao" | "sim">("nao");
   const [draggingAnimeId, setDraggingAnimeId] = useState<string | null>(null);
   const [tierWaveRun, setTierWaveRun] = useState(0);
-  const [logoDiveRun, setLogoDiveRun] = useState(0);
-  const logoClickSequenceRef = useRef({ count: 0, lastAt: 0 });
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [watchedFlashId, setWatchedFlashId] = useState<string | null>(null);
@@ -536,39 +534,6 @@ function Index() {
     }
     return [...filtered].sort(compareByMAL);
   }, [animes, search, displayMode.scoreMode, tierFilter, typeFilter, genreFilter, semDadosFilter, watchedFilter]);
-
-  function getTierEasterEggMessage() {
-    const visibleWatched = displayedRanked.filter((anime) => anime.watched);
-    const tierCounts = TIER_ROWS.map((tier) => ({
-      tier,
-      count: visibleWatched.filter((anime) => anime.tier === tier).length,
-    }));
-    const sCount = tierCounts.find(({ tier }) => tier === "S")?.count ?? 0;
-    const eCount = tierCounts.find(({ tier }) => tier === "E")?.count ?? 0;
-    const withoutTier = visibleWatched.filter((anime) => anime.tier === null).length;
-    const largestCount = Math.max(...tierCounts.map(({ count }) => count));
-    const largestTiers = tierCounts.filter(({ count }) => count === largestCount);
-    const messages: string[] = [];
-
-    if (sCount > 0) {
-      messages.push(`${sCount} anime${sCount === 1 ? "" : "s"} na S. Você não é uma pessoa difícil de agradar.`);
-    }
-    if (largestCount > 0 && largestTiers.length === 1) {
-      const [{ tier, count }] = largestTiers;
-      messages.push(`Sua tier ${tier} tem ${count} anime${count === 1 ? "" : "s"}. Parece que temos uma vencedora.`);
-    }
-    if (withoutTier > 0) {
-      messages.push(`${withoutTier} assistido${withoutTier === 1 ? "" : "s"} ainda sem tier. Decide aí.`);
-    }
-    if (eCount === 0) {
-      messages.push("Nenhum anime na E. Ou você tem sorte, ou é covarde.");
-    }
-
-    if (messages.length === 0) {
-      return `${visibleWatched.length} animes nessa tierlist. O julgamento está em dia.`;
-    }
-    return messages[Math.floor(Math.random() * messages.length)];
-  }
 
   const visibleRankingItemCount =
     displayMode.scoreMode === "gosto"
@@ -1506,25 +1471,12 @@ function Index() {
               onClick={() => {
                 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
                 window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
-                if (displayMode.scoreMode !== "gosto" || draggingAnimeId !== null) return;
-
-                if (!reduced) setTierWaveRun((run) => run + 1);
-
-                const now = Date.now();
-                const previous = logoClickSequenceRef.current;
-                const count = now - previous.lastAt > 3000 ? 1 : previous.count + 1;
-                logoClickSequenceRef.current = { count, lastAt: now };
-                if (count < 3) return;
-
-                logoClickSequenceRef.current = { count: 0, lastAt: 0 };
-                if (!reduced) setLogoDiveRun((run) => run + 1);
-                toast(getTierEasterEggMessage());
+                if (displayMode.scoreMode === "gosto" && draggingAnimeId === null && !reduced) {
+                  setTierWaveRun((run) => run + 1);
+                }
               }}
             >
-              <BrandLockup
-                size="sm"
-                className={`h-11 sm:h-16 ${logoDiveRun > 0 ? `logo-dive-${logoDiveRun % 2 === 0 ? "b" : "a"}` : ""}`}
-              />
+              <BrandLockup size="sm" className="h-11 sm:h-16" />
             </button>
           </h1>
           <div className="flex items-center gap-2 sm:gap-3">
@@ -1552,10 +1504,7 @@ function Index() {
                 { value: "gosto", ariaLabel: "Ordenar pelo meu gosto", content: "Meu gosto" },
               ]}
               value={scoreMode}
-              onChange={(mode) => {
-                logoClickSequenceRef.current = { count: 0, lastAt: 0 };
-                setScoreMode(mode);
-              }}
+              onChange={setScoreMode}
             />
             <button
               type="button"

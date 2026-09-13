@@ -281,20 +281,6 @@
   50% { transform: translateY(-9px); }
 }
 
-@keyframes logo-dive-a {
-  0%, 100% { transform: translateY(0) scale(1); }
-  32% { transform: translateY(14px) scale(.9); }
-  64% { transform: translateY(-2px) scale(1.04); }
-  82% { transform: translateY(1px) scale(.985); }
-}
-
-@keyframes logo-dive-b {
-  0%, 100% { transform: translateY(0) scale(1); }
-  32% { transform: translateY(14px) scale(.9); }
-  64% { transform: translateY(-2px) scale(1.04); }
-  82% { transform: translateY(1px) scale(.985); }
-}
-
 @keyframes skeleton-shimmer {
   from {
     background-position: -200% 0;
@@ -378,22 +364,6 @@
   animation-name: tier-wave-card-b;
 }
 
-.logo-dive-a,
-.logo-dive-b {
-  transform-origin: center;
-  animation-duration: 750ms;
-  animation-timing-function: cubic-bezier(.34, 1.3, .64, 1);
-  animation-fill-mode: both;
-}
-
-.logo-dive-a {
-  animation-name: logo-dive-a;
-}
-
-.logo-dive-b {
-  animation-name: logo-dive-b;
-}
-
 .watched-icon {
   transition: opacity 220ms ease, transform 220ms cubic-bezier(.34, 1.3, .64, 1);
 }
@@ -473,9 +443,7 @@
   .tier-wave-row-a::after,
   .tier-wave-row-b::after,
   .tier-wave-card-a,
-  .tier-wave-card-b,
-  .logo-dive-a,
-  .logo-dive-b {
+  .tier-wave-card-b {
     animation: none;
   }
 
