@@ -918,9 +918,19 @@ function Index() {
 
   async function setAnimeTier(animeId: string, tier: Tier | null) {
     const prev = animes;
-    withViewTransition(() => {
+    const currentTier = animes.find((anime) => anime.id === animeId)?.tier ?? null;
+    const isVisibleForTier = (value: Tier | null) =>
+      tierFilter.size === 0 || (value !== null && tierFilter.has(value));
+    const shouldAnimate =
+      scoreMode === "gosto" || isVisibleForTier(currentTier) !== isVisibleForTier(tier);
+    const applyTierPatch = () => {
       setAnimes((p) => p.map((a) => (a.id === animeId ? { ...a, tier, tierPosition: null } : a)));
-    });
+    };
+    if (shouldAnimate) {
+      withViewTransition(applyTierPatch);
+    } else {
+      applyTierPatch();
+    }
     try {
       await updateTier(animeId, tier);
     } catch (err) {
