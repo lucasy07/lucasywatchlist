@@ -1118,7 +1118,6 @@ function Index() {
     let scanned = 0;
     for (let i = 0; i < targets.length; i++) {
       const a = targets[i];
-      onProgress?.(i + 1, targets.length);
       try {
         const chain = await buildChain(a.malId!, undefined, signal);
         const seasonsDraft = a.seasons.map((s) => ({ ...s }));
@@ -1241,6 +1240,7 @@ function Index() {
           console.error("failed to persist last checked for", a.name, err);
         }
         scanned += 1;
+        onProgress?.(scanned, targets.length);
       } catch (err) {
         const aborted =
           (err instanceof DOMException && err.name === "AbortError") ||
@@ -1592,7 +1592,11 @@ function Index() {
                     <RefreshCw className="hidden h-3.5 w-3.5 animate-spin motion-reduce:animate-none sm:inline group-hover:hidden group-focus-visible:hidden" />
                     <X className="h-3.5 w-3.5 sm:hidden sm:group-hover:inline sm:group-focus-visible:inline" />
                     <span role="status" className="hidden sm:inline group-hover:hidden group-focus-visible:hidden">
-                      Verificando {checkProgress.current}/{checkProgress.total}
+                      Verificando{" "}
+                      {checkProgress.total === 0
+                        ? 0
+                        : Math.round((checkProgress.current / checkProgress.total) * 100)}
+                      %
                     </span>
                     <span className="sm:hidden sm:group-hover:inline sm:group-focus-visible:inline">
                       Cancelar
