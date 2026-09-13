@@ -70,7 +70,6 @@ import {
   type UpcomingSeason,
   
   TIER_VALUE,
-  tierFromAverage,
   fetchAnimes,
   createAnime,
   deleteAnime as deleteAnimeRow,
@@ -84,9 +83,7 @@ import {
   setWatched,
   importLegacyIfNeeded,
   uid,
-  average,
   mediaMAL,
-  mediaPessoal,
   rankColor,
   formatReleaseLabel,
   formatDateBR,
@@ -772,7 +769,6 @@ function Index() {
         const seasons: Season[] = selected.map((s) => ({
           id: uid(),
           name: s.title,
-          rating: null,
           malId: s.malId,
           year: s.year,
           malScore: s.malScore,
@@ -897,7 +893,6 @@ function Index() {
     const newSeason: Season = {
       id: uid(),
       name: seasonPick.title,
-      rating: null,
       malId: seasonPick.malId,
       malScore: seasonPick.score ?? null,
       year: seasonDetails?.year ?? null,
@@ -1336,7 +1331,6 @@ function Index() {
     const newSeason: Season = {
       id: uid(),
       name: found.title,
-      rating: null,
       malId: found.malId,
       year: found.year,
       malScore: found.malScore,
@@ -1399,10 +1393,6 @@ function Index() {
     setDetailOpen(true);
   }
 
-  function updateEditSeason(id: string, patch: Partial<Season>) {
-    setEditSeasons((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
-  }
-
   function removeEditSeason(id: string) {
     setEditSeasons((prev) => prev.filter((s) => s.id !== id));
   }
@@ -1417,10 +1407,6 @@ function Index() {
     for (const s of editSeasons) {
       if (!s.name.trim()) {
         toast.error("Toda temporada precisa de nome");
-        return;
-      }
-      if (s.rating !== null && (Number.isNaN(s.rating) || s.rating < 0 || s.rating > 10)) {
-        toast.error(`Nota inválida em "${s.name}"`);
         return;
       }
     }

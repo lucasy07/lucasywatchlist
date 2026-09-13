@@ -3,8 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 export type Season = {
   id: string;
   name: string;
-  /** User score 0-10. null until the user rates it. */
-  rating: number | null;
+  /** Dado legado do antigo localStorage, somente leitura; não há UI de edição. */
+  rating?: number | null;
   malId?: number | null;
   year?: number | null;
   malScore?: number | null;
@@ -357,22 +357,6 @@ export async function updateUpcoming(
 
 export function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
-
-export function average(seasons: Season[]) {
-  const rated = seasons.filter((s): s is Season & { rating: number } => typeof s.rating === "number");
-  if (rated.length === 0) return 0;
-  return rated.reduce((s, x) => s + x.rating, 0) / rated.length;
-}
-
-/** Arithmetic mean of user scores across rated seasons. OVAs excluded. null if none rated. */
-export function mediaPessoal(seasons: Season[]): number | null {
-  const rated = seasons.filter(
-    (s): s is Season & { rating: number } =>
-      typeof s.rating === "number" && !isExcludedFromAverage(s),
-  );
-  if (rated.length === 0) return null;
-  return rated.reduce((s, x) => s + x.rating, 0) / rated.length;
 }
 
 /** Arithmetic mean of MAL scores across seasons. OVAs excluded. null if none. */
