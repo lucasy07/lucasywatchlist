@@ -318,12 +318,18 @@ function Index() {
   const [checking, setChecking] = useState(false);
   const [checkingId, setCheckingId] = useState<string | null>(null);
   const [checkProgress, setCheckProgress] = useState<{ current: number; total: number } | null>(null);
+  const [checkAborted, setCheckAborted] = useState<{ scanned: number; total: number } | null>(null);
   const [checkDialogOpen, setCheckDialogOpen] = useState(false);
   const [foundAvailable, setFoundAvailable] = useState<FoundSeason[]>([]);
   const [foundUpcoming, setFoundUpcoming] = useState<
     Array<{ parentId: string; parentName: string; title: string; releaseDate: string }>
   >([]);
   const [foundUpdated, setFoundUpdated] = useState<UpdatedSeason[]>([]);
+  const scanAbortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => scanAbortRef.current?.abort();
+  }, []);
 
 
   useEffect(() => {
@@ -1095,7 +1101,11 @@ function Index() {
     });
   }
 
-  async function scanTargets(targets: Anime[], onProgress?: (current: number, total: number) => void) {
+  async function scanTargets(
+    targets: Anime[],
+    onProgress?: (current: number, total: number) => void,
+    signal?: AbortSignal,
+  ) {
     const existing = new Set<number>();
     for (const a of animes) {
       if (a.malId) existing.add(a.malId);
@@ -1104,11 +1114,12 @@ function Index() {
     const available: FoundSeason[] = [];
     const upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }> = [];
     const updated: UpdatedSeason[] = [];
+    let scanned = 0;
     for (let i = 0; i < targets.length; i++) {
       const a = targets[i];
       onProgress?.(i + 1, targets.length);
       try {
-        const chain = await buildChain(a.malId!);
+        const chain = await buildChain(a.malId!, undefined, signal);
         const seasonsDraft = a.seasons.map((s) => ({ ...s }));
         let seasonsChanged = false;
         for (const s of chain) {
@@ -1228,37 +1239,51 @@ function Index() {
         } catch (err) {
           console.error("failed to persist last checked for", a.name, err);
         }
+        scanned += 1;
       } catch (err) {
+        const aborted =
+          (err instanceof DOMException && err.name === "AbortError") ||
+          (err as { name?: string })?.name === "AbortError";
+        if (aborted) break;
         console.error("check chain failed for", a.name, err);
       }
     }
-    return { available, upcomingSaved, updated };
+    return { available, upcomingSaved, updated, aborted: signal?.aborted ?? false, scanned };
   }
 
   async function checkNewSeasons() {
-    if (checking || checkingId) return;
+    if (checkingId !== null) return;
+    if (checking) {
+      scanAbortRef.current?.abort();
+      return;
+    }
     const targets = animes.filter((a) => typeof a.malId === "number" && a.malId !== null);
     if (targets.length === 0) {
       toast.error("Nenhum anime com vínculo ao MAL");
       return;
     }
     setChecking(true);
+    setCheckAborted(null);
     setCheckProgress({ current: 0, total: targets.length });
-    let result: { available: FoundSeason[]; upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }>; updated: UpdatedSeason[] };
+    const ac = new AbortController();
+    scanAbortRef.current = ac;
+    let result: { available: FoundSeason[]; upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }>; updated: UpdatedSeason[]; aborted: boolean; scanned: number };
     try {
       result = await scanTargets(targets, (current, total) =>
         setCheckProgress({ current, total }),
-      );
+      , ac.signal);
     } finally {
       setChecking(false);
       setCheckProgress(null);
+      scanAbortRef.current = null;
     }
+    if (result.aborted) setCheckAborted({ scanned: result.scanned, total: targets.length });
     if (
       result.available.length === 0 &&
       result.upcomingSaved.length === 0 &&
       result.updated.length === 0
     ) {
-      toast("Nenhuma temporada nova encontrada");
+      toast(result.aborted ? "Verificação cancelada" : "Nenhuma temporada nova encontrada");
       return;
     }
     setFoundAvailable(result.available);
@@ -1549,16 +1574,28 @@ function Index() {
                 variant="ghost"
                 size="sm"
                 onClick={checkNewSeasons}
-                disabled={checking || animes.length === 0}
-                className="h-8 gap-1.5 text-xs"
-                aria-label="Verificar novas temporadas"
-                title="Verificar novas temporadas"
+                disabled={animes.length === 0 || checkingId !== null}
+                className="group h-8 gap-1.5 text-xs"
+                aria-busy={checking || undefined}
+                aria-label={checking ? "Cancelar verificação" : "Verificar novas temporadas"}
+                title={checking ? "Cancelar verificação" : "Verificar novas temporadas"}
               >
-                <RefreshCw className={`h-3.5 w-3.5 ${checking ? "animate-spin" : ""}`} />
                 {checking && checkProgress ? (
-                  `Verificando ${checkProgress.current}/${checkProgress.total}`
+                  <>
+                    <RefreshCw className="hidden h-3.5 w-3.5 animate-spin motion-reduce:animate-none sm:inline group-hover:hidden group-focus-visible:hidden" />
+                    <X className="h-3.5 w-3.5 sm:hidden sm:group-hover:inline sm:group-focus-visible:inline" />
+                    <span role="status" className="hidden sm:inline group-hover:hidden group-focus-visible:hidden">
+                      Verificando {checkProgress.current}/{checkProgress.total}
+                    </span>
+                    <span className="sm:hidden sm:group-hover:inline sm:group-focus-visible:inline">
+                      Cancelar
+                    </span>
+                  </>
                 ) : (
-                  <span className="hidden sm:inline">Verificar novas temporadas</span>
+                  <>
+                    <RefreshCw className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Verificar novas temporadas</span>
+                  </>
                 )}
               </Button>
               {!checking && (
@@ -2692,7 +2729,9 @@ function Index() {
           <DialogHeader>
             <DialogTitle>Novas temporadas</DialogTitle>
             <DialogDescription>
-              Resultado da verificação a partir do MyAnimeList.
+              {checkAborted
+                ? `Verificação cancelada em ${checkAborted.scanned} de ${checkAborted.total} animes. O resultado é parcial.`
+                : "Resultado da verificação a partir do MyAnimeList."}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-6">
