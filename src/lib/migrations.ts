@@ -7,13 +7,12 @@ import {
   updateTier,
   parseJikanDuration,
 } from "@/lib/anime-storage";
+import { getJikanAnime, searchJikanAnime } from "@/lib/jikan-client";
 
 const MIGRATIONS_KEY_PREFIX = "anime-watchlist:migrations:";
 const IMG_TRIED_KEY_PREFIX = "anime-watchlist:img-tried:";
 
 const TIER_MIGRATION_VERSION = 1;
-
-const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 function readVersion(userId: string): number {
   if (typeof window === "undefined") return 0;
@@ -78,20 +77,17 @@ async function backfillImageUrl({ userId, animes, onPatch, signal }: MigrationPa
 
       let jikanOk = false;
       try {
-        const res = await fetch(
-          `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(anime.name)}&limit=1&sfw=true`,
-        );
-        if (res.ok) {
-          const json = await res.json();
-          const top = json?.data?.[0];
-          const img: string | undefined =
-            top?.images?.jpg?.large_image_url ?? top?.images?.jpg?.image_url;
-          if (img) {
-            jikanOk = true;
-            imageUrl = img;
-            malId = top?.mal_id ?? null;
-            malScore = top?.score ?? null;
-          }
+        const top = (await searchJikanAnime(anime.name, 1, {
+          signal,
+          priority: "background",
+        }))[0];
+        const img: string | undefined =
+          top?.images?.jpg?.large_image_url ?? top?.images?.jpg?.image_url;
+        if (img) {
+          jikanOk = true;
+          imageUrl = img;
+          malId = top?.mal_id ?? null;
+          malScore = top?.score ?? null;
         }
       } catch {
         // fall through to AniList fallback
@@ -127,18 +123,14 @@ async function backfillImageUrl({ userId, animes, onPatch, signal }: MigrationPa
 
           let gotDetails = false;
           try {
-            const dRes = await fetch(`https://api.jikan.moe/v4/anime/${idMal}`);
-            if (dRes.ok) {
-              const dJson = await dRes.json();
-              const data = dJson?.data;
-              const img: string | undefined =
-                data?.images?.jpg?.large_image_url ?? data?.images?.jpg?.image_url;
-              if (img) {
-                gotDetails = true;
-                malId = data?.mal_id ?? idMal;
-                imageUrl = img;
-                malScore = data?.score ?? null;
-              }
+            const data = await getJikanAnime(idMal, { signal, priority: "background" });
+            const img: string | undefined =
+              data?.images?.jpg?.large_image_url ?? data?.images?.jpg?.image_url;
+            if (img) {
+              gotDetails = true;
+              malId = data?.mal_id ?? idMal;
+              imageUrl = img;
+              malScore = data?.score ?? null;
             }
           } catch {
             // fall through to AniList cover
@@ -167,7 +159,6 @@ async function backfillImageUrl({ userId, animes, onPatch, signal }: MigrationPa
     } catch {
       // ignore
     }
-    await sleep(400);
   }
 }
 
@@ -186,19 +177,15 @@ async function backfillSeasonType({ animes, onPatch, signal }: MigrationParams):
       const s = seasons[i];
       if (!s.malId || (s.type != null && s.type !== "")) continue;
       try {
-        const res = await fetch(`https://api.jikan.moe/v4/anime/${s.malId}`);
-        if (res.ok) {
-          const json = await res.json();
-          const t: string | null = json?.data?.type ?? null;
-          if (t) {
-            seasons[i] = { ...s, type: t };
-            changed = true;
-          }
+        const data = await getJikanAnime(s.malId, { signal, priority: "background" });
+        const t: string | null = data?.type ?? null;
+        if (t) {
+          seasons[i] = { ...s, type: t };
+          changed = true;
         }
       } catch {
         // ignore
       }
-      await sleep(400);
     }
     if (changed && !signal.aborted) {
       try {
@@ -229,20 +216,16 @@ async function backfillSeasonEpisodes({ animes, onPatch, signal }: MigrationPara
       const s = seasons[i];
       if (!s.malId || s.episodes !== undefined) continue;
       try {
-        const res = await fetch(`https://api.jikan.moe/v4/anime/${s.malId}`);
-        if (res.ok) {
-          const json = await res.json();
-          seasons[i] = {
-            ...s,
-            episodes: json?.data?.episodes ?? null,
-            durationMin: parseJikanDuration(json?.data?.duration),
-          };
-          changed = true;
-        }
+        const data = await getJikanAnime(s.malId, { signal, priority: "background" });
+        seasons[i] = {
+          ...s,
+          episodes: data?.episodes ?? null,
+          durationMin: parseJikanDuration(data?.duration),
+        };
+        changed = true;
       } catch {
         // ignore; retried in a future session
       }
-      await sleep(400);
     }
     if (changed && !signal.aborted) {
       try {
@@ -273,25 +256,21 @@ async function backfillSeasonImage({ animes, onPatch, signal }: MigrationParams)
       const s = seasons[i];
       if (!s.malId || s.imageUrl !== undefined) continue;
       try {
-        const res = await fetch(`https://api.jikan.moe/v4/anime/${s.malId}`);
-        if (res.ok) {
-          const json = await res.json();
-          const patch: Partial<Season> = {};
-          patch.imageUrl =
-            json?.data?.images?.jpg?.large_image_url ??
-            json?.data?.images?.jpg?.image_url ??
-            null;
-          if (s.episodes === undefined) {
-            patch.episodes = json?.data?.episodes ?? null;
-            patch.durationMin = parseJikanDuration(json?.data?.duration);
-          }
-          seasons[i] = { ...s, ...patch };
-          changed = true;
+        const data = await getJikanAnime(s.malId, { signal, priority: "background" });
+        const patch: Partial<Season> = {};
+        patch.imageUrl =
+          data?.images?.jpg?.large_image_url ??
+          data?.images?.jpg?.image_url ??
+          null;
+        if (s.episodes === undefined) {
+          patch.episodes = data?.episodes ?? null;
+          patch.durationMin = parseJikanDuration(data?.duration);
         }
+        seasons[i] = { ...s, ...patch };
+        changed = true;
       } catch {
         // ignore; retried in a future session
       }
-      await sleep(400);
     }
     if (changed && !signal.aborted) {
       try {
@@ -314,26 +293,25 @@ async function backfillGenres({ animes, onPatch, signal }: MigrationParams): Pro
   for (const anime of targets) {
     if (signal.aborted) return;
     try {
-      const res = await fetch(`https://api.jikan.moe/v4/anime/${anime.malId}`);
+      const data = await getJikanAnime(anime.malId as number, {
+        signal,
+        priority: "background",
+      });
       if (signal.aborted) return;
-      if (res.ok) {
-        const json = await res.json();
-        const raw = json?.data?.genres;
-        const genres = [
-          ...new Set(
-            (Array.isArray(raw) ? raw : [])
-              .map((g: { name?: unknown }) => (typeof g?.name === "string" ? g.name.trim() : ""))
-              .filter((n: string) => n.length > 0),
-          ),
-        ] as string[];
-        await updateAnimeMeta(anime.id, { genres });
-        if (signal.aborted) return;
-        onPatch(anime.id, { genres });
-      }
+      const raw = data?.genres;
+      const genres = [
+        ...new Set(
+          (Array.isArray(raw) ? raw : [])
+            .map((g: { name?: unknown }) => (typeof g?.name === "string" ? g.name.trim() : ""))
+            .filter((n: string) => n.length > 0),
+        ),
+      ] as string[];
+      await updateAnimeMeta(anime.id, { genres });
+      if (signal.aborted) return;
+      onPatch(anime.id, { genres });
     } catch {
       // ignore; retried in a future session
     }
-    await sleep(400);
   }
 }
 

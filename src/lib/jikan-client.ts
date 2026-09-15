@@ -36,14 +36,14 @@ export type JikanRelation = {
 
 export type JikanSearchResult = JikanAnimeDetails;
 
-type QueueTask<T = unknown> = {
+type QueueTask = {
   path: string;
   priority: JikanPriority;
   controller: AbortController;
   consumers: number;
   started: boolean;
-  promise: Promise<T>;
-  resolve: (value: T) => void;
+  promise: Promise<unknown>;
+  resolve: (value: unknown) => void;
   reject: (reason: unknown) => void;
 };
 
@@ -87,24 +87,21 @@ async function executeRequest<T>(path: string, signal: AbortSignal): Promise<T> 
   for (let attempt = 0; attempt < 3; attempt++) {
     if (signal.aborted) throw abortError();
     await waitForRequestGap(signal);
+    let response: Response;
     try {
-      const response = await fetch(`${JIKAN_BASE_URL}${path}`, { signal });
-      lastRequestEndedAt = Date.now();
-      if (response.ok) return (await response.json()) as T;
-
-      const error = new Error(String(response.status));
-      const transient = response.status === 429 || response.status >= 500;
-      if (!transient) throw error;
-      lastError = error;
+      response = await fetch(`${JIKAN_BASE_URL}${path}`, { signal });
     } catch (error) {
       lastRequestEndedAt = Date.now();
       if (isAbortError(error) || signal.aborted) throw abortError();
-      if (error instanceof Error && /^\d+$/.test(error.message)) {
-        const status = Number(error.message);
-        if (!(status === 429 || status >= 500)) throw error;
-      }
-      lastError = error instanceof Error ? error : new Error("Jikan error");
+      throw error instanceof Error ? error : new Error("Jikan error");
     }
+    lastRequestEndedAt = Date.now();
+
+    if (response.ok) return (await response.json()) as T;
+    const error = new Error(String(response.status));
+    const transient = response.status === 429 || response.status >= 500;
+    if (!transient) throw error;
+    lastError = error;
 
     if (attempt < BACKOFF_MS.length) {
       await abortableDelay(BACKOFF_MS[attempt], signal);
@@ -142,14 +139,14 @@ async function processQueue(): Promise<void> {
   }
 }
 
-function createTask<T>(path: string, priority: JikanPriority): QueueTask<T> {
-  let resolvePromise: (value: T) => void = () => undefined;
+function createTask(path: string, priority: JikanPriority): QueueTask {
+  let resolvePromise: (value: unknown) => void = () => undefined;
   let rejectPromise: (reason: unknown) => void = () => undefined;
-  const promise = new Promise<T>((resolve, reject) => {
+  const promise = new Promise<unknown>((resolve, reject) => {
     resolvePromise = resolve;
     rejectPromise = reject;
   });
-  const task: QueueTask<T> = {
+  const task: QueueTask = {
     path,
     priority,
     controller: new AbortController(),
@@ -159,13 +156,15 @@ function createTask<T>(path: string, priority: JikanPriority): QueueTask<T> {
     resolve: resolvePromise,
     reject: rejectPromise,
   };
-  promise.finally(() => {
-    if (inFlight.get(path) === task) inFlight.delete(path);
-  }).catch(() => undefined);
+  promise
+    .finally(() => {
+      if (inFlight.get(path) === task) inFlight.delete(path);
+    })
+    .catch(() => undefined);
   return task;
 }
 
-function attachConsumer<T>(task: QueueTask<T>, signal?: AbortSignal): Promise<T> {
+function attachConsumer<T>(task: QueueTask, signal?: AbortSignal): Promise<T> {
   if (signal?.aborted) return Promise.reject(abortError());
   task.consumers += 1;
   return new Promise<T>((resolve, reject) => {
@@ -189,7 +188,7 @@ function attachConsumer<T>(task: QueueTask<T>, signal?: AbortSignal): Promise<T>
     signal?.addEventListener("abort", onAbort, { once: true });
     task.promise.then(
       (value) => {
-        if (finish()) resolve(value);
+        if (finish()) resolve(value as T);
       },
       (error) => {
         if (finish()) reject(error);
@@ -200,7 +199,7 @@ function attachConsumer<T>(task: QueueTask<T>, signal?: AbortSignal): Promise<T>
 
 export function jikanFetch<T>(path: string, opts: JikanFetchOptions = {}): Promise<T> {
   const priority = opts.priority ?? "background";
-  const existing = inFlight.get(path) as QueueTask<T> | undefined;
+  const existing = inFlight.get(path);
   if (existing) {
     if (!existing.started && priority === "interactive" && existing.priority === "background") {
       removePendingTask(existing);
@@ -211,12 +210,12 @@ export function jikanFetch<T>(path: string, opts: JikanFetchOptions = {}): Promi
   }
 
   if (opts.signal?.aborted) return Promise.reject(abortError());
-  const task = createTask<T>(path, priority);
+  const task = createTask(path, priority);
   inFlight.set(path, task);
   (priority === "interactive" ? interactiveQueue : backgroundQueue).push(task);
   const result = attachConsumer(task, opts.signal);
   void processQueue();
-  return result;
+  return result as Promise<T>;
 }
 
 export async function getJikanAnime(
@@ -231,10 +230,7 @@ export async function getJikanRelations(
   malId: number,
   opts: JikanFetchOptions = {},
 ): Promise<JikanRelation[]> {
-  const response = await jikanFetch<{ data: JikanRelation[] }>(
-    `/anime/${malId}/relations`,
-    opts,
-  );
+  const response = await jikanFetch<{ data: JikanRelation[] }>(`/anime/${malId}/relations`, opts);
   return response.data ?? [];
 }
 
