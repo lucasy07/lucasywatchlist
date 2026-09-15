@@ -140,6 +140,9 @@ import { withViewTransition } from "@/lib/view-transition";
 const TIER_ROWS = (Object.keys(TIER_VALUE) as Tier[]).sort(
   (a, b) => TIER_VALUE[b] - TIER_VALUE[a],
 );
+// Espelham o stagger e a duração definidos nas animações de src/styles.css.
+const TIER_WAVE_STAGGER_MS = 70;
+const TIER_WAVE_DURATION_MS = 620;
 
 const ROW_IDS = new Set<string>([...TIER_ROWS, "none"]);
 
@@ -232,6 +235,7 @@ function Index() {
   const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [watchedFlashId, setWatchedFlashId] = useState<string | null>(null);
   const watchedFlashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tierWaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tierSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
@@ -591,6 +595,7 @@ function Index() {
     return () => {
       if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
       if (watchedFlashTimeoutRef.current) clearTimeout(watchedFlashTimeoutRef.current);
+      if (tierWaveTimeoutRef.current) clearTimeout(tierWaveTimeoutRef.current);
     };
   }, []);
 
@@ -1454,6 +1459,11 @@ function Index() {
                 window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
                 if (displayMode.scoreMode === "gosto" && draggingAnimeId === null && !reduced) {
                   setTierWaveRun((run) => run + 1);
+                  if (tierWaveTimeoutRef.current) clearTimeout(tierWaveTimeoutRef.current);
+                  tierWaveTimeoutRef.current = setTimeout(() => {
+                    setTierWaveRun(0);
+                    tierWaveTimeoutRef.current = null;
+                  }, TIER_ROWS.length * TIER_WAVE_STAGGER_MS + TIER_WAVE_DURATION_MS + 80);
                 }
               }}
             >
@@ -1866,7 +1876,7 @@ function Index() {
                   className={`border-b border-border/60 last:border-b-0 ${hasItems ? "min-h-32" : "min-h-20"} ${waveVariant ? `tier-wave-row-${waveVariant}` : ""}`}
                   style={{
                     "--wave-tint": `var(--tier-${t.toLowerCase()})`,
-                    "--wave-delay": `${rowIndex * 70}ms`,
+                    "--wave-delay": `${rowIndex * TIER_WAVE_STAGGER_MS}ms`,
                   } as CSSProperties}
                   label={
                     <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
@@ -1881,7 +1891,7 @@ function Index() {
                       className={`list-none ${waveVariant ? `tier-wave-card-${waveVariant}` : ""}`}
                       style={{
                         viewTransitionName: enableItemViewTransitions ? `anime-${anime.id}` : undefined,
-                        "--wave-delay": `${rowIndex * 70}ms`,
+                        "--wave-delay": `${rowIndex * TIER_WAVE_STAGGER_MS}ms`,
                       } as CSSProperties}
                     >
                       <DraggableCover
@@ -1903,7 +1913,7 @@ function Index() {
                 className={`min-h-32 border-t border-border/60 ${tierWaveRun > 0 ? `tier-wave-row-${tierWaveRun % 2 === 0 ? "b" : "a"}` : ""}`}
                 style={{
                   "--wave-tint": "var(--muted-foreground)",
-                  "--wave-delay": `${TIER_ROWS.length * 70}ms`,
+                  "--wave-delay": `${TIER_ROWS.length * TIER_WAVE_STAGGER_MS}ms`,
                 } as CSSProperties}
                 label={
                   <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
@@ -1922,7 +1932,7 @@ function Index() {
                       className={`list-none ${tierWaveRun > 0 ? `tier-wave-card-${tierWaveRun % 2 === 0 ? "b" : "a"}` : ""}`}
                       style={{
                         viewTransitionName: enableItemViewTransitions ? `anime-${anime.id}` : undefined,
-                        "--wave-delay": `${TIER_ROWS.length * 70}ms`,
+                        "--wave-delay": `${TIER_ROWS.length * TIER_WAVE_STAGGER_MS}ms`,
                       } as CSSProperties}
                     >
                       <DraggableCover
