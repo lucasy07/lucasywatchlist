@@ -87,24 +87,21 @@ async function executeRequest<T>(path: string, signal: AbortSignal): Promise<T> 
   for (let attempt = 0; attempt < 3; attempt++) {
     if (signal.aborted) throw abortError();
     await waitForRequestGap(signal);
+    let response: Response;
     try {
-      const response = await fetch(`${JIKAN_BASE_URL}${path}`, { signal });
-      lastRequestEndedAt = Date.now();
-      if (response.ok) return (await response.json()) as T;
-
-      const error = new Error(String(response.status));
-      const transient = response.status === 429 || response.status >= 500;
-      if (!transient) throw error;
-      lastError = error;
+      response = await fetch(`${JIKAN_BASE_URL}${path}`, { signal });
     } catch (error) {
       lastRequestEndedAt = Date.now();
       if (isAbortError(error) || signal.aborted) throw abortError();
-      if (error instanceof Error && /^\d+$/.test(error.message)) {
-        const status = Number(error.message);
-        if (!(status === 429 || status >= 500)) throw error;
-      }
-      lastError = error instanceof Error ? error : new Error("Jikan error");
+      throw error instanceof Error ? error : new Error("Jikan error");
     }
+    lastRequestEndedAt = Date.now();
+
+    if (response.ok) return (await response.json()) as T;
+    const error = new Error(String(response.status));
+    const transient = response.status === 429 || response.status >= 500;
+    if (!transient) throw error;
+    lastError = error;
 
     if (attempt < BACKOFF_MS.length) {
       await abortableDelay(BACKOFF_MS[attempt], signal);
