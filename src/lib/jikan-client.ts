@@ -216,7 +216,7 @@ export function jikanFetch<T>(path: string, opts: JikanFetchOptions = {}): Promi
   (priority === "interactive" ? interactiveQueue : backgroundQueue).push(task);
   const result = attachConsumer(task, opts.signal);
   void processQueue();
-  return result;
+  return result as Promise<T>;
 }
 
 export async function getJikanAnime(
