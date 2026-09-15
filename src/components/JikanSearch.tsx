@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { searchJikanAnime } from "@/lib/jikan-client";
 
 export type JikanPick = {
   malId: number;
@@ -20,11 +21,7 @@ type JikanAnime = {
 };
 
 async function searchJikan(q: string, signal: AbortSignal): Promise<JikanAnime[]> {
-  const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=5&sfw=true`;
-  const res = await fetch(url, { signal });
-  if (!res.ok) throw new Error(String(res.status));
-  const json = (await res.json()) as { data: JikanAnime[] };
-  return json.data ?? [];
+  return searchJikanAnime(q, 5, { signal, priority: "interactive" });
 }
 
 type AniListMedia = {
@@ -105,13 +102,7 @@ export function JikanSearch({ value, onChange, onPick, placeholder, id, autoFocu
     queryFn: ({ signal }) => searchAnime(debounced, signal),
     enabled,
     staleTime: 60_000,
-    retry: (failureCount, error) => {
-      if (failureCount >= 3) return false;
-      const status = Number(error.message);
-      if (Number.isNaN(status)) return true;
-      return status === 429 || status >= 500;
-    },
-    retryDelay: (attemptIndex) => Math.min(800 * 2 ** attemptIndex, 4000),
+    retry: false,
   });
 
   const results = enabled ? (data ?? []) : [];

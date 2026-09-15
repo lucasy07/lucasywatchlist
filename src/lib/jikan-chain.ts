@@ -3,6 +3,11 @@
 // as one anime grouped by its seasons.
 
 import { parseJikanDuration } from "@/lib/anime-storage";
+import {
+  getJikanAnime,
+  getJikanRelations,
+  type JikanAnimeDetails,
+} from "@/lib/jikan-client";
 
 export type ChainSeason = {
   malId: number;
@@ -18,73 +23,13 @@ export type ChainSeason = {
   durationMin: number | null;
 };
 
-type JikanRelation = {
-  relation: string;
-  entry: Array<{ mal_id: number; type: string }>;
-};
-
-type JikanFull = {
-  mal_id: number;
-  title: string;
-  type: string | null;
-  status: string | null;
-  year: number | null;
-  score: number | null;
-  aired?: { from?: string | null } | null;
-  episodes?: number | null;
-  duration?: string | null;
-  images?: { jpg?: { large_image_url?: string; image_url?: string } };
-  genres?: Array<{ name: string }> | null;
-};
-
 const KEEP_TYPES = new Set(["TV", "ONA", "Movie", "OVA", "Special"]);
 const MAX_ENTRIES = 15;
-const DELAY_MS = 400;
-
-const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
-
-async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const backoffs = [700, 1400];
-  let lastErr: unknown;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
-    try {
-      const res = await fetch(url, { signal });
-      if (res.ok) return (await res.json()) as T;
-      const transient = res.status === 429 || res.status >= 500;
-      const err = new Error(`Jikan ${res.status}`);
-      if (!transient) throw err;
-      lastErr = err;
-    } catch (e) {
-      if (e instanceof DOMException && e.name === "AbortError") throw e;
-      if ((e as { name?: string })?.name === "AbortError") throw e;
-      if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
-      // If this was a non-transient HTTP error we threw above, rethrow.
-      if (e instanceof Error && /^Jikan \d+$/.test(e.message)) {
-        const status = Number(e.message.slice(6));
-        if (!(status === 429 || status >= 500)) throw e;
-      }
-      lastErr = e;
-    }
-    if (attempt < 2) {
-      const wait = backoffs[attempt];
-      const start = Date.now();
-      while (Date.now() - start < wait) {
-        if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
-        await sleep(Math.min(100, wait - (Date.now() - start)));
-      }
-    }
-  }
-  throw lastErr instanceof Error ? lastErr : new Error("Jikan error");
-}
 
 async function getRelations(malId: number, signal?: AbortSignal): Promise<number[]> {
-  const json = await fetchJson<{ data: JikanRelation[] }>(
-    `https://api.jikan.moe/v4/anime/${malId}/relations`,
-    signal,
-  );
+  const relations = await getJikanRelations(malId, { signal, priority: "background" });
   const ids: number[] = [];
-  for (const rel of json.data ?? []) {
+  for (const rel of relations) {
     if (rel.relation !== "Sequel" && rel.relation !== "Prequel") continue;
     for (const e of rel.entry ?? []) {
       if (e.type === "anime") ids.push(e.mal_id);
@@ -93,13 +38,9 @@ async function getRelations(malId: number, signal?: AbortSignal): Promise<number
   return ids;
 }
 
-async function getDetails(malId: number, signal?: AbortSignal): Promise<JikanFull | null> {
+async function getDetails(malId: number, signal?: AbortSignal): Promise<JikanAnimeDetails | null> {
   try {
-    const json = await fetchJson<{ data: JikanFull }>(
-      `https://api.jikan.moe/v4/anime/${malId}`,
-      signal,
-    );
-    return json.data;
+    return await getJikanAnime(malId, { signal, priority: "background" });
   } catch {
     return null;
   }
@@ -141,7 +82,6 @@ export async function buildChain(
     } catch {
       // ignore relation errors for a single node
     }
-    await sleep(DELAY_MS);
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
   }
 
@@ -177,7 +117,6 @@ export async function buildChain(
       });
     }
     onProgress?.({ current: i + 1, total });
-    if (i < idsToFetch.length - 1) await sleep(DELAY_MS);
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
   }
 

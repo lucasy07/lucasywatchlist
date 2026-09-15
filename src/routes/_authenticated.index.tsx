@@ -129,6 +129,7 @@ import {
 import { CoverArt, DraggableCover, TierDropRow } from "@/components/TierlistDnD";
 
 import { buildChain, type ChainSeason } from "@/lib/jikan-chain";
+import { getJikanAnime } from "@/lib/jikan-client";
 import { runMigrations } from "@/lib/migrations";
 import { EmptyState } from "@/components/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -847,24 +848,18 @@ function Index() {
     setSeasonDetails(null);
     setSeasonDetailsLoading(true);
     try {
-      const res = await fetch(`https://api.jikan.moe/v4/anime/${pick.malId}`);
-      if (res.ok) {
-        const json = await res.json();
-        const data = json?.data;
-        const t: string | null = data?.type ?? null;
-        const y: number | null =
-          data?.year ??
-          (data?.aired?.from ? new Date(data.aired.from).getFullYear() : null);
-        setSeasonDetails({
-          malId: pick.malId,
-          type: t,
-          year: Number.isFinite(y as number) ? (y as number) : null,
-          episodes: data?.episodes ?? null,
-          durationMin: parseJikanDuration(data?.duration),
-        });
-      } else {
-        setSeasonDetails({ malId: pick.malId, type: null, year: null, episodes: null, durationMin: null });
-      }
+      const data = await getJikanAnime(pick.malId, { priority: "interactive" });
+      const t: string | null = data?.type ?? null;
+      const y: number | null =
+        data?.year ??
+        (data?.aired?.from ? new Date(data.aired.from).getFullYear() : null);
+      setSeasonDetails({
+        malId: pick.malId,
+        type: t,
+        year: Number.isFinite(y as number) ? (y as number) : null,
+        episodes: data?.episodes ?? null,
+        durationMin: parseJikanDuration(data?.duration),
+      });
     } catch {
       setSeasonDetails({ malId: pick.malId, type: null, year: null, episodes: null, durationMin: null });
     } finally {
