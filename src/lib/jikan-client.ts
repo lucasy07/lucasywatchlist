@@ -156,9 +156,11 @@ function createTask(path: string, priority: JikanPriority): QueueTask {
     resolve: resolvePromise,
     reject: rejectPromise,
   };
-  promise.finally(() => {
-    if (inFlight.get(path) === task) inFlight.delete(path);
-  }).catch(() => undefined);
+  promise
+    .finally(() => {
+      if (inFlight.get(path) === task) inFlight.delete(path);
+    })
+    .catch(() => undefined);
   return task;
 }
 
@@ -228,10 +230,7 @@ export async function getJikanRelations(
   malId: number,
   opts: JikanFetchOptions = {},
 ): Promise<JikanRelation[]> {
-  const response = await jikanFetch<{ data: JikanRelation[] }>(
-    `/anime/${malId}/relations`,
-    opts,
-  );
+  const response = await jikanFetch<{ data: JikanRelation[] }>(`/anime/${malId}/relations`, opts);
   return response.data ?? [];
 }
 
