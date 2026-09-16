@@ -162,9 +162,13 @@ async function backfillImageUrl({ userId, animes, onPatch, signal }: MigrationPa
   }
 }
 
-async function backfillSeasonType({ animes, onPatch, signal }: MigrationParams): Promise<void> {
+async function backfillSeasonDetails({ animes, onPatch, signal }: MigrationParams): Promise<void> {
   const targets = animes.filter((a) =>
-    a.seasons.some((s) => s.malId && (s.type == null || s.type === "")),
+    a.seasons.some(
+      (s) =>
+        s.malId &&
+        (s.type == null || s.type === "" || s.episodes === undefined || s.imageUrl === undefined),
+    ),
   );
   if (targets.length === 0) return;
 
@@ -172,106 +176,61 @@ async function backfillSeasonType({ animes, onPatch, signal }: MigrationParams):
     if (signal.aborted) return;
     const seasons = [...anime.seasons];
     let changed = false;
+    let genresPatch: string[] | undefined;
+
     for (let i = 0; i < seasons.length; i++) {
       if (signal.aborted) return;
       const s = seasons[i];
-      if (!s.malId || (s.type != null && s.type !== "")) continue;
-      try {
-        const data = await getJikanAnime(s.malId, { signal, priority: "background" });
-        const t: string | null = data?.type ?? null;
-        if (t) {
-          seasons[i] = { ...s, type: t };
-          changed = true;
-        }
-      } catch {
-        // ignore
-      }
-    }
-    if (changed && !signal.aborted) {
-      try {
-        await updateSeasons(anime.id, seasons);
-        // Keep the shared snapshot in sync so later backfills don't write stale seasons back.
-        anime.seasons = seasons;
-        if (signal.aborted) return;
-        onPatch(anime.id, { seasons });
-      } catch {
-        // ignore
-      }
-    }
-  }
-}
+      const missingType = s.type == null || s.type === "";
+      const missingEpisodes = s.episodes === undefined;
+      const missingImage = s.imageUrl === undefined;
+      if (!s.malId || (!missingType && !missingEpisodes && !missingImage)) continue;
 
-async function backfillSeasonEpisodes({ animes, onPatch, signal }: MigrationParams): Promise<void> {
-  const targets = animes.filter((a) =>
-    a.seasons.some((s) => s.malId && s.episodes === undefined),
-  );
-  if (targets.length === 0) return;
-
-  for (const anime of targets) {
-    if (signal.aborted) return;
-    const seasons = [...anime.seasons];
-    let changed = false;
-    for (let i = 0; i < seasons.length; i++) {
-      if (signal.aborted) return;
-      const s = seasons[i];
-      if (!s.malId || s.episodes !== undefined) continue;
-      try {
-        const data = await getJikanAnime(s.malId, { signal, priority: "background" });
-        seasons[i] = {
-          ...s,
-          episodes: data?.episodes ?? null,
-          durationMin: parseJikanDuration(data?.duration),
-        };
-        changed = true;
-      } catch {
-        // ignore; retried in a future session
-      }
-    }
-    if (changed && !signal.aborted) {
-      try {
-        await updateSeasons(anime.id, seasons);
-        // Keep the shared snapshot in sync so later backfills don't write stale seasons back.
-        anime.seasons = seasons;
-        if (signal.aborted) return;
-        onPatch(anime.id, { seasons });
-      } catch {
-        // ignore
-      }
-    }
-  }
-}
-
-async function backfillSeasonImage({ animes, onPatch, signal }: MigrationParams): Promise<void> {
-  const targets = animes.filter((a) =>
-    a.seasons.some((s) => s.malId && s.imageUrl === undefined),
-  );
-  if (targets.length === 0) return;
-
-  for (const anime of targets) {
-    if (signal.aborted) return;
-    const seasons = [...anime.seasons];
-    let changed = false;
-    for (let i = 0; i < seasons.length; i++) {
-      if (signal.aborted) return;
-      const s = seasons[i];
-      if (!s.malId || s.imageUrl !== undefined) continue;
       try {
         const data = await getJikanAnime(s.malId, { signal, priority: "background" });
         const patch: Partial<Season> = {};
-        patch.imageUrl =
-          data?.images?.jpg?.large_image_url ??
-          data?.images?.jpg?.image_url ??
-          null;
-        if (s.episodes === undefined) {
-          patch.episodes = data?.episodes ?? null;
-          patch.durationMin = parseJikanDuration(data?.duration);
+
+        if (missingType && data.type) patch.type = data.type;
+        if (missingEpisodes) {
+          patch.episodes = data.episodes ?? null;
+          patch.durationMin = parseJikanDuration(data.duration);
         }
-        seasons[i] = { ...s, ...patch };
-        changed = true;
+        if (missingImage) {
+          patch.imageUrl = data.images?.jpg?.large_image_url ?? data.images?.jpg?.image_url ?? null;
+        }
+
+        if (Object.keys(patch).length > 0) {
+          seasons[i] = { ...s, ...patch };
+          changed = true;
+        }
+
+        if (anime.genres == null && data.mal_id === anime.malId) {
+          genresPatch = [
+            ...new Set(
+              (Array.isArray(data.genres) ? data.genres : [])
+                .map((g: { name?: unknown }) =>
+                  typeof g?.name === "string" ? g.name.trim() : "",
+                )
+                .filter((name: string) => name.length > 0),
+            ),
+          ];
+        }
       } catch {
         // ignore; retried in a future session
       }
     }
+
+    if (genresPatch !== undefined && !signal.aborted) {
+      try {
+        await updateAnimeMeta(anime.id, { genres: genresPatch });
+        anime.genres = genresPatch;
+        if (signal.aborted) return;
+        onPatch(anime.id, { genres: genresPatch });
+      } catch {
+        // ignore
+      }
+    }
+
     if (changed && !signal.aborted) {
       try {
         await updateSeasons(anime.id, seasons);
@@ -342,11 +301,7 @@ async function migrateTierFromRatings({ userId, animes, onPatch, signal }: Migra
 export async function runMigrations(params: MigrationParams): Promise<void> {
   await backfillImageUrl(params);
   if (params.signal.aborted) return;
-  await backfillSeasonType(params);
-  if (params.signal.aborted) return;
-  await backfillSeasonEpisodes(params);
-  if (params.signal.aborted) return;
-  await backfillSeasonImage(params);
+  await backfillSeasonDetails(params);
   if (params.signal.aborted) return;
   await backfillGenres(params);
   if (params.signal.aborted) return;
