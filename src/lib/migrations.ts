@@ -1,6 +1,7 @@
 import {
   type Anime,
   type Season,
+  isExcludedFromAverage,
   tierFromAverage,
   updateAnimeMeta,
   updateSeasons,
@@ -12,7 +13,7 @@ import { getJikanAnime, searchJikanAnime } from "@/lib/jikan-client";
 const MIGRATIONS_KEY_PREFIX = "anime-watchlist:migrations:";
 const IMG_TRIED_KEY_PREFIX = "anime-watchlist:img-tried:";
 
-const TIER_MIGRATION_VERSION = 1;
+const TIER_MIGRATION_VERSION = 2;
 
 function readVersion(userId: string): number {
   if (typeof window === "undefined") return 0;
@@ -277,12 +278,15 @@ async function backfillGenres({ animes, onPatch, signal }: MigrationParams): Pro
 async function migrateTierFromRatings({ userId, animes, onPatch, signal }: MigrationParams): Promise<void> {
   if (readVersion(userId) >= TIER_MIGRATION_VERSION) return;
   const candidates = animes.filter(
-    (a) => a.tier == null && a.seasons.some((s) => typeof s.rating === "number"),
+    (a) =>
+      a.tier == null &&
+      a.seasons.some((s) => typeof s.rating === "number" && !isExcludedFromAverage(s)),
   );
   for (const a of candidates) {
     if (signal.aborted) return;
     const rated = a.seasons.filter(
-      (s): s is Season & { rating: number } => typeof s.rating === "number",
+      (s): s is Season & { rating: number } =>
+        typeof s.rating === "number" && !isExcludedFromAverage(s),
     );
     if (rated.length === 0) continue;
     const avg = rated.reduce((sum, s) => sum + s.rating, 0) / rated.length;
