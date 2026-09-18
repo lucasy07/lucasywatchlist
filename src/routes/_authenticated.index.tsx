@@ -24,6 +24,7 @@ import {
   Pencil,
   Image as ImageIcon,
   RefreshCw,
+  Gauge,
   Filter,
   AlertCircle,
   Award,
@@ -156,6 +157,16 @@ const tierCollisionDetection: CollisionDetection = (args) => {
 
 export const Route = createFileRoute("/_authenticated/")({
   codeSplitGroupings: [["component"]],
+  head: () => ({
+    meta: [
+      { title: "Minha coleção — Umi Watchlist" },
+      { name: "description", content: "Organize, classifique e acompanhe sua coleção de animes no Umi Watchlist." },
+      { property: "og:title", content: "Minha coleção — Umi Watchlist" },
+      { property: "og:description", content: "Organize, classifique e acompanhe sua coleção de animes no Umi Watchlist." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
@@ -329,9 +340,17 @@ function Index() {
   >([]);
   const [foundUpdated, setFoundUpdated] = useState<UpdatedSeason[]>([]);
   const scanAbortRef = useRef<AbortController | null>(null);
+  const [updatingMalScores, setUpdatingMalScores] = useState(false);
+  const [malScoreProgress, setMalScoreProgress] = useState<{ current: number; total: number } | null>(null);
+  const [malScoreDialogOpen, setMalScoreDialogOpen] = useState(false);
+  const [malScoreUpdated, setMalScoreUpdated] = useState<UpdatedSeason[]>([]);
+  const malScoreAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    return () => scanAbortRef.current?.abort();
+    return () => {
+      scanAbortRef.current?.abort();
+      malScoreAbortRef.current?.abort();
+    };
   }, []);
 
 
@@ -1248,7 +1267,7 @@ function Index() {
   }
 
   async function checkNewSeasons() {
-    if (checkingId !== null) return;
+    if (checkingId !== null || updatingMalScores) return;
     if (checking) {
       scanAbortRef.current?.abort();
       return;
@@ -1291,7 +1310,7 @@ function Index() {
   }
 
   async function checkNewSeasonsForAnime(animeId: string) {
-    if (checking || checkingId) return;
+    if (checking || checkingId || updatingMalScores) return;
     const anime = animes.find((a) => a.id === animeId);
     if (!anime) return;
     if (typeof anime.malId !== "number" || anime.malId === null) {
@@ -1318,6 +1337,118 @@ function Index() {
     setFoundUpcoming(result.upcomingSaved);
     setFoundUpdated(result.updated);
     setCheckDialogOpen(true);
+  }
+
+  async function updateMalScores() {
+    if (checking || checkingId !== null) return;
+    if (updatingMalScores) {
+      malScoreAbortRef.current?.abort();
+      return;
+    }
+
+    const total = animes.reduce(
+      (count, anime) => count + anime.seasons.filter((season) => typeof season.malId === "number").length,
+      0,
+    );
+    if (total === 0) {
+      toast.error("Nenhuma temporada com vínculo ao MAL");
+      return;
+    }
+
+    const controller = new AbortController();
+    malScoreAbortRef.current = controller;
+    setUpdatingMalScores(true);
+    setMalScoreProgress({ current: 0, total });
+    let completed = 0;
+    const updated: UpdatedSeason[] = [];
+
+    try {
+      for (const anime of animes) {
+        if (controller.signal.aborted) break;
+        const seasonsDraft = anime.seasons.map((season) => ({ ...season }));
+        const animeUpdated: UpdatedSeason[] = [];
+        let changed = false;
+
+        for (let index = 0; index < seasonsDraft.length; index += 1) {
+          if (controller.signal.aborted) break;
+          const current = seasonsDraft[index];
+          if (typeof current.malId !== "number") continue;
+
+          try {
+            const data = await getJikanAnime(current.malId, {
+              signal: controller.signal,
+              priority: "background",
+            });
+            const next = { ...current };
+            const filledFields: string[] = [];
+            const oldScore = typeof current.malScore === "number" ? current.malScore : null;
+
+            if (typeof data.score === "number" && data.score !== oldScore) {
+              next.malScore = data.score;
+            }
+            if ((current.year === null || current.year === undefined) && data.year !== null && data.year !== undefined) {
+              next.year = data.year;
+              filledFields.push("year");
+            }
+            if ((current.type === null || current.type === undefined) && data.type !== null && data.type !== undefined) {
+              next.type = data.type;
+              filledFields.push("type");
+            }
+
+            const seasonChanged =
+              next.malScore !== current.malScore || next.year !== current.year || next.type !== current.type;
+            if (seasonChanged) {
+              seasonsDraft[index] = next;
+              changed = true;
+              animeUpdated.push({
+                parentId: anime.id,
+                parentName: anime.name,
+                title: current.name,
+                malId: current.malId,
+                oldScore,
+                newScore: typeof next.malScore === "number" ? next.malScore : null,
+                filledFields,
+              });
+            }
+          } catch {
+            if (controller.signal.aborted) break;
+          }
+
+          completed += 1;
+          setMalScoreProgress({ current: completed, total });
+        }
+
+        if (controller.signal.aborted) break;
+        if (changed) {
+          try {
+            if (controller.signal.aborted) break;
+            await updateSeasons(anime.id, seasonsDraft);
+            setAnimes((previous) =>
+              previous.map((item) =>
+                item.id === anime.id ? { ...item, seasons: seasonsDraft.map((season) => ({ ...season })) } : item,
+              ),
+            );
+            updated.push(...animeUpdated);
+          } catch (error) {
+            console.error("failed to persist MAL score updates for", anime.name, error);
+          }
+        }
+      }
+    } finally {
+      setUpdatingMalScores(false);
+      setMalScoreProgress(null);
+      malScoreAbortRef.current = null;
+    }
+
+    if (controller.signal.aborted) {
+      toast(`Atualização cancelada em ${completed} de ${total} temporadas. O resultado é parcial.`);
+    }
+    if (updated.length === 0) {
+      if (!controller.signal.aborted) toast("Nenhuma nota mudou");
+      return;
+    }
+    setMalScoreUpdated(updated);
+    setMalScoreDialogOpen(true);
   }
 
 
@@ -1572,7 +1703,7 @@ function Index() {
                 variant="ghost"
                 size="sm"
                 onClick={checkNewSeasons}
-                disabled={animes.length === 0 || checkingId !== null}
+                disabled={animes.length === 0 || checkingId !== null || updatingMalScores}
                 className="group h-8 gap-1.5 text-xs"
                 aria-busy={checking || undefined}
                 aria-label={checking ? "Cancelar verificação" : "Verificar novas temporadas"}
@@ -1597,6 +1728,38 @@ function Index() {
                   <>
                     <RefreshCw className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">Verificar novas temporadas</span>
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={updateMalScores}
+                disabled={animes.length === 0 || checking || checkingId !== null}
+                className="group h-8 gap-1.5 text-xs"
+                aria-busy={updatingMalScores || undefined}
+                aria-label={updatingMalScores ? "Cancelar atualização de notas do MAL" : "Atualizar notas do MAL"}
+                title={updatingMalScores ? "Cancelar atualização de notas do MAL" : "Atualizar notas do MAL"}
+              >
+                {updatingMalScores && malScoreProgress ? (
+                  <>
+                    <Gauge className="hidden h-3.5 w-3.5 animate-spin motion-reduce:animate-none sm:inline group-hover:hidden group-focus-visible:hidden" />
+                    <X className="h-3.5 w-3.5 sm:hidden sm:group-hover:inline sm:group-focus-visible:inline" />
+                    <span role="status" className="hidden sm:inline group-hover:hidden group-focus-visible:hidden">
+                      Atualizando{" "}
+                      {malScoreProgress.total === 0
+                        ? 0
+                        : Math.round((malScoreProgress.current / malScoreProgress.total) * 100)}
+                      %
+                    </span>
+                    <span className="sm:hidden sm:group-hover:inline sm:group-focus-visible:inline">
+                      Cancelar
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Gauge className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Atualizar notas do MAL</span>
                   </>
                 )}
               </Button>
@@ -2084,7 +2247,7 @@ function Index() {
                       variant="ghost"
                       size="icon"
                       onClick={() => checkNewSeasonsForAnime(anime.id)}
-                      disabled={checking || checkingId !== null}
+                      disabled={checking || checkingId !== null || updatingMalScores}
                       className="h-8 w-8 text-muted-foreground hover:text-primary"
                       aria-label="Verificar novas temporadas"
                       title="Verificar novas temporadas"
@@ -2346,7 +2509,7 @@ function Index() {
                           variant="outline"
                           size="icon"
                           onClick={() => checkNewSeasonsForAnime(anime.id)}
-                          disabled={checking || checkingId !== null}
+                          disabled={checking || checkingId !== null || updatingMalScores}
                           className="text-muted-foreground hover:text-primary"
                           aria-label="Verificar novas temporadas"
                           title="Verificar novas temporadas"
@@ -2847,6 +3010,37 @@ function Index() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={malScoreDialogOpen} onOpenChange={setMalScoreDialogOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-card">
+          <DialogHeader>
+            <DialogTitle>Notas atualizadas</DialogTitle>
+            <DialogDescription>Alterações encontradas nas temporadas vinculadas ao MyAnimeList.</DialogDescription>
+          </DialogHeader>
+          <ul className="grid gap-2">
+            {malScoreUpdated.map((updatedSeason) => (
+              <li
+                key={`${updatedSeason.parentId}-${updatedSeason.malId}`}
+                className="overflow-hidden rounded-lg border border-border/60 bg-card-elevated p-2 min-w-0"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="line-clamp-2 text-sm font-medium">{updatedSeason.title}</p>
+                  <p className="truncate text-[11px] text-muted-foreground">
+                    em {updatedSeason.parentName} •{" "}
+                    {typeof updatedSeason.oldScore === "number" ? updatedSeason.oldScore.toFixed(2) : "—"} →{" "}
+                    {typeof updatedSeason.newScore === "number" ? updatedSeason.newScore.toFixed(2) : "—"}
+                    {updatedSeason.filledFields.includes("year") ? " • ano preenchido" : ""}
+                    {updatedSeason.filledFields.includes("type") ? " • tipo preenchido" : ""}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <DialogFooter>
+            <Button onClick={() => setMalScoreDialogOpen(false)}>Fechar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <AlertDialog
         open={confirmDelete !== null}
         onOpenChange={(open) => !open && setConfirmDelete(null)}
@@ -3028,7 +3222,7 @@ function Index() {
                 <Button
                   variant="outline"
                   onClick={() => detailAnimeId && checkNewSeasonsForAnime(detailAnimeId)}
-                  disabled={checking || checkingId !== null || !detailAnime?.malId}
+                  disabled={checking || checkingId !== null || updatingMalScores || !detailAnime?.malId}
                 >
                   <RefreshCw className={`mr-1 h-4 w-4 ${detailAnimeId && checkingId === detailAnimeId ? "animate-spin" : ""}`} />
                   Verificar novas temporadas
