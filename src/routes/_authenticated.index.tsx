@@ -157,6 +157,16 @@ const tierCollisionDetection: CollisionDetection = (args) => {
 
 export const Route = createFileRoute("/_authenticated/")({
   codeSplitGroupings: [["component"]],
+  head: () => ({
+    meta: [
+      { title: "Minha coleção — Umi Watchlist" },
+      { name: "description", content: "Organize, classifique e acompanhe sua coleção de animes no Umi Watchlist." },
+      { property: "og:title", content: "Minha coleção — Umi Watchlist" },
+      { property: "og:description", content: "Organize, classifique e acompanhe sua coleção de animes no Umi Watchlist." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
