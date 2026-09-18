@@ -1413,7 +1413,6 @@ function Index() {
           try {
             if (controller.signal.aborted) break;
             await updateSeasons(anime.id, seasonsDraft);
-            if (controller.signal.aborted) break;
             setAnimes((previous) =>
               previous.map((item) =>
                 item.id === anime.id ? { ...item, seasons: seasonsDraft.map((season) => ({ ...season })) } : item,
