@@ -51,6 +51,10 @@ export type ChainProgress = {
   total: number;
 };
 
+export type BuildChainOptions = {
+  knownMalIds?: Set<number>;
+};
+
 /**
  * Build the season chain for a given malId by walking Sequel/Prequel
  * relations recursively. Sequential requests with rate-limit delay.
@@ -61,6 +65,7 @@ export async function buildChain(
   rootMalId: number,
   onProgress?: (p: ChainProgress) => void,
   signal?: AbortSignal,
+  options?: BuildChainOptions,
 ): Promise<ChainSeason[]> {
   const visited = new Set<number>([rootMalId]);
   const queue: number[] = [rootMalId];
@@ -85,12 +90,15 @@ export async function buildChain(
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
   }
 
-  const total = idsToFetch.length;
+  const detailIds = options?.knownMalIds
+    ? idsToFetch.filter((id) => !options.knownMalIds?.has(id))
+    : idsToFetch;
+  const total = detailIds.length;
   onProgress?.({ current: 0, total });
 
   const seasons: ChainSeason[] = [];
-  for (let i = 0; i < idsToFetch.length; i++) {
-    const id = idsToFetch[i];
+  for (let i = 0; i < detailIds.length; i++) {
+    const id = detailIds[i];
     const d = await getDetails(id, signal);
     if (d && d.type && KEEP_TYPES.has(d.type)) {
       const year =
