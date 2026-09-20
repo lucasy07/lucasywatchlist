@@ -20,7 +20,6 @@ import {
   CalendarClock,
   Check,
   RotateCcw,
-
   Pencil,
   Image as ImageIcon,
   RefreshCw,
@@ -69,7 +68,6 @@ import {
   type Season,
   type Tier,
   type UpcomingSeason,
-  
   TIER_VALUE,
   fetchAnimes,
   createAnime,
@@ -140,10 +138,7 @@ import { SegmentedToggle } from "@/components/SegmentedToggle";
 import { withViewTransition } from "@/lib/view-transition";
 import type { FoundSeason, UpdatedSeason } from "@/lib/scan-types";
 
-
-const TIER_ROWS = (Object.keys(TIER_VALUE) as Tier[]).sort(
-  (a, b) => TIER_VALUE[b] - TIER_VALUE[a],
-);
+const TIER_ROWS = (Object.keys(TIER_VALUE) as Tier[]).sort((a, b) => TIER_VALUE[b] - TIER_VALUE[a]);
 // Espelham o stagger e a duração definidos nas animações de src/styles.css.
 const TIER_WAVE_STAGGER_MS = 70;
 const TIER_WAVE_DURATION_MS = 620;
@@ -163,16 +158,21 @@ export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
       { title: "Minha coleção — Umi Watchlist" },
-      { name: "description", content: "Organize, classifique e acompanhe sua coleção de animes no Umi Watchlist." },
+      {
+        name: "description",
+        content: "Organize, classifique e acompanhe sua coleção de animes no Umi Watchlist.",
+      },
       { property: "og:title", content: "Minha coleção — Umi Watchlist" },
-      { property: "og:description", content: "Organize, classifique e acompanhe sua coleção de animes no Umi Watchlist." },
+      {
+        property: "og:description",
+        content: "Organize, classifique e acompanhe sua coleção de animes no Umi Watchlist.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Index,
 });
-
 
 function TiltCardInner({
   children,
@@ -189,7 +189,11 @@ function TiltCardInner({
       className={`group relative overflow-hidden rounded-2xl border ${
         tierS ? "border-tier-s/70 ring-1 ring-inset ring-tier-s/40" : "border-border/60"
       } transition-[border-color,box-shadow] duration-200 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)]`}
-      style={{ background: "var(--gradient-card)", boxShadow: "var(--shadow-card)", transformOrigin: "center" }}
+      style={{
+        background: "var(--gradient-card)",
+        boxShadow: "var(--shadow-card)",
+        transformOrigin: "center",
+      }}
     >
       {children}
     </div>
@@ -216,8 +220,6 @@ function WatchedIcon({ watched, className = "h-4 w-4" }: { watched: boolean; cla
     </span>
   );
 }
-
-
 
 function Index() {
   const { user } = useAuth();
@@ -259,25 +261,23 @@ function Index() {
     ? (animes.find((a) => a.id === draggingAnimeId) ?? null)
     : null;
 
-
   const [showFilters, setShowFilters] = useState(false);
-  
-  
+
   const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
 
   // Add Anime dialog
   const [animeDialogOpen, setAnimeDialogOpen] = useState(false);
   const [newAnimeName, setNewAnimeName] = useState("");
-  
+
   const [newAnimeMal, setNewAnimeMal] = useState<JikanPick | null>(null);
   const [chainSeasons, setChainSeasons] = useState<ChainSeason[] | null>(null);
   const [selectedChainIds, setSelectedChainIds] = useState<Set<number>>(() => new Set());
   const [chainLoading, setChainLoading] = useState(false);
-  const [chainProgress, setChainProgress] = useState<{ current: number; total: number } | null>(null);
+  const [chainProgress, setChainProgress] = useState<{ current: number; total: number } | null>(
+    null,
+  );
   const [chainError, setChainError] = useState(false);
   const chainAbortRef = useRef<AbortController | null>(null);
-  
-
 
   // Add Season dialog
   const [seasonDialogOpen, setSeasonDialogOpen] = useState(false);
@@ -285,10 +285,13 @@ function Index() {
   const [seasonSearch, setSeasonSearch] = useState("");
   const [seasonPick, setSeasonPick] = useState<JikanPick | null>(null);
   const [seasonDetailsLoading, setSeasonDetailsLoading] = useState(false);
-  const [seasonDetails, setSeasonDetails] = useState<{ malId: number; type: string | null; year: number | null; episodes: number | null; durationMin: number | null } | null>(null);
-  
-  
-
+  const [seasonDetails, setSeasonDetails] = useState<{
+    malId: number;
+    type: string | null;
+    year: number | null;
+    episodes: number | null;
+    durationMin: number | null;
+  } | null>(null);
 
   // FAB menu
   const [fabOpen, setFabOpen] = useState(false);
@@ -301,7 +304,6 @@ function Index() {
   const [editSeasons, setEditSeasons] = useState<Season[]>([]);
   const [editTier, setEditTier] = useState<Tier | null>(null);
 
-
   // Detail dialog
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailAnimeId, setDetailAnimeId] = useState<string>("");
@@ -313,7 +315,9 @@ function Index() {
 
   const [checking, setChecking] = useState(false);
   const [checkingId, setCheckingId] = useState<string | null>(null);
-  const [checkProgress, setCheckProgress] = useState<{ current: number; total: number } | null>(null);
+  const [checkProgress, setCheckProgress] = useState<{ current: number; total: number } | null>(
+    null,
+  );
   const [checkAborted, setCheckAborted] = useState<{ scanned: number; total: number } | null>(null);
   const [checkDialogOpen, setCheckDialogOpen] = useState(false);
   const [foundAvailable, setFoundAvailable] = useState<FoundSeason[]>([]);
@@ -322,7 +326,10 @@ function Index() {
   >([]);
   const scanAbortRef = useRef<AbortController | null>(null);
   const [updatingMalScores, setUpdatingMalScores] = useState(false);
-  const [malScoreProgress, setMalScoreProgress] = useState<{ current: number; total: number } | null>(null);
+  const [malScoreProgress, setMalScoreProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
   const [malScoreDialogOpen, setMalScoreDialogOpen] = useState(false);
   const [malScoreUpdated, setMalScoreUpdated] = useState<UpdatedSeason[]>([]);
   const malScoreAbortRef = useRef<AbortController | null>(null);
@@ -334,7 +341,6 @@ function Index() {
     };
   }, []);
 
-
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
@@ -343,7 +349,9 @@ function Index() {
         const imported = await importLegacyIfNeeded(user.id);
         setStep(2);
         if (imported > 0) {
-          toast.success(`${imported} anime${imported === 1 ? "" : "s"} importado${imported === 1 ? "" : "s"} do dispositivo`);
+          toast.success(
+            `${imported} anime${imported === 1 ? "" : "s"} importado${imported === 1 ? "" : "s"} do dispositivo`,
+          );
         }
         const data = await fetchAnimes();
         if (!cancelled) {
@@ -356,7 +364,6 @@ function Index() {
         toast.error("Falha ao carregar seus animes");
         if (!cancelled) setHydrated(true);
         setStep(3);
-
       }
     })();
     const savedView =
@@ -367,7 +374,11 @@ function Index() {
     if (savedScoreMode === "mal" || savedScoreMode === "gosto") setScoreMode(savedScoreMode);
     const savedWatchedFilter =
       typeof window !== "undefined" ? localStorage.getItem("anime-ranker:v1:watchedFilter") : null;
-    if (savedWatchedFilter === "todos" || savedWatchedFilter === "nao" || savedWatchedFilter === "sim") {
+    if (
+      savedWatchedFilter === "todos" ||
+      savedWatchedFilter === "nao" ||
+      savedWatchedFilter === "sim"
+    ) {
       setWatchedFilter(savedWatchedFilter);
     }
     return () => {
@@ -433,9 +444,6 @@ function Index() {
     localStorage.setItem("anime-ranker:v1:watchedFilter", watchedFilter);
   }, [watchedFilter, hydrated]);
 
-
-
-
   // Run all data migrations/backfills once after hydration.
   useEffect(() => {
     if (!hydrated || !user) return;
@@ -455,7 +463,8 @@ function Index() {
   const lastCheckedGlobal = useMemo(() => {
     let latest: string | null = null;
     for (const a of animes) {
-      if (a.lastCheckedAt && (latest === null || a.lastCheckedAt > latest)) latest = a.lastCheckedAt;
+      if (a.lastCheckedAt && (latest === null || a.lastCheckedAt > latest))
+        latest = a.lastCheckedAt;
     }
     return latest;
   }, [animes]);
@@ -517,7 +526,16 @@ function Index() {
     }
 
     return [...filtered].sort(compareByMAL);
-  }, [animes, search, scoreMode, tierFilter, typeFilter, genreFilter, semDadosFilter, watchedFilter]);
+  }, [
+    animes,
+    search,
+    scoreMode,
+    tierFilter,
+    typeFilter,
+    genreFilter,
+    semDadosFilter,
+    watchedFilter,
+  ]);
 
   const displayedRanked = useMemo(() => {
     const filtered = animes.filter((anime) => animeMatchesFilters(anime, displayMode.scoreMode));
@@ -535,7 +553,16 @@ function Index() {
       });
     }
     return [...filtered].sort(compareByMAL);
-  }, [animes, search, displayMode.scoreMode, tierFilter, typeFilter, genreFilter, semDadosFilter, watchedFilter]);
+  }, [
+    animes,
+    search,
+    displayMode.scoreMode,
+    tierFilter,
+    typeFilter,
+    genreFilter,
+    semDadosFilter,
+    watchedFilter,
+  ]);
 
   const visibleRankingItemCount =
     displayMode.scoreMode === "gosto"
@@ -587,7 +614,8 @@ function Index() {
     if (mediaMAL(created.seasons) === null) {
       return { description: "Sem nota do MAL ainda — vai para o fim da lista" };
     }
-    const position = [...animes, created].sort(compareByMAL).findIndex((a) => a.id === created.id) + 1;
+    const position =
+      [...animes, created].sort(compareByMAL).findIndex((a) => a.id === created.id) + 1;
     return { description: `#${position} por nota MAL` };
   }
 
@@ -601,9 +629,17 @@ function Index() {
 
   const watchedFilterActive = scoreMode !== "gosto" && watchedFilter !== "nao";
   const filtersActive =
-    tierFilter.size > 0 || typeFilter.size > 0 || genreFilter.size > 0 || semDadosFilter || watchedFilterActive;
+    tierFilter.size > 0 ||
+    typeFilter.size > 0 ||
+    genreFilter.size > 0 ||
+    semDadosFilter ||
+    watchedFilterActive;
   const filtersActiveCount =
-    tierFilter.size + typeFilter.size + genreFilter.size + (semDadosFilter ? 1 : 0) + (watchedFilterActive ? 1 : 0);
+    tierFilter.size +
+    typeFilter.size +
+    genreFilter.size +
+    (semDadosFilter ? 1 : 0) +
+    (watchedFilterActive ? 1 : 0);
   function clearFilters() {
     withViewTransition(() => {
       setTierFilter(new Set());
@@ -617,7 +653,8 @@ function Index() {
     withViewTransition(() => {
       setTierFilter((prev) => {
         const n = new Set(prev);
-        if (n.has(t)) n.delete(t); else n.add(t);
+        if (n.has(t)) n.delete(t);
+        else n.add(t);
         return n;
       });
     });
@@ -626,7 +663,8 @@ function Index() {
     withViewTransition(() => {
       setTypeFilter((prev) => {
         const n = new Set(prev);
-        if (n.has(t)) n.delete(t); else n.add(t);
+        if (n.has(t)) n.delete(t);
+        else n.add(t);
         return n;
       });
     });
@@ -635,7 +673,8 @@ function Index() {
     withViewTransition(() => {
       setGenreFilter((prev) => {
         const n = new Set(prev);
-        if (n.has(g)) n.delete(g); else n.add(g);
+        if (n.has(g)) n.delete(g);
+        else n.add(g);
         return n;
       });
     });
@@ -644,7 +683,6 @@ function Index() {
   function selectGenreFilter(genre: string) {
     withViewTransition(() => setGenreFilter(new Set([genre])));
   }
-
 
   const watchedCount = useMemo(() => animes.filter((a) => a.watched).length, [animes]);
   const displayedCount = useMemo(() => {
@@ -696,7 +734,6 @@ function Index() {
     setSelectedChainIds(new Set());
   }
 
-
   async function startChainFetch(pick: JikanPick) {
     chainAbortRef.current?.abort();
     const ctrl = new AbortController();
@@ -707,11 +744,7 @@ function Index() {
     setChainProgress({ current: 0, total: 0 });
     setChainError(false);
     try {
-      const seasons = await buildChain(
-        pick.malId,
-        (p) => setChainProgress(p),
-        ctrl.signal,
-      );
+      const seasons = await buildChain(pick.malId, (p) => setChainProgress(p), ctrl.signal);
       if (ctrl.signal.aborted) return;
       // Ensure the picked anime itself is included (in case it was filtered or
       // the API returned nothing): fall back to the pick details.
@@ -825,7 +858,6 @@ function Index() {
     }
   }
 
-
   function openAddSeason(animeId?: string) {
     if (animes.length === 0) {
       toast.error("Adicione um anime primeiro");
@@ -856,8 +888,7 @@ function Index() {
       const data = await getJikanAnime(pick.malId, { priority: "interactive" });
       const t: string | null = data?.type ?? null;
       const y: number | null =
-        data?.year ??
-        (data?.aired?.from ? new Date(data.aired.from).getFullYear() : null);
+        data?.year ?? (data?.aired?.from ? new Date(data.aired.from).getFullYear() : null);
       setSeasonDetails({
         malId: pick.malId,
         type: t,
@@ -866,14 +897,17 @@ function Index() {
         durationMin: parseJikanDuration(data?.duration),
       });
     } catch {
-      setSeasonDetails({ malId: pick.malId, type: null, year: null, episodes: null, durationMin: null });
+      setSeasonDetails({
+        malId: pick.malId,
+        type: null,
+        year: null,
+        episodes: null,
+        durationMin: null,
+      });
     } finally {
       setSeasonDetailsLoading(false);
     }
   }
-
-
-
 
   async function addSeason() {
     if (!seasonAnimeId) {
@@ -903,9 +937,7 @@ function Index() {
     };
     const newSeasons = [...target.seasons, newSeason];
     const prev = animes;
-    setAnimes((p) =>
-      p.map((a) => (a.id === seasonAnimeId ? { ...a, seasons: newSeasons } : a)),
-    );
+    setAnimes((p) => p.map((a) => (a.id === seasonAnimeId ? { ...a, seasons: newSeasons } : a)));
     setSeasonDialogOpen(false);
     try {
       await updateSeasons(seasonAnimeId, newSeasons);
@@ -916,7 +948,6 @@ function Index() {
       setAnimes(prev);
     }
   }
-
 
   async function setAnimeTier(animeId: string, tier: Tier | null) {
     const prev = animes;
@@ -1033,9 +1064,7 @@ function Index() {
     if (from === to) return;
     const originalSeasons = target.seasons;
     const newSeasons = arrayMove(originalSeasons, from, to);
-    setAnimes((prev) =>
-      prev.map((a) => (a.id === animeId ? { ...a, seasons: newSeasons } : a)),
-    );
+    setAnimes((prev) => prev.map((a) => (a.id === animeId ? { ...a, seasons: newSeasons } : a)));
     try {
       await updateSeasons(animeId, newSeasons);
     } catch (err) {
@@ -1055,9 +1084,7 @@ function Index() {
     const removed = target.seasons[index];
     const originalSeasons = target.seasons;
     const newSeasons = target.seasons.filter((s) => s.id !== seasonId);
-    setAnimes((prev) =>
-      prev.map((a) => (a.id === animeId ? { ...a, seasons: newSeasons } : a)),
-    );
+    setAnimes((prev) => prev.map((a) => (a.id === animeId ? { ...a, seasons: newSeasons } : a)));
     try {
       await updateSeasons(animeId, newSeasons);
     } catch (err) {
@@ -1088,9 +1115,7 @@ function Index() {
           } catch (err) {
             console.error(err);
             toast.error("Falha ao desfazer");
-            setAnimes((prev) =>
-              prev.map((a) => (a.id === animeId ? { ...a, seasons: base } : a)),
-            );
+            setAnimes((prev) => prev.map((a) => (a.id === animeId ? { ...a, seasons: base } : a)));
           }
         },
       },
@@ -1108,7 +1133,12 @@ function Index() {
       for (const s of a.seasons) if (s.malId) existing.add(s.malId);
     }
     const available: FoundSeason[] = [];
-    const upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }> = [];
+    const upcomingSaved: Array<{
+      parentId: string;
+      parentName: string;
+      title: string;
+      releaseDate: string;
+    }> = [];
     let scanned = 0;
     for (let i = 0; i < targets.length; i++) {
       const a = targets[i];
@@ -1121,11 +1151,7 @@ function Index() {
           const notAired =
             typeof s.status === "string" && s.status.toLowerCase().includes("not yet");
           if (notAired) {
-            const iso = s.airedFrom
-              ? s.airedFrom.slice(0, 10)
-              : s.year
-                ? `${s.year}-01-01`
-                : null;
+            const iso = s.airedFrom ? s.airedFrom.slice(0, 10) : s.year ? `${s.year}-01-01` : null;
             if (!iso) continue;
             let shouldSave = false;
             const current = a.upcoming;
@@ -1178,9 +1204,7 @@ function Index() {
         try {
           const iso = new Date().toISOString();
           await updateLastCheckedAt(a.id, iso);
-          setAnimes((prev) =>
-            prev.map((x) => (x.id === a.id ? { ...x, lastCheckedAt: iso } : x)),
-          );
+          setAnimes((prev) => prev.map((x) => (x.id === a.id ? { ...x, lastCheckedAt: iso } : x)));
         } catch (err) {
           console.error("failed to persist last checked for", a.name, err);
         }
@@ -1213,7 +1237,17 @@ function Index() {
     setCheckProgress({ current: 0, total: targets.length });
     const ac = new AbortController();
     scanAbortRef.current = ac;
-    let result: { available: FoundSeason[]; upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }>; aborted: boolean; scanned: number };
+    let result: {
+      available: FoundSeason[];
+      upcomingSaved: Array<{
+        parentId: string;
+        parentName: string;
+        title: string;
+        releaseDate: string;
+      }>;
+      aborted: boolean;
+      scanned: number;
+    };
     try {
       result = await scanTargets(
         targets,
@@ -1226,10 +1260,7 @@ function Index() {
       scanAbortRef.current = null;
     }
     if (result.aborted) setCheckAborted({ scanned: result.scanned, total: targets.length });
-    if (
-      result.available.length === 0 &&
-      result.upcomingSaved.length === 0
-    ) {
+    if (result.available.length === 0 && result.upcomingSaved.length === 0) {
       toast(result.aborted ? "Verificação cancelada" : "Nenhuma temporada nova encontrada");
       return;
     }
@@ -1248,16 +1279,21 @@ function Index() {
     }
     setCheckAborted(null);
     setCheckingId(animeId);
-    let result: { available: FoundSeason[]; upcomingSaved: Array<{ parentId: string; parentName: string; title: string; releaseDate: string }> };
+    let result: {
+      available: FoundSeason[];
+      upcomingSaved: Array<{
+        parentId: string;
+        parentName: string;
+        title: string;
+        releaseDate: string;
+      }>;
+    };
     try {
       result = await scanTargets([anime]);
     } finally {
       setCheckingId(null);
     }
-    if (
-      result.available.length === 0 &&
-      result.upcomingSaved.length === 0
-    ) {
+    if (result.available.length === 0 && result.upcomingSaved.length === 0) {
       toast("Nenhuma temporada nova encontrada");
       return;
     }
@@ -1274,7 +1310,8 @@ function Index() {
     }
 
     const total = animes.reduce(
-      (count, anime) => count + anime.seasons.filter((season) => typeof season.malId === "number").length,
+      (count, anime) =>
+        count + anime.seasons.filter((season) => typeof season.malId === "number").length,
       0,
     );
     if (total === 0) {
@@ -1313,17 +1350,27 @@ function Index() {
             if (typeof data.score === "number" && data.score !== oldScore) {
               next.malScore = data.score;
             }
-            if ((current.year === null || current.year === undefined) && data.year !== null && data.year !== undefined) {
+            if (
+              (current.year === null || current.year === undefined) &&
+              data.year !== null &&
+              data.year !== undefined
+            ) {
               next.year = data.year;
               filledFields.push("year");
             }
-            if ((current.type === null || current.type === undefined) && data.type !== null && data.type !== undefined) {
+            if (
+              (current.type === null || current.type === undefined) &&
+              data.type !== null &&
+              data.type !== undefined
+            ) {
               next.type = data.type;
               filledFields.push("type");
             }
 
             const seasonChanged =
-              next.malScore !== current.malScore || next.year !== current.year || next.type !== current.type;
+              next.malScore !== current.malScore ||
+              next.year !== current.year ||
+              next.type !== current.type;
             if (seasonChanged) {
               seasonsDraft[index] = next;
               changed = true;
@@ -1352,7 +1399,9 @@ function Index() {
             await updateSeasons(anime.id, seasonsDraft);
             setAnimes((previous) =>
               previous.map((item) =>
-                item.id === anime.id ? { ...item, seasons: seasonsDraft.map((season) => ({ ...season })) } : item,
+                item.id === anime.id
+                  ? { ...item, seasons: seasonsDraft.map((season) => ({ ...season })) }
+                  : item,
               ),
             );
             updated.push(...animeUpdated);
@@ -1377,7 +1426,6 @@ function Index() {
     setMalScoreUpdated(updated);
     setMalScoreDialogOpen(true);
   }
-
 
   async function addFoundSeason(found: FoundSeason) {
     const target = animes.find((a) => a.id === found.parentId);
@@ -1414,18 +1462,12 @@ function Index() {
     }
   }
 
-
-
-
   function toggleExpand(id: string) {
     setExpanded((e) => ({ ...e, [id]: !e[id] }));
   }
 
-
   async function clearUpcoming(animeId: string) {
-    setAnimes((prev) =>
-      prev.map((a) => (a.id === animeId ? { ...a, upcoming: undefined } : a)),
-    );
+    setAnimes((prev) => prev.map((a) => (a.id === animeId ? { ...a, upcoming: undefined } : a)));
     toast.success("Lançamento removido");
     try {
       await updateUpcoming(animeId, null);
@@ -1501,7 +1543,12 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Toaster theme="dark" position="top-right" offset={{ top: "96px" }} mobileOffset={{ top: "80px" }} />
+      <Toaster
+        theme="dark"
+        position="top-right"
+        offset={{ top: "96px" }}
+        mobileOffset={{ top: "80px" }}
+      />
 
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur-xl">
@@ -1518,10 +1565,13 @@ function Index() {
                 if (displayMode.scoreMode === "gosto" && draggingAnimeId === null && !reduced) {
                   setTierWaveRun((run) => run + 1);
                   if (tierWaveTimeoutRef.current) clearTimeout(tierWaveTimeoutRef.current);
-                  tierWaveTimeoutRef.current = setTimeout(() => {
-                    setTierWaveRun(0);
-                    tierWaveTimeoutRef.current = null;
-                  }, TIER_ROWS.length * TIER_WAVE_STAGGER_MS + TIER_WAVE_DURATION_MS + 80);
+                  tierWaveTimeoutRef.current = setTimeout(
+                    () => {
+                      setTierWaveRun(0);
+                      tierWaveTimeoutRef.current = null;
+                    },
+                    TIER_ROWS.length * TIER_WAVE_STAGGER_MS + TIER_WAVE_DURATION_MS + 80,
+                  );
                 }
               }}
             >
@@ -1581,7 +1631,6 @@ function Index() {
               )}
             </button>
             <ProfileMenu onOpenStats={() => setStatsOpen(true)} />
-
           </div>
         </div>
         <div className="mx-auto max-w-5xl px-4 pb-4 sm:px-6">
@@ -1618,7 +1667,6 @@ function Index() {
         </div>
       </header>
 
-
       {/* List */}
       <main className="mx-auto max-w-5xl px-4 pb-32 pt-6 sm:px-6">
         <div
@@ -1640,7 +1688,10 @@ function Index() {
                   <>
                     <RefreshCw className="hidden h-3.5 w-3.5 animate-spin motion-reduce:animate-none sm:inline group-hover:hidden group-focus-visible:hidden" />
                     <X className="h-3.5 w-3.5 sm:hidden sm:group-hover:inline sm:group-focus-visible:inline" />
-                    <span role="status" className="hidden sm:inline group-hover:hidden group-focus-visible:hidden">
+                    <span
+                      role="status"
+                      className="hidden sm:inline group-hover:hidden group-focus-visible:hidden"
+                    >
                       Verificando{" "}
                       {checkProgress.total === 0
                         ? 0
@@ -1665,14 +1716,25 @@ function Index() {
                 disabled={animes.length === 0 || checking || checkingId !== null}
                 className="group h-8 gap-1.5 text-xs"
                 aria-busy={updatingMalScores || undefined}
-                aria-label={updatingMalScores ? "Cancelar atualização de notas do MAL" : "Atualizar notas do MAL"}
-                title={updatingMalScores ? "Cancelar atualização de notas do MAL" : "Atualizar notas do MAL"}
+                aria-label={
+                  updatingMalScores
+                    ? "Cancelar atualização de notas do MAL"
+                    : "Atualizar notas do MAL"
+                }
+                title={
+                  updatingMalScores
+                    ? "Cancelar atualização de notas do MAL"
+                    : "Atualizar notas do MAL"
+                }
               >
                 {updatingMalScores && malScoreProgress ? (
                   <>
                     <Gauge className="hidden h-3.5 w-3.5 animate-spin motion-reduce:animate-none sm:inline group-hover:hidden group-focus-visible:hidden" />
                     <X className="h-3.5 w-3.5 sm:hidden sm:group-hover:inline sm:group-focus-visible:inline" />
-                    <span role="status" className="hidden sm:inline group-hover:hidden group-focus-visible:hidden">
+                    <span
+                      role="status"
+                      className="hidden sm:inline group-hover:hidden group-focus-visible:hidden"
+                    >
                       Atualizando{" "}
                       {malScoreProgress.total === 0
                         ? 0
@@ -1705,183 +1767,185 @@ function Index() {
         </div>
 
         {showFilters && (
-        <div className="mb-4 flex items-start gap-2">
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-              <Filter className="h-3.5 w-3.5" />
-              Tier
-            </div>
-            {TIER_ROWS.map((t) => {
-              const active = tierFilter.has(t);
-              return (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => toggleTier(t)}
-                  aria-pressed={active}
-                  className={`focus-ring h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-semibold transition-colors ${
-                    active
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {t}
-                </button>
-              );
-            })}
-            <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Tipo
-            </div>
-            {["TV", "Movie", "ONA"].map((t) => {
-              const active = typeFilter.has(t);
-              return (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => toggleType(t)}
-                  aria-pressed={active}
-                  className={`focus-ring h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
-                    active
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {t}
-                </button>
-              );
-            })}
-            {genreOptions.length > 0 && (
-              <>
-                <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  Gênero
-                </div>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      className={`focus-ring inline-flex items-center gap-1 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
-                        genreFilter.size > 0
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      Selecionar
-                      {genreFilter.size > 0 && <span>({genreFilter.size})</span>}
-                      <ChevronDown className="h-3.5 w-3.5" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-0" align="start">
-                    <Command>
-                      <CommandInput placeholder="Buscar gênero..." />
-                      <CommandList>
-                        <CommandEmpty>Nenhum gênero encontrado.</CommandEmpty>
-                        <CommandGroup>
-                          {genreOptions.map((g) => {
-                            const active = genreFilter.has(g.name);
-                            return (
-                              <CommandItem
-                                key={g.name}
-                                value={g.name}
-                                onSelect={() => toggleGenre(g.name)}
-                              >
-                                <Check
-                                  className={`mr-2 h-4 w-4 ${active ? "opacity-100 text-primary" : "opacity-0"}`}
-                                />
-                                <span className="flex-1 truncate">{g.name}</span>
-                                <span className="ml-2 text-[11px] tabular-nums text-muted-foreground">
-                                  {g.count}
-                                </span>
-                              </CommandItem>
-                            );
-                          })}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                    {genreFilter.size > 0 && (
-                      <div className="border-t border-border/60 p-2">
-                        <button
-                          type="button"
-                          onClick={() => withViewTransition(() => setGenreFilter(new Set()))}
-                          className="focus-ring w-full rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-destructive"
-                        >
-                          Limpar gêneros
-                        </button>
-                      </div>
-                    )}
-                  </PopoverContent>
-                </Popover>
-                {[...genreFilter].map((g) => (
+          <div className="mb-4 flex items-start gap-2">
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                <Filter className="h-3.5 w-3.5" />
+                Tier
+              </div>
+              {TIER_ROWS.map((t) => {
+                const active = tierFilter.has(t);
+                return (
                   <button
-                    key={g}
+                    key={t}
                     type="button"
-                    onClick={() => toggleGenre(g)}
-                    aria-label={`Remover filtro ${g}`}
-                    className="focus-ring inline-flex items-center gap-1 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border border-primary bg-primary text-xs font-medium text-primary-foreground transition-colors"
+                    onClick={() => toggleTier(t)}
+                    aria-pressed={active}
+                    className={`focus-ring h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-semibold transition-colors ${
+                      active
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+                    }`}
                   >
-                    {g}
-                    <X className="h-3 w-3" />
+                    {t}
                   </button>
-                ))}
-              </>
-            )}
-            {scoreMode !== "gosto" && (
-              <>
-                <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  Assistidos
-                </div>
-                {([
-                  { v: "todos", label: "Todos" },
-                  { v: "nao", label: "Não assistidos" },
-                  { v: "sim", label: `Assistidos${watchedCount > 0 ? ` (${watchedCount})` : ""}` },
-                ] as const).map((opt) => {
-                  const active = watchedFilter === opt.v;
-                  return (
+                );
+              })}
+              <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Tipo
+              </div>
+              {["TV", "Movie", "ONA"].map((t) => {
+                const active = typeFilter.has(t);
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => toggleType(t)}
+                    aria-pressed={active}
+                    className={`focus-ring h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
+                      active
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                );
+              })}
+              {genreOptions.length > 0 && (
+                <>
+                  <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    Gênero
+                  </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className={`focus-ring inline-flex items-center gap-1 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
+                          genreFilter.size > 0
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        Selecionar
+                        {genreFilter.size > 0 && <span>({genreFilter.size})</span>}
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Buscar gênero..." />
+                        <CommandList>
+                          <CommandEmpty>Nenhum gênero encontrado.</CommandEmpty>
+                          <CommandGroup>
+                            {genreOptions.map((g) => {
+                              const active = genreFilter.has(g.name);
+                              return (
+                                <CommandItem
+                                  key={g.name}
+                                  value={g.name}
+                                  onSelect={() => toggleGenre(g.name)}
+                                >
+                                  <Check
+                                    className={`mr-2 h-4 w-4 ${active ? "opacity-100 text-primary" : "opacity-0"}`}
+                                  />
+                                  <span className="flex-1 truncate">{g.name}</span>
+                                  <span className="ml-2 text-[11px] tabular-nums text-muted-foreground">
+                                    {g.count}
+                                  </span>
+                                </CommandItem>
+                              );
+                            })}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                      {genreFilter.size > 0 && (
+                        <div className="border-t border-border/60 p-2">
+                          <button
+                            type="button"
+                            onClick={() => withViewTransition(() => setGenreFilter(new Set()))}
+                            className="focus-ring w-full rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-destructive"
+                          >
+                            Limpar gêneros
+                          </button>
+                        </div>
+                      )}
+                    </PopoverContent>
+                  </Popover>
+                  {[...genreFilter].map((g) => (
                     <button
-                      key={opt.v}
+                      key={g}
                       type="button"
-                      onClick={() => withViewTransition(() => setWatchedFilter(opt.v))}
-                      aria-pressed={active}
-                      className={`focus-ring h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
-                        active
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
-                      }`}
+                      onClick={() => toggleGenre(g)}
+                      aria-label={`Remover filtro ${g}`}
+                      className="focus-ring inline-flex items-center gap-1 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border border-primary bg-primary text-xs font-medium text-primary-foreground transition-colors"
                     >
-                      {opt.label}
+                      {g}
+                      <X className="h-3 w-3" />
                     </button>
-                  );
-                })}
-              </>
+                  ))}
+                </>
+              )}
+              {scoreMode !== "gosto" && (
+                <>
+                  <div className="ml-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    Assistidos
+                  </div>
+                  {(
+                    [
+                      { v: "todos", label: "Todos" },
+                      { v: "nao", label: "Não assistidos" },
+                      {
+                        v: "sim",
+                        label: `Assistidos${watchedCount > 0 ? ` (${watchedCount})` : ""}`,
+                      },
+                    ] as const
+                  ).map((opt) => {
+                    const active = watchedFilter === opt.v;
+                    return (
+                      <button
+                        key={opt.v}
+                        type="button"
+                        onClick={() => withViewTransition(() => setWatchedFilter(opt.v))}
+                        aria-pressed={active}
+                        className={`focus-ring h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
+                          active
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </>
+              )}
+              <button
+                type="button"
+                onClick={() => withViewTransition(() => setSemDadosFilter((v) => !v))}
+                aria-pressed={semDadosFilter}
+                className={`focus-ring ml-2 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
+                  semDadosFilter
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Sem dados
+              </button>
+            </div>
+            {filtersActive && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                aria-label="Limpar filtros"
+                className="focus-ring inline-flex items-center gap-1.5 shrink-0 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border border-destructive/40 bg-destructive/10 text-xs font-medium text-destructive transition-colors hover:bg-destructive/20 hover:border-destructive/60"
+              >
+                <X className="h-3.5 w-3.5" />
+                Limpar ({filtersActiveCount})
+              </button>
             )}
-            <button
-              type="button"
-              onClick={() => withViewTransition(() => setSemDadosFilter((v) => !v))}
-              aria-pressed={semDadosFilter}
-              className={`focus-ring ml-2 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border text-xs font-medium transition-colors ${
-                semDadosFilter
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Sem dados
-            </button>
           </div>
-          {filtersActive && (
-            <button
-              type="button"
-              onClick={clearFilters}
-              aria-label="Limpar filtros"
-              className="focus-ring inline-flex items-center gap-1.5 shrink-0 h-11 px-4 sm:h-7 sm:px-2.5 rounded-full border border-destructive/40 bg-destructive/10 text-xs font-medium text-destructive transition-colors hover:bg-destructive/20 hover:border-destructive/60"
-            >
-              <X className="h-3.5 w-3.5" />
-              Limpar ({filtersActiveCount})
-            </button>
-          )}
-        </div>
         )}
-
-
-
 
         <div
           className={`motion-reduce:opacity-100 motion-reduce:transition-none ${
@@ -1890,575 +1954,601 @@ function Index() {
               : "opacity-100 transition-opacity duration-[180ms] ease-out"
           }`}
         >
-        {!hydrated ? (
-          <RankingSkeleton scoreMode={scoreMode} viewMode={viewMode} />
-        ) : displayedRanked.length === 0 && filtersActive ? (
-          <EmptyState
-            icon={Filter}
-            title="Nenhum anime com esses filtros."
-            description="Tente afrouxar os filtros para ver mais resultados."
-            action={
-              <Button variant="outline" onClick={clearFilters}>
-                Limpar filtros
-              </Button>
-            }
-          />
-        ) : displayedRanked.length === 0 && animes.length > 0 ? (
-          <EmptyState
-            icon={Search}
-            title="Nenhum resultado"
-            description="Tente buscar por outro nome."
-          />
-        ) : displayedRanked.length === 0 ? (
-          <EmptyState
-            icon={Sparkles}
-            title="Comece seu ranking"
-            description="Adicione seu primeiro anime e comece a notar as temporadas."
-            action={
-              <Button onClick={() => setAnimeDialogOpen(true)}>
-                <Plus className="mr-1 h-4 w-4" /> Adicionar anime
-              </Button>
-            }
-          />
-
-
-        ) : displayMode.scoreMode === "gosto" ? (
-          watchedCount === 0 ? (
+          {!hydrated ? (
+            <RankingSkeleton scoreMode={scoreMode} viewMode={viewMode} />
+          ) : displayedRanked.length === 0 && filtersActive ? (
+            <EmptyState
+              icon={Filter}
+              title="Nenhum anime com esses filtros."
+              description="Tente afrouxar os filtros para ver mais resultados."
+              action={
+                <Button variant="outline" onClick={clearFilters}>
+                  Limpar filtros
+                </Button>
+              }
+            />
+          ) : displayedRanked.length === 0 && animes.length > 0 ? (
+            <EmptyState
+              icon={Search}
+              title="Nenhum resultado"
+              description="Tente buscar por outro nome."
+            />
+          ) : displayedRanked.length === 0 ? (
             <EmptyState
               icon={Sparkles}
-              title="Nenhum anime assistido"
-              description="Marque animes como assistidos para vê-los na sua tierlist."
+              title="Comece seu ranking"
+              description="Adicione seu primeiro anime e comece a notar as temporadas."
+              action={
+                <Button onClick={() => setAnimeDialogOpen(true)}>
+                  <Plus className="mr-1 h-4 w-4" /> Adicionar anime
+                </Button>
+              }
             />
-          ) : (
-          <div className="space-y-2">
-            <DndContext
-              sensors={tierSensors}
-              collisionDetection={tierCollisionDetection}
-              onDragStart={(e: DragStartEvent) => setDraggingAnimeId(String(e.active.id))}
-              onDragCancel={() => setDraggingAnimeId(null)}
-              onDragEnd={(e: DragEndEvent) => {
-                setDraggingAnimeId(null);
-                const overId = e.over?.id;
-                if (!overId) return;
-                const activeId = String(e.active.id);
-                if (String(overId) === activeId) return;
-                const anime = animes.find((a) => a.id === activeId);
-                if (!anime) return;
-                const overAnime = animes.find((a) => a.id === String(overId));
-                if (overAnime) {
-                  void moveAnimeInTierlist(anime.id, overAnime.tier, overAnime.id);
-                  return;
-                }
-                const target = overId === "none" ? null : (String(overId) as Tier);
-                void moveAnimeInTierlist(anime.id, target, null);
-              }}
-            >
-            <div className="overflow-hidden rounded-xl border border-border/60">
-            {TIER_ROWS.map((t, rowIndex) => {
-              const items = displayedRanked.filter((a) => a.tier === t && a.watched);
-              const hasItems = items.length > 0;
-              const waveVariant = tierWaveRun > 0 ? (tierWaveRun % 2 === 0 ? "b" : "a") : null;
-              return (
-                <TierDropRow
-                  key={t}
-                  id={t}
-                  items={items.map((a) => a.id)}
-                  className={`border-b border-border/60 last:border-b-0 ${hasItems ? "min-h-32" : "min-h-20"} ${waveVariant ? `tier-wave-row-${waveVariant}` : ""}`}
-                  style={{
-                    "--wave-tint": `var(--tier-${t.toLowerCase()})`,
-                    "--wave-delay": `${rowIndex * TIER_WAVE_STAGGER_MS}ms`,
-                  } as CSSProperties}
-                  label={
-                    <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
-                      <div className={`absolute inset-y-0 left-0 w-1.5 ${tierBg(t)}`} />
-                      <span className={`font-display text-2xl font-bold sm:text-3xl ${tierColor(t)}`}>{t}</span>
-                    </div>
-                  }
-                >
-                  {items.map((anime, idx) => (
-                    <li
-                      key={anime.id}
-                      className={`list-none ${waveVariant ? `tier-wave-card-${waveVariant}` : ""}`}
-                      style={{
-                        viewTransitionName: enableItemViewTransitions ? `anime-${anime.id}` : undefined,
-                        "--wave-delay": `${rowIndex * TIER_WAVE_STAGGER_MS}ms`,
-                      } as CSSProperties}
-                    >
-                      <DraggableCover
-                        id={`anime-${anime.id}`}
-                        anime={anime}
-                        idx={idx}
-                        onOpen={openDetail}
-                        highlighted={highlightId === anime.id}
-                      />
-                    </li>
-                  ))}
-                </TierDropRow>
-              );
-            })}
-            {(draggingAnimeId !== null || displayedRanked.some((a) => a.tier === null && a.watched)) && (
-              <TierDropRow
-                id="none"
-                items={displayedRanked.filter((a) => a.tier === null && a.watched).map((a) => a.id)}
-                className={`min-h-32 border-t border-border/60 ${tierWaveRun > 0 ? `tier-wave-row-${tierWaveRun % 2 === 0 ? "b" : "a"}` : ""}`}
-                style={{
-                  "--wave-tint": "var(--muted-foreground)",
-                  "--wave-delay": `${TIER_ROWS.length * TIER_WAVE_STAGGER_MS}ms`,
-                } as CSSProperties}
-                label={
-                  <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
-                    <div className="absolute inset-y-0 left-0 w-1.5 bg-muted-foreground/30" />
-                    <span className="font-display text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                      Sem tier
-                    </span>
-                  </div>
-                }
-              >
-                {displayedRanked
-                  .filter((a) => a.tier === null && a.watched)
-                  .map((anime, idx) => (
-                    <li
-                      key={anime.id}
-                      className={`list-none ${tierWaveRun > 0 ? `tier-wave-card-${tierWaveRun % 2 === 0 ? "b" : "a"}` : ""}`}
-                      style={{
-                        viewTransitionName: enableItemViewTransitions ? `anime-${anime.id}` : undefined,
-                        "--wave-delay": `${TIER_ROWS.length * TIER_WAVE_STAGGER_MS}ms`,
-                      } as CSSProperties}
-                    >
-                      <DraggableCover
-                        id={`anime-${anime.id}`}
-                        anime={anime}
-                        idx={idx}
-                        onOpen={openDetail}
-                        highlighted={highlightId === anime.id}
-                      />
-                    </li>
-                  ))}
-              </TierDropRow>
-            )}
-          </div>
-            {(() => {
-              const overlay = (
-                <DragOverlay>
-                  {draggingAnime ? (
-                    <div className="group w-20 scale-105 rounded-lg ring-2 ring-primary/50">
-                      <CoverArt anime={draggingAnime} />
-                    </div>
-                  ) : null}
-                </DragOverlay>
-              );
-              return typeof document !== "undefined"
-                ? createPortal(overlay, document.body)
-                : overlay;
-            })()}
-            </DndContext>
-          </div>
-
-          )
-        ) : displayMode.viewMode === "grid" ? (
-          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-            {displayedRanked.map((anime, idx) => {
-              const malAvg = mediaMAL(anime.seasons);
-              const primaryValue = malAvg != null ? malAvg.toFixed(2) : "—";
-              const primaryColor = malAvg != null ? rankColor(malAvg) : "text-muted-foreground";
-              return (
-                <li
-                  key={anime.id}
-                  id={`anime-${anime.id}`}
-                  className={`${animateRankingItems ? "animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none" : ""} [transform-style:preserve-3d] ${
-                    highlightId === anime.id
-                      ? "card-flash"
-                      : ""
-                  } ${watchedFlashId === anime.id ? "watched-card-flash" : ""}`}
-                  style={{
-                    viewTransitionName: enableItemViewTransitions ? `anime-${anime.id}` : undefined,
-                    ...(animateRankingItems ? { animationDelay: `${Math.min(idx, 12) * 30}ms` } : {}),
+          ) : displayMode.scoreMode === "gosto" ? (
+            watchedCount === 0 ? (
+              <EmptyState
+                icon={Sparkles}
+                title="Nenhum anime assistido"
+                description="Marque animes como assistidos para vê-los na sua tierlist."
+              />
+            ) : (
+              <div className="space-y-2">
+                <DndContext
+                  sensors={tierSensors}
+                  collisionDetection={tierCollisionDetection}
+                  onDragStart={(e: DragStartEvent) => setDraggingAnimeId(String(e.active.id))}
+                  onDragCancel={() => setDraggingAnimeId(null)}
+                  onDragEnd={(e: DragEndEvent) => {
+                    setDraggingAnimeId(null);
+                    const overId = e.over?.id;
+                    if (!overId) return;
+                    const activeId = String(e.active.id);
+                    if (String(overId) === activeId) return;
+                    const anime = animes.find((a) => a.id === activeId);
+                    if (!anime) return;
+                    const overAnime = animes.find((a) => a.id === String(overId));
+                    if (overAnime) {
+                      void moveAnimeInTierlist(anime.id, overAnime.tier, overAnime.id);
+                      return;
+                    }
+                    const target = overId === "none" ? null : (String(overId) as Tier);
+                    void moveAnimeInTierlist(anime.id, target, null);
                   }}
                 >
-                <TiltCardInner tierS={anime.tier === "S"}>
-                  <button
-                    type="button"
-                    onClick={() => openDetail(anime.id)}
-                    aria-label={anime.name}
-                    title={anime.name}
-                    className="block w-full cursor-pointer appearance-none border-0 bg-transparent p-0 text-left"
-                  >
-                    <div className="relative aspect-[2/3] w-full overflow-hidden bg-card-elevated">
-                      {anime.cover || anime.imageUrl ? (
-                        <img
-                          src={anime.cover ?? anime.imageUrl ?? undefined}
-                          alt={anime.name}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-primary/40">
-                          <ImageIcon className="h-10 w-10" />
-                        </div>
-                      )}
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-                      <div
-                        className={`font-display absolute left-2 top-2 flex h-7 min-w-7 items-center justify-center rounded-full border px-2 text-xs font-bold backdrop-blur ${
-                          idx === 0
-                            ? "border-primary/60 bg-primary/20 text-primary"
-                            : "border-border/60 bg-background/70 text-foreground/80"
-                        }`}
-                      >
-                        #{idx + 1}
-                      </div>
-                      <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
-                        <div className="flex items-baseline gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
-                          <span className={`font-display text-sm font-bold tabular-nums ${primaryColor}`}>
-                            {primaryValue}
-                          </span>
-                          <span className="text-[9px] text-muted-foreground">/10</span>
-                        </div>
-                        <Badge
-                          variant="outline"
-                          className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
-                        >
-                          <span className={`font-display font-bold ${tierColor(anime.tier)}`}>
-                            {anime.tier ?? "—"}
-                          </span>
-                        </Badge>
-                      </div>
-                      {isAwardWinning(anime) && (
-                        <div
-                          className="absolute right-2 bottom-3 flex h-7 w-7 items-center justify-center rounded-full bg-award text-award-foreground"
-                          title="Award Winning (MAL)"
-                          aria-label="Award Winning (MAL)"
-                        >
-                          <Award className="h-3.5 w-3.5" />
-                        </div>
-                      )}
-                      {anime.upcoming?.releaseDate && (
-                        <span
-                          className="absolute left-2 top-11 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground shadow-lg"
-                        >
-                          <CalendarClock className="h-3 w-3" />
-                          {formatReleaseLabel(anime.upcoming.releaseDate)}
-                        </span>
-                      )}
-                      <div className={`absolute inset-x-0 bottom-0 p-3 ${isAwardWinning(anime) ? "pr-11" : ""}`}>
-                        <h3 className="font-display line-clamp-2 text-sm font-semibold leading-tight tracking-tight">
-                          {anime.name}
-                        </h3>
-                        <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
-                          {anime.seasons.length}{" "}
-                          {anime.seasons.length === 1 ? "temporada" : "temporadas"}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-
-                  <div className="flex gap-1 p-2">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => openAddSeason(anime.id)}
-                      className="h-8 flex-1 text-xs transition-[color,box-shadow] duration-200 hover:bg-primary/15 hover:text-primary hover:ring-1 hover:ring-primary/40 focus-visible:bg-primary/15 focus-visible:text-primary focus-visible:ring-1 focus-visible:ring-primary/40 active:bg-primary/25"
-                    >
-                      <Plus className="mr-1 h-3.5 w-3.5" /> Temp.
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => openEdit(anime.id)}
-                      className="h-8 w-8 text-muted-foreground hover:text-primary"
-                      aria-label="Editar"
-                      title="Editar"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => checkNewSeasonsForAnime(anime.id)}
-                      disabled={checking || checkingId !== null || updatingMalScores}
-                      className="h-8 w-8 text-muted-foreground hover:text-primary"
-                      aria-label="Verificar novas temporadas"
-                      title="Verificar novas temporadas"
-                    >
-                      <RefreshCw className={`h-3.5 w-3.5 ${checkingId === anime.id ? "animate-spin" : ""}`} />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleWatchedToggle(anime.id, !anime.watched)}
-                      className={`h-8 w-8 hover:text-primary ${anime.watched ? "text-primary" : "text-muted-foreground"}`}
-                      aria-label={anime.watched ? "Desmarcar assistido" : "Marcar como assistido"}
-                      title={anime.watched ? "Desmarcar assistido" : "Marcar como assistido"}
-                    >
-                      <WatchedIcon watched={anime.watched} className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setConfirmDelete({ id: anime.id, name: anime.name })}
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      aria-label="Remover anime"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </TiltCardInner>
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <ul className="grid gap-4">
-            {displayedRanked.map((anime, idx) => {
-              const malAvg = mediaMAL(anime.seasons);
-              const primaryValue = malAvg != null ? malAvg.toFixed(2) : "—";
-              const primaryColor = malAvg != null ? rankColor(malAvg) : "text-muted-foreground";
-              const isOpen = expanded[anime.id] ?? false;
-              return (
-                <li
-                  key={anime.id}
-                  id={`anime-${anime.id}`}
-                  className={`group relative overflow-hidden rounded-2xl border border-border/60 transition-all ${animateRankingItems ? "animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none" : ""} hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)] ${
-                    highlightId === anime.id
-                      ? "card-flash"
-                      : ""
-                  } ${watchedFlashId === anime.id ? "watched-card-flash" : ""}`}
-                  style={{
-                    viewTransitionName: enableItemViewTransitions ? `anime-${anime.id}` : undefined,
-                    background: "var(--gradient-card)",
-                    boxShadow: "var(--shadow-card)",
-                    ...(animateRankingItems ? { animationDelay: `${Math.min(idx, 12) * 30}ms` } : {}),
-                  }}
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`pointer-events-none absolute inset-y-0 left-0 w-[6px] bg-tier-s transition-opacity duration-200 motion-reduce:transition-none ${
-                      anime.tier === "S" ? "opacity-100" : "opacity-0"
-                    }`}
-                  />
-                  <div
-                    className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5"
-                    onDoubleClick={(e) => {
-                      if ((e.target as HTMLElement).closest("button, a, input")) return;
-                      toggleExpand(anime.id);
-                    }}
-                    onMouseDown={(e) => {
-                      if (e.detail > 1) e.preventDefault();
-                    }}
-                  >
-                    <div
-                      className={`font-display flex h-10 w-8 shrink-0 items-center justify-center text-sm font-bold sm:h-14 sm:w-10 sm:text-xl ${
-                        idx === 0
-                          ? "text-primary"
-                          : idx === 1
-                            ? "text-foreground/80"
-                            : idx === 2
-                              ? "text-primary/60"
-                              : "text-muted-foreground/70"
-                      }`}
-                    >
-                      #{idx + 1}
-                    </div>
-                    <div className="relative self-stretch min-h-[120px] w-20 shrink-0 overflow-hidden rounded-lg bg-card-elevated ring-1 ring-border/40 sm:min-h-[168px] sm:w-28">
-                      {anime.cover || anime.imageUrl ? (
-                        <img
-                          src={anime.cover ?? anime.imageUrl ?? undefined}
-                          alt={anime.name}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center">
-                          <ImageIcon className="h-7 w-7 text-primary/40" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-display truncate text-base font-semibold tracking-tight sm:text-lg">
-                        {anime.name}
-                      </h3>
-                      <p className="mt-0.5 text-[11px] uppercase tracking-wider text-muted-foreground">
-                        {anime.seasons.length}{" "}
-                        {anime.seasons.length === 1 ? "temporada" : "temporadas"}
-                      </p>
-                      {anime.upcoming?.releaseDate && (
-                        <span
-                          className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary"
-                        >
-                          <CalendarClock className="h-3 w-3" />
-                          {formatReleaseLabel(anime.upcoming.releaseDate)}
-                        </span>
-                      )}
-                      {(isAwardWinning(anime) || (anime.genres && anime.genres.length > 0)) && (
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {isAwardWinning(anime) && (
-                            <button
-                              type="button"
-                              aria-label="Filtrar por Award Winning"
-                              title="Award Winning (MAL)"
-                              onClick={() => {
-                                selectGenreFilter(AWARD_GENRE);
-                                setShowFilters(true);
-                              }}
-                              className="focus-ring inline-flex items-center gap-1 rounded-md bg-award px-1.5 py-0.5 text-[10px] font-medium text-award-foreground transition-colors hover:brightness-110"
-                            >
-                              <Award className="h-3 w-3" />
-                              Award Winning
-                            </button>
-                          )}
-                          {anime.genres
-                            ?.filter(
-                              (g) => g.trim().toLowerCase() !== AWARD_GENRE.toLowerCase(),
-                            )
-                            .map((g) => {
-                              const on = genreFilterLower.has(g.toLowerCase());
-                              return (
-                                <span
-                                  key={g}
-                                  className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium ${
-                                    on
-                                      ? "bg-primary/15 text-primary"
-                                      : "bg-foreground/5 text-muted-foreground"
-                                  }`}
-                                >
-                                  {g}
-                                </span>
-                              );
-                            })}
-                        </div>
-                      )}
-
-                    </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <div className="flex items-baseline gap-1">
-                        <span className={`font-display text-2xl font-bold tabular-nums sm:text-3xl ${primaryColor}`}>
-                          {primaryValue}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">/10</span>
-                      </div>
-                      <Badge variant="outline" className="gap-1 border-primary/30 px-1.5 py-0 text-[10px] text-foreground/80">
-                        <span
-                          key={anime.tier ?? "none"}
-                          className={`tier-badge-pop font-display font-bold transition-colors duration-200 motion-reduce:transition-none ${tierColor(anime.tier)}`}
-                        >
-                          {anime.tier ?? "—"}
-                        </span>
-                      </Badge>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => toggleExpand(anime.id)}
-                      className="shrink-0 rounded-full text-muted-foreground hover:text-primary"
-                      aria-label={isOpen ? "Recolher" : "Expandir"}
-                    >
-                      {isOpen ? (
-                        <ChevronUp className="h-5 w-5" />
-                      ) : (
-                        <ChevronDown className="h-5 w-5" />
-                      )}
-                    </Button>
-                  </div>
-
-
-                  {isOpen && (
-                    <div className="border-t border-border bg-background/30 px-4 py-3 sm:px-5">
-                      <div className="mb-3 flex flex-wrap items-center gap-2">
-                        <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                          Meu tier
-                        </span>
-                        <TierPicker
-                          value={anime.tier}
-                          onChange={(t) => setAnimeTier(anime.id, t)}
-                        />
-                      </div>
-                      {anime.seasons.length === 0 ? (
-                        <p className="py-2 text-center text-sm text-muted-foreground">
-                          Nenhuma temporada ainda
-                        </p>
-                      ) : (
-                        <SortableCardSeasons
-                          seasons={anime.seasons}
-                          onReorder={(from, to) => reorderSeasons(anime.id, from, to)}
-                          onDelete={(seasonId) => deleteSeason(anime.id, seasonId)}
-                        />
-
-                      )}
-                      {anime.upcoming?.releaseDate && (
-                        <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
-                              <CalendarClock className="h-3.5 w-3.5" />
-                              {formatReleaseLabel(anime.upcoming.releaseDate)}
+                  <div className="overflow-hidden rounded-xl border border-border/60">
+                    {TIER_ROWS.map((t, rowIndex) => {
+                      const items = displayedRanked.filter((a) => a.tier === t && a.watched);
+                      const hasItems = items.length > 0;
+                      const waveVariant =
+                        tierWaveRun > 0 ? (tierWaveRun % 2 === 0 ? "b" : "a") : null;
+                      return (
+                        <TierDropRow
+                          key={t}
+                          id={t}
+                          items={items.map((a) => a.id)}
+                          className={`border-b border-border/60 last:border-b-0 ${hasItems ? "min-h-32" : "min-h-20"} ${waveVariant ? `tier-wave-row-${waveVariant}` : ""}`}
+                          style={
+                            {
+                              "--wave-tint": `var(--tier-${t.toLowerCase()})`,
+                              "--wave-delay": `${rowIndex * TIER_WAVE_STAGGER_MS}ms`,
+                            } as CSSProperties
+                          }
+                          label={
+                            <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
+                              <div className={`absolute inset-y-0 left-0 w-1.5 ${tierBg(t)}`} />
+                              <span
+                                className={`font-display text-2xl font-bold sm:text-3xl ${tierColor(t)}`}
+                              >
+                                {t}
+                              </span>
                             </div>
-                            <p className="truncate text-[11px] text-muted-foreground">
-                              {anime.upcoming.title} •{" "}
-                              {formatDateBR(anime.upcoming.releaseDate)}
+                          }
+                        >
+                          {items.map((anime, idx) => (
+                            <li
+                              key={anime.id}
+                              className={`list-none ${waveVariant ? `tier-wave-card-${waveVariant}` : ""}`}
+                              style={
+                                {
+                                  viewTransitionName: enableItemViewTransitions
+                                    ? `anime-${anime.id}`
+                                    : undefined,
+                                  "--wave-delay": `${rowIndex * TIER_WAVE_STAGGER_MS}ms`,
+                                } as CSSProperties
+                              }
+                            >
+                              <DraggableCover
+                                id={`anime-${anime.id}`}
+                                anime={anime}
+                                idx={idx}
+                                onOpen={openDetail}
+                                highlighted={highlightId === anime.id}
+                              />
+                            </li>
+                          ))}
+                        </TierDropRow>
+                      );
+                    })}
+                    {(draggingAnimeId !== null ||
+                      displayedRanked.some((a) => a.tier === null && a.watched)) && (
+                      <TierDropRow
+                        id="none"
+                        items={displayedRanked
+                          .filter((a) => a.tier === null && a.watched)
+                          .map((a) => a.id)}
+                        className={`min-h-32 border-t border-border/60 ${tierWaveRun > 0 ? `tier-wave-row-${tierWaveRun % 2 === 0 ? "b" : "a"}` : ""}`}
+                        style={
+                          {
+                            "--wave-tint": "var(--muted-foreground)",
+                            "--wave-delay": `${TIER_ROWS.length * TIER_WAVE_STAGGER_MS}ms`,
+                          } as CSSProperties
+                        }
+                        label={
+                          <div className="relative flex w-12 sm:w-16 shrink-0 items-center justify-center bg-card">
+                            <div className="absolute inset-y-0 left-0 w-1.5 bg-muted-foreground/30" />
+                            <span className="font-display text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                              Sem tier
+                            </span>
+                          </div>
+                        }
+                      >
+                        {displayedRanked
+                          .filter((a) => a.tier === null && a.watched)
+                          .map((anime, idx) => (
+                            <li
+                              key={anime.id}
+                              className={`list-none ${tierWaveRun > 0 ? `tier-wave-card-${tierWaveRun % 2 === 0 ? "b" : "a"}` : ""}`}
+                              style={
+                                {
+                                  viewTransitionName: enableItemViewTransitions
+                                    ? `anime-${anime.id}`
+                                    : undefined,
+                                  "--wave-delay": `${TIER_ROWS.length * TIER_WAVE_STAGGER_MS}ms`,
+                                } as CSSProperties
+                              }
+                            >
+                              <DraggableCover
+                                id={`anime-${anime.id}`}
+                                anime={anime}
+                                idx={idx}
+                                onOpen={openDetail}
+                                highlighted={highlightId === anime.id}
+                              />
+                            </li>
+                          ))}
+                      </TierDropRow>
+                    )}
+                  </div>
+                  {(() => {
+                    const overlay = (
+                      <DragOverlay>
+                        {draggingAnime ? (
+                          <div className="group w-20 scale-105 rounded-lg ring-2 ring-primary/50">
+                            <CoverArt anime={draggingAnime} />
+                          </div>
+                        ) : null}
+                      </DragOverlay>
+                    );
+                    return typeof document !== "undefined"
+                      ? createPortal(overlay, document.body)
+                      : overlay;
+                  })()}
+                </DndContext>
+              </div>
+            )
+          ) : displayMode.viewMode === "grid" ? (
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+              {displayedRanked.map((anime, idx) => {
+                const malAvg = mediaMAL(anime.seasons);
+                const primaryValue = malAvg != null ? malAvg.toFixed(2) : "—";
+                const primaryColor = malAvg != null ? rankColor(malAvg) : "text-muted-foreground";
+                return (
+                  <li
+                    key={anime.id}
+                    id={`anime-${anime.id}`}
+                    className={`${animateRankingItems ? "animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none" : ""} [transform-style:preserve-3d] ${
+                      highlightId === anime.id ? "card-flash" : ""
+                    } ${watchedFlashId === anime.id ? "watched-card-flash" : ""}`}
+                    style={{
+                      viewTransitionName: enableItemViewTransitions
+                        ? `anime-${anime.id}`
+                        : undefined,
+                      ...(animateRankingItems
+                        ? { animationDelay: `${Math.min(idx, 12) * 30}ms` }
+                        : {}),
+                    }}
+                  >
+                    <TiltCardInner tierS={anime.tier === "S"}>
+                      <button
+                        type="button"
+                        onClick={() => openDetail(anime.id)}
+                        aria-label={anime.name}
+                        title={anime.name}
+                        className="block w-full cursor-pointer appearance-none border-0 bg-transparent p-0 text-left"
+                      >
+                        <div className="relative aspect-[2/3] w-full overflow-hidden bg-card-elevated">
+                          {anime.cover || anime.imageUrl ? (
+                            <img
+                              src={anime.cover ?? anime.imageUrl ?? undefined}
+                              alt={anime.name}
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-primary/40">
+                              <ImageIcon className="h-10 w-10" />
+                            </div>
+                          )}
+                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                          <div
+                            className={`font-display absolute left-2 top-2 flex h-7 min-w-7 items-center justify-center rounded-full border px-2 text-xs font-bold backdrop-blur ${
+                              idx === 0
+                                ? "border-primary/60 bg-primary/20 text-primary"
+                                : "border-border/60 bg-background/70 text-foreground/80"
+                            }`}
+                          >
+                            #{idx + 1}
+                          </div>
+                          <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
+                            <div className="flex items-baseline gap-1 rounded-full border border-primary/30 bg-background/80 px-2.5 py-1 backdrop-blur">
+                              <span
+                                className={`font-display text-sm font-bold tabular-nums ${primaryColor}`}
+                              >
+                                {primaryValue}
+                              </span>
+                              <span className="text-[9px] text-muted-foreground">/10</span>
+                            </div>
+                            <Badge
+                              variant="outline"
+                              className="gap-1 border-border/60 bg-background/80 px-1.5 py-0 text-[10px] backdrop-blur"
+                            >
+                              <span className={`font-display font-bold ${tierColor(anime.tier)}`}>
+                                {anime.tier ?? "—"}
+                              </span>
+                            </Badge>
+                          </div>
+                          {isAwardWinning(anime) && (
+                            <div
+                              className="absolute right-2 bottom-3 flex h-7 w-7 items-center justify-center rounded-full bg-award text-award-foreground"
+                              title="Award Winning (MAL)"
+                              aria-label="Award Winning (MAL)"
+                            >
+                              <Award className="h-3.5 w-3.5" />
+                            </div>
+                          )}
+                          {anime.upcoming?.releaseDate && (
+                            <span className="absolute left-2 top-11 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground shadow-lg">
+                              <CalendarClock className="h-3 w-3" />
+                              {formatReleaseLabel(anime.upcoming.releaseDate)}
+                            </span>
+                          )}
+                          <div
+                            className={`absolute inset-x-0 bottom-0 p-3 ${isAwardWinning(anime) ? "pr-11" : ""}`}
+                          >
+                            <h3 className="font-display line-clamp-2 text-sm font-semibold leading-tight tracking-tight">
+                              {anime.name}
+                            </h3>
+                            <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                              {anime.seasons.length}{" "}
+                              {anime.seasons.length === 1 ? "temporada" : "temporadas"}
                             </p>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => clearUpcoming(anime.id)}
-                            className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
-                            aria-label="Remover lançamento"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </Button>
                         </div>
-                      )}
-                      <div className="mt-3 flex flex-wrap gap-2">
+                      </button>
+
+                      <div className="flex gap-1 p-2">
                         <Button
                           variant="secondary"
                           size="sm"
                           onClick={() => openAddSeason(anime.id)}
-                          className="flex-1"
+                          className="h-8 flex-1 text-xs transition-[color,box-shadow] duration-200 hover:bg-primary/15 hover:text-primary hover:ring-1 hover:ring-primary/40 focus-visible:bg-primary/15 focus-visible:text-primary focus-visible:ring-1 focus-visible:ring-primary/40 active:bg-primary/25"
                         >
-                          <Plus className="mr-1 h-4 w-4" /> Temporada
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openEdit(anime.id)}
-                          className="flex-1"
-                        >
-                          <Pencil className="mr-1 h-4 w-4" /> Editar anime
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleWatchedToggle(anime.id, !anime.watched)}
-                          className="flex-1"
-                        >
-                          <WatchedIcon watched={anime.watched} />
-                          {anime.watched ? "Desmarcar" : "Assistido"}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => checkNewSeasonsForAnime(anime.id)}
-                          disabled={checking || checkingId !== null || updatingMalScores}
-                          className="text-muted-foreground hover:text-primary"
-                          aria-label="Verificar novas temporadas"
-                          title="Verificar novas temporadas"
-                        >
-                          <RefreshCw className={`h-4 w-4 ${checkingId === anime.id ? "animate-spin" : ""}`} />
+                          <Plus className="mr-1 h-3.5 w-3.5" /> Temp.
                         </Button>
                         <Button
                           variant="ghost"
-                          size="sm"
-                          onClick={() => setConfirmDelete({ id: anime.id, name: anime.name })}
-                          className="text-muted-foreground hover:text-destructive"
+                          size="icon"
+                          onClick={() => openEdit(anime.id)}
+                          className="h-8 w-8 text-muted-foreground hover:text-primary"
+                          aria-label="Editar"
+                          title="Editar"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => checkNewSeasonsForAnime(anime.id)}
+                          disabled={checking || checkingId !== null || updatingMalScores}
+                          className="h-8 w-8 text-muted-foreground hover:text-primary"
+                          aria-label="Verificar novas temporadas"
+                          title="Verificar novas temporadas"
+                        >
+                          <RefreshCw
+                            className={`h-3.5 w-3.5 ${checkingId === anime.id ? "animate-spin" : ""}`}
+                          />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleWatchedToggle(anime.id, !anime.watched)}
+                          className={`h-8 w-8 hover:text-primary ${anime.watched ? "text-primary" : "text-muted-foreground"}`}
+                          aria-label={
+                            anime.watched ? "Desmarcar assistido" : "Marcar como assistido"
+                          }
+                          title={anime.watched ? "Desmarcar assistido" : "Marcar como assistido"}
+                        >
+                          <WatchedIcon watched={anime.watched} className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setConfirmDelete({ id: anime.id, name: anime.name })}
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          aria-label="Remover anime"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
+                    </TiltCardInner>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <ul className="grid gap-4">
+              {displayedRanked.map((anime, idx) => {
+                const malAvg = mediaMAL(anime.seasons);
+                const primaryValue = malAvg != null ? malAvg.toFixed(2) : "—";
+                const primaryColor = malAvg != null ? rankColor(malAvg) : "text-muted-foreground";
+                const isOpen = expanded[anime.id] ?? false;
+                return (
+                  <li
+                    key={anime.id}
+                    id={`anime-${anime.id}`}
+                    className={`group relative overflow-hidden rounded-2xl border border-border/60 transition-all ${animateRankingItems ? "animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both duration-300 motion-reduce:animate-none" : ""} hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elegant)] ${
+                      highlightId === anime.id ? "card-flash" : ""
+                    } ${watchedFlashId === anime.id ? "watched-card-flash" : ""}`}
+                    style={{
+                      viewTransitionName: enableItemViewTransitions
+                        ? `anime-${anime.id}`
+                        : undefined,
+                      background: "var(--gradient-card)",
+                      boxShadow: "var(--shadow-card)",
+                      ...(animateRankingItems
+                        ? { animationDelay: `${Math.min(idx, 12) * 30}ms` }
+                        : {}),
+                    }}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`pointer-events-none absolute inset-y-0 left-0 w-[6px] bg-tier-s transition-opacity duration-200 motion-reduce:transition-none ${
+                        anime.tier === "S" ? "opacity-100" : "opacity-0"
+                      }`}
+                    />
+                    <div
+                      className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5"
+                      onDoubleClick={(e) => {
+                        if ((e.target as HTMLElement).closest("button, a, input")) return;
+                        toggleExpand(anime.id);
+                      }}
+                      onMouseDown={(e) => {
+                        if (e.detail > 1) e.preventDefault();
+                      }}
+                    >
+                      <div
+                        className={`font-display flex h-10 w-8 shrink-0 items-center justify-center text-sm font-bold sm:h-14 sm:w-10 sm:text-xl ${
+                          idx === 0
+                            ? "text-primary"
+                            : idx === 1
+                              ? "text-foreground/80"
+                              : idx === 2
+                                ? "text-primary/60"
+                                : "text-muted-foreground/70"
+                        }`}
+                      >
+                        #{idx + 1}
+                      </div>
+                      <div className="relative self-stretch min-h-[120px] w-20 shrink-0 overflow-hidden rounded-lg bg-card-elevated ring-1 ring-border/40 sm:min-h-[168px] sm:w-28">
+                        {anime.cover || anime.imageUrl ? (
+                          <img
+                            src={anime.cover ?? anime.imageUrl ?? undefined}
+                            alt={anime.name}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center">
+                            <ImageIcon className="h-7 w-7 text-primary/40" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-display truncate text-base font-semibold tracking-tight sm:text-lg">
+                          {anime.name}
+                        </h3>
+                        <p className="mt-0.5 text-[11px] uppercase tracking-wider text-muted-foreground">
+                          {anime.seasons.length}{" "}
+                          {anime.seasons.length === 1 ? "temporada" : "temporadas"}
+                        </p>
+                        {anime.upcoming?.releaseDate && (
+                          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                            <CalendarClock className="h-3 w-3" />
+                            {formatReleaseLabel(anime.upcoming.releaseDate)}
+                          </span>
+                        )}
+                        {(isAwardWinning(anime) || (anime.genres && anime.genres.length > 0)) && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {isAwardWinning(anime) && (
+                              <button
+                                type="button"
+                                aria-label="Filtrar por Award Winning"
+                                title="Award Winning (MAL)"
+                                onClick={() => {
+                                  selectGenreFilter(AWARD_GENRE);
+                                  setShowFilters(true);
+                                }}
+                                className="focus-ring inline-flex items-center gap-1 rounded-md bg-award px-1.5 py-0.5 text-[10px] font-medium text-award-foreground transition-colors hover:brightness-110"
+                              >
+                                <Award className="h-3 w-3" />
+                                Award Winning
+                              </button>
+                            )}
+                            {anime.genres
+                              ?.filter((g) => g.trim().toLowerCase() !== AWARD_GENRE.toLowerCase())
+                              .map((g) => {
+                                const on = genreFilterLower.has(g.toLowerCase());
+                                return (
+                                  <span
+                                    key={g}
+                                    className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium ${
+                                      on
+                                        ? "bg-primary/15 text-primary"
+                                        : "bg-foreground/5 text-muted-foreground"
+                                    }`}
+                                  >
+                                    {g}
+                                  </span>
+                                );
+                              })}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        <div className="flex items-baseline gap-1">
+                          <span
+                            className={`font-display text-2xl font-bold tabular-nums sm:text-3xl ${primaryColor}`}
+                          >
+                            {primaryValue}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">/10</span>
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className="gap-1 border-primary/30 px-1.5 py-0 text-[10px] text-foreground/80"
+                        >
+                          <span
+                            key={anime.tier ?? "none"}
+                            className={`tier-badge-pop font-display font-bold transition-colors duration-200 motion-reduce:transition-none ${tierColor(anime.tier)}`}
+                          >
+                            {anime.tier ?? "—"}
+                          </span>
+                        </Badge>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => toggleExpand(anime.id)}
+                        className="shrink-0 rounded-full text-muted-foreground hover:text-primary"
+                        aria-label={isOpen ? "Recolher" : "Expandir"}
+                      >
+                        {isOpen ? (
+                          <ChevronUp className="h-5 w-5" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5" />
+                        )}
+                      </Button>
                     </div>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
+
+                    {isOpen && (
+                      <div className="border-t border-border bg-background/30 px-4 py-3 sm:px-5">
+                        <div className="mb-3 flex flex-wrap items-center gap-2">
+                          <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                            Meu tier
+                          </span>
+                          <TierPicker
+                            value={anime.tier}
+                            onChange={(t) => setAnimeTier(anime.id, t)}
+                          />
+                        </div>
+                        {anime.seasons.length === 0 ? (
+                          <p className="py-2 text-center text-sm text-muted-foreground">
+                            Nenhuma temporada ainda
+                          </p>
+                        ) : (
+                          <SortableCardSeasons
+                            seasons={anime.seasons}
+                            onReorder={(from, to) => reorderSeasons(anime.id, from, to)}
+                            onDelete={(seasonId) => deleteSeason(anime.id, seasonId)}
+                          />
+                        )}
+                        {anime.upcoming?.releaseDate && (
+                          <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                                <CalendarClock className="h-3.5 w-3.5" />
+                                {formatReleaseLabel(anime.upcoming.releaseDate)}
+                              </div>
+                              <p className="truncate text-[11px] text-muted-foreground">
+                                {anime.upcoming.title} • {formatDateBR(anime.upcoming.releaseDate)}
+                              </p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => clearUpcoming(anime.id)}
+                              className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
+                              aria-label="Remover lançamento"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        )}
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => openAddSeason(anime.id)}
+                            className="flex-1"
+                          >
+                            <Plus className="mr-1 h-4 w-4" /> Temporada
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEdit(anime.id)}
+                            className="flex-1"
+                          >
+                            <Pencil className="mr-1 h-4 w-4" /> Editar anime
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleWatchedToggle(anime.id, !anime.watched)}
+                            className="flex-1"
+                          >
+                            <WatchedIcon watched={anime.watched} />
+                            {anime.watched ? "Desmarcar" : "Assistido"}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => checkNewSeasonsForAnime(anime.id)}
+                            disabled={checking || checkingId !== null || updatingMalScores}
+                            className="text-muted-foreground hover:text-primary"
+                            aria-label="Verificar novas temporadas"
+                            title="Verificar novas temporadas"
+                          >
+                            <RefreshCw
+                              className={`h-4 w-4 ${checkingId === anime.id ? "animate-spin" : ""}`}
+                            />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setConfirmDelete({ id: anime.id, name: anime.name })}
+                            className="text-muted-foreground hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       </main>
 
@@ -2492,11 +2582,8 @@ function Index() {
           style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-elegant)" }}
           aria-label="Adicionar"
         >
-          <Plus
-            className={`h-7 w-7 transition-transform ${fabOpen ? "rotate-45" : ""}`}
-          />
+          <Plus className={`h-7 w-7 transition-transform ${fabOpen ? "rotate-45" : ""}`} />
         </button>
-
       </div>
 
       {/* Add Anime Dialog */}
@@ -2544,7 +2631,9 @@ function Index() {
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span>Buscando temporadas...</span>
                   {chainProgress && chainProgress.total > 0 && (
-                    <span>{chainProgress.current} de {chainProgress.total}</span>
+                    <span>
+                      {chainProgress.current} de {chainProgress.total}
+                    </span>
                   )}
                 </div>
                 {chainProgress && chainProgress.total > 0 ? (
@@ -2584,7 +2673,8 @@ function Index() {
             {!chainLoading && !chainError && chainSeasons && chainSeasons.length > 0 && (
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">
-                  {selectedChainIds.size} de {chainSeasons.length} selecionada{chainSeasons.length === 1 ? "" : "s"}
+                  {selectedChainIds.size} de {chainSeasons.length} selecionada
+                  {chainSeasons.length === 1 ? "" : "s"}
                 </p>
                 <ul className="max-h-72 overflow-y-auto rounded-md border border-border p-2">
                   {chainSeasons.map((s) => {
@@ -2648,7 +2738,6 @@ function Index() {
               Adicionar
             </Button>
           </DialogFooter>
-
         </DialogContent>
       </Dialog>
 
@@ -2706,20 +2795,16 @@ function Index() {
             <Button onClick={addSeason} disabled={!seasonPick || seasonDetailsLoading}>
               Adicionar
             </Button>
-
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
 
       {/* Edit Anime Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-card">
           <DialogHeader>
             <DialogTitle>Editar anime</DialogTitle>
-            <DialogDescription>
-              Atualize o nome, a capa e as temporadas.
-            </DialogDescription>
+            <DialogDescription>Atualize o nome, a capa e as temporadas.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
             <div className="grid gap-2">
@@ -2737,11 +2822,7 @@ function Index() {
                     <div className="flex items-start gap-3">
                       <div className="relative h-40 w-28 shrink-0 overflow-hidden rounded-lg border border-border bg-secondary">
                         {currentCover ? (
-                          <img
-                            src={currentCover}
-                            alt=""
-                            className="h-full w-full object-cover"
-                          />
+                          <img src={currentCover} alt="" className="h-full w-full object-cover" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-primary/40">
                             <ImageIcon className="h-10 w-10" />
@@ -2749,9 +2830,7 @@ function Index() {
                         )}
                       </div>
                       <div className="flex min-w-0 flex-1 flex-col pt-1">
-                        <span className="text-sm font-medium text-foreground">
-                          {coverLabel}
-                        </span>
+                        <span className="text-sm font-medium text-foreground">{coverLabel}</span>
                       </div>
                     </div>
 
@@ -2818,7 +2897,6 @@ function Index() {
               ) : (
                 <SortableSeasonList seasons={editSeasons} setSeasons={setEditSeasons} />
               )}
-
             </div>
           </div>
           <DialogFooter>
@@ -2854,7 +2932,8 @@ function Index() {
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir anime?</AlertDialogTitle>
             <AlertDialogDescription>
-              Isso remove &quot;{confirmDelete?.name}&quot; e todas as suas temporadas. Esta ação não pode ser desfeita.
+              Isso remove &quot;{confirmDelete?.name}&quot; e todas as suas temporadas. Esta ação
+              não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -2883,7 +2962,6 @@ function Index() {
         <DialogContent className="max-h-[90vh] max-w-[calc(100vw-2rem)] sm:max-w-2xl overflow-y-auto overflow-x-hidden border-border bg-card">
           <DialogHeader>
             <DialogTitle>Detalhes do anime</DialogTitle>
-            
           </DialogHeader>
           {detailAnime ? (
             <div className="grid gap-4">
@@ -2913,7 +2991,9 @@ function Index() {
                       <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                         MAL
                       </span>
-                      <span className={`font-display text-xl font-bold tabular-nums ${scoreColor(mediaMAL(detailAnime.seasons))}`}>
+                      <span
+                        className={`font-display text-xl font-bold tabular-nums ${scoreColor(mediaMAL(detailAnime.seasons))}`}
+                      >
                         {formatScore(mediaMAL(detailAnime.seasons))}
                         {mediaMAL(detailAnime.seasons) !== null && (
                           <span className="ml-0.5 text-[10px] text-muted-foreground">/10</span>
@@ -2973,7 +3053,6 @@ function Index() {
                 )}
               </div>
               <div className="grid gap-2">
-
                 <h4 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                   Temporadas
                 </h4>
@@ -3007,9 +3086,7 @@ function Index() {
                             ]
                               .filter(Boolean)
                               .join(" · ")}
-                            {excluded && (
-                              <span className="block">fora da média</span>
-                            )}
+                            {excluded && <span className="block">fora da média</span>}
                           </p>
                         </div>
                       );
@@ -3027,9 +3104,13 @@ function Index() {
                 <Button
                   variant="outline"
                   onClick={() => detailAnimeId && checkNewSeasonsForAnime(detailAnimeId)}
-                  disabled={checking || checkingId !== null || updatingMalScores || !detailAnime?.malId}
+                  disabled={
+                    checking || checkingId !== null || updatingMalScores || !detailAnime?.malId
+                  }
                 >
-                  <RefreshCw className={`mr-1 h-4 w-4 ${detailAnimeId && checkingId === detailAnimeId ? "animate-spin" : ""}`} />
+                  <RefreshCw
+                    className={`mr-1 h-4 w-4 ${detailAnimeId && checkingId === detailAnimeId ? "animate-spin" : ""}`}
+                  />
                   Verificar novas temporadas
                 </Button>
                 <span className="text-[11px] text-muted-foreground">
@@ -3064,7 +3145,6 @@ function Index() {
   );
 }
 
-
 function RankingSkeleton({
   scoreMode,
   viewMode,
@@ -3089,7 +3169,11 @@ function RankingSkeleton({
 
   if (scoreMode === "gosto") {
     return (
-      <div role="status" aria-busy="true" className="animate-in fade-in-0 duration-150 motion-reduce:animate-none">
+      <div
+        role="status"
+        aria-busy="true"
+        className="animate-in fade-in-0 duration-150 motion-reduce:animate-none"
+      >
         <span className="sr-only">Carregando…</span>
         <div className="overflow-hidden rounded-xl border border-border/60">
           {TIER_ROWS.map((t) => (
@@ -3109,7 +3193,9 @@ function RankingSkeleton({
                     key={i}
                     aria-hidden
                     className="aspect-[2/3] w-20 rounded-lg"
-                    style={{ "--skeleton-delay": `${Math.min(i, 8) * 90}ms` } as React.CSSProperties}
+                    style={
+                      { "--skeleton-delay": `${Math.min(i, 8) * 90}ms` } as React.CSSProperties
+                    }
                   />
                 ))}
               </div>
@@ -3122,7 +3208,11 @@ function RankingSkeleton({
 
   if (viewMode === "grid") {
     return (
-      <div role="status" aria-busy="true" className="animate-in fade-in-0 duration-150 motion-reduce:animate-none">
+      <div
+        role="status"
+        aria-busy="true"
+        className="animate-in fade-in-0 duration-150 motion-reduce:animate-none"
+      >
         <span className="sr-only">Carregando…</span>
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -3154,18 +3244,24 @@ function RankingSkeleton({
   }
 
   return (
-    <div role="status" aria-busy="true" className="animate-in fade-in-0 duration-150 motion-reduce:animate-none">
+    <div
+      role="status"
+      aria-busy="true"
+      className="animate-in fade-in-0 duration-150 motion-reduce:animate-none"
+    >
       <span className="sr-only">Carregando…</span>
       <ul className="grid gap-4">
         {Array.from({ length: 3 }).map((_, i) => (
           <li
             key={i}
             className="overflow-hidden rounded-2xl border border-border/60"
-            style={{
-              background: "var(--gradient-card)",
-              boxShadow: "var(--shadow-card)",
-              "--skeleton-delay": `${Math.min(i, 8) * 90}ms`,
-            } as React.CSSProperties}
+            style={
+              {
+                background: "var(--gradient-card)",
+                boxShadow: "var(--shadow-card)",
+                "--skeleton-delay": `${Math.min(i, 8) * 90}ms`,
+              } as React.CSSProperties
+            }
           >
             <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-5">
               <Skeleton aria-hidden className="h-10 w-8 sm:h-14 sm:w-10" />
@@ -3190,7 +3286,3 @@ function RankingSkeleton({
     </div>
   );
 }
-
-
-
-

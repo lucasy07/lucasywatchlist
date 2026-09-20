@@ -64,43 +64,44 @@
 /* Umi — paleta baseada em Asanagi Umi */
 :root {
   --radius: 0.875rem;
-  --background: #1C1E28;
-  --foreground: #D9DCE0;
+  --background: #1c1e28;
+  --foreground: #d9dce0;
   --card: #242733;
-  --card-elevated: #2E3140;
-  --card-foreground: #D9DCE0;
+  --card-elevated: #2e3140;
+  --card-foreground: #d9dce0;
   --popover: #242733;
-  --popover-foreground: #D9DCE0;
+  --popover-foreground: #d9dce0;
   --tier-s: oklch(0.86 0.13 220);
   --tier-a: oklch(0.82 0.14 252);
   --tier-b: oklch(0.78 0.16 285);
   --tier-c: oklch(0.74 0.18 312);
-  --tier-d: oklch(0.70 0.19 336);
-  --tier-e: oklch(0.66 0.20 358);
+  --tier-d: oklch(0.7 0.19 336);
+  --tier-e: oklch(0.66 0.2 358);
   --tier-foreground: oklch(0.25 0 0);
-  --primary: #E0446A;
-  --primary-foreground: #12141C;
-  --primary-on-dark: #E25275;
-  --primary-glow: #F06A8A;
+  --primary: #e0446a;
+  --primary-foreground: #12141c;
+  --primary-on-dark: #e25275;
+  --primary-glow: #f06a8a;
   --secondary: #242733;
-  --secondary-foreground: #D9DCE0;
+  --secondary-foreground: #d9dce0;
   --muted: #242733;
-  --muted-foreground: #989CAB;
-  --border-interactive: #747C9C;
-  --accent: #2BA6E0;
-  --accent-foreground: #1C1E28;
-  --destructive: #E0603F;
-  --destructive-foreground: #1C1E28;
-  --award: #E8B65A;
-  --award-foreground: #1C1E28;
+  --muted-foreground: #989cab;
+  --border-interactive: #747c9c;
+  --accent: #2ba6e0;
+  --accent-foreground: #1c1e28;
+  --destructive: #e0603f;
+  --destructive-foreground: #1c1e28;
+  --award: #e8b65a;
+  --award-foreground: #1c1e28;
   --border: #333748;
   --border-strong: #424759;
   --input: #242733;
-  --ring: #E0446A;
-  --gradient-primary: linear-gradient(135deg, #E0446A, #F06A8A);
-  --gradient-card: linear-gradient(180deg, #262937, #1F2230);
-  --gradient-accent-text: linear-gradient(135deg, #F06A8A, #2BA6E0);
-  --gradient-scrim: linear-gradient(to right,
+  --ring: #e0446a;
+  --gradient-primary: linear-gradient(135deg, #e0446a, #f06a8a);
+  --gradient-card: linear-gradient(180deg, #262937, #1f2230);
+  --gradient-accent-text: linear-gradient(135deg, #f06a8a, #2ba6e0);
+  --gradient-scrim: linear-gradient(
+    to right,
     var(--background) 0%,
     color-mix(in srgb, var(--background) 99%, transparent) 8%,
     color-mix(in srgb, var(--background) 90%, transparent) 16%,
@@ -110,38 +111,38 @@
     color-mix(in srgb, var(--background) 13%, transparent) 48%,
     color-mix(in srgb, var(--background) 3%, transparent) 56%,
     color-mix(in srgb, var(--background) 0%, transparent) 64%,
-    color-mix(in srgb, var(--background) 0%, transparent) 100%);
-  --gradient-scrim-mobile: linear-gradient(to bottom,
+    color-mix(in srgb, var(--background) 0%, transparent) 100%
+  );
+  --gradient-scrim-mobile:
+    linear-gradient(
+      to bottom,
       color-mix(in srgb, var(--background) 34%, transparent) 0%,
       color-mix(in srgb, var(--background) 34%, transparent) 30%,
-      var(--background) 100%),
-    radial-gradient(88% 100% at 32% 32%,
+      var(--background) 100%
+    ),
+    radial-gradient(
+      88% 100% at 32% 32%,
       color-mix(in srgb, var(--background) 34%, transparent) 0%,
       color-mix(in srgb, var(--background) 34%, transparent) 30%,
-      color-mix(in srgb, var(--background) 80%, transparent) 100%);
-  --shadow-glow: 0 0 48px #E0446A38;
-  --shadow-card:
-    0 1px 0 0 #ffffff0a inset,
-    0 1px 2px #00000059,
-    0 12px 32px -12px #0000008c;
+      color-mix(in srgb, var(--background) 80%, transparent) 100%
+    );
+  --shadow-glow: 0 0 48px #e0446a38;
+  --shadow-card: 0 1px 0 0 #ffffff0a inset, 0 1px 2px #00000059, 0 12px 32px -12px #0000008c;
   --shadow-elegant:
-    0 1px 0 0 #E0446A1a inset,
-    0 2px 4px #00000059,
-    0 28px 60px -24px #000000a6,
-    0 0 0 1px #E0446A24;
-  --chart-1: #E0446A;
-  --chart-2: #2BA6E0;
+    0 1px 0 0 #e0446a1a inset, 0 2px 4px #00000059, 0 28px 60px -24px #000000a6, 0 0 0 1px #e0446a24;
+  --chart-1: #e0446a;
+  --chart-2: #2ba6e0;
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
   --sidebar: #242733;
-  --sidebar-foreground: #D9DCE0;
-  --sidebar-primary: #E0446A;
-  --sidebar-primary-foreground: #1C1E28;
+  --sidebar-foreground: #d9dce0;
+  --sidebar-primary: #e0446a;
+  --sidebar-primary-foreground: #1c1e28;
   --sidebar-accent: #242733;
-  --sidebar-accent-foreground: #D9DCE0;
+  --sidebar-accent-foreground: #d9dce0;
   --sidebar-border: #333748;
-  --sidebar-ring: #E0446A;
+  --sidebar-ring: #e0446a;
 }
 
 @layer base {
@@ -192,7 +193,6 @@
     padding-right: 0 !important;
   }
 
-
   button:not(:disabled),
   [role="button"]:not(:disabled),
   a[href] {
@@ -222,19 +222,29 @@
 @keyframes card-flash {
   0% {
     transform: scale(1);
-    box-shadow: var(--shadow-elegant), 0 0 0 0 color-mix(in oklab, var(--primary) 0%, transparent);
+    box-shadow:
+      var(--shadow-elegant),
+      0 0 0 0 color-mix(in oklab, var(--primary) 0%, transparent);
   }
   14% {
     transform: scale(1.02);
-    box-shadow: var(--shadow-elegant), 0 0 0 2px var(--primary), 0 0 18px 5px color-mix(in oklab, var(--primary) 48%, transparent);
+    box-shadow:
+      var(--shadow-elegant),
+      0 0 0 2px var(--primary),
+      0 0 18px 5px color-mix(in oklab, var(--primary) 48%, transparent);
   }
   42% {
     transform: scale(1);
-    box-shadow: var(--shadow-elegant), 0 0 0 2px color-mix(in oklab, var(--primary) 72%, transparent), 0 0 34px 10px color-mix(in oklab, var(--primary-glow) 22%, transparent);
+    box-shadow:
+      var(--shadow-elegant),
+      0 0 0 2px color-mix(in oklab, var(--primary) 72%, transparent),
+      0 0 34px 10px color-mix(in oklab, var(--primary-glow) 22%, transparent);
   }
   100% {
     transform: scale(1);
-    box-shadow: var(--shadow-elegant), 0 0 0 0 color-mix(in oklab, var(--primary) 0%, transparent);
+    box-shadow:
+      var(--shadow-elegant),
+      0 0 0 0 color-mix(in oklab, var(--primary) 0%, transparent);
   }
 }
 
@@ -253,7 +263,7 @@
 @keyframes tier-badge-pop {
   from {
     opacity: 0;
-    transform: scale(.8);
+    transform: scale(0.8);
   }
   to {
     opacity: 1;
@@ -262,23 +272,45 @@
 }
 
 @keyframes tier-wave-row-a {
-  0%, 100% { opacity: 0; }
-  28%, 62% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0;
+  }
+  28%,
+  62% {
+    opacity: 1;
+  }
 }
 
 @keyframes tier-wave-row-b {
-  0%, 100% { opacity: 0; }
-  28%, 62% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0;
+  }
+  28%,
+  62% {
+    opacity: 1;
+  }
 }
 
 @keyframes tier-wave-card-a {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-9px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
 }
 
 @keyframes tier-wave-card-b {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-9px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
 }
 
 @keyframes skeleton-shimmer {
@@ -314,7 +346,7 @@
 }
 
 .card-flash {
-  animation: card-flash 1100ms cubic-bezier(.34, 1.3, .64, 1);
+  animation: card-flash 1100ms cubic-bezier(0.34, 1.3, 0.64, 1);
 }
 
 .watched-card-flash {
@@ -322,7 +354,7 @@
 }
 
 .tier-badge-pop {
-  animation: tier-badge-pop 180ms cubic-bezier(.34, 1.3, .64, 1);
+  animation: tier-badge-pop 180ms cubic-bezier(0.34, 1.3, 0.64, 1);
 }
 
 .tier-wave-row-a::after,
@@ -365,7 +397,9 @@
 }
 
 .watched-icon {
-  transition: opacity 220ms ease, transform 220ms cubic-bezier(.34, 1.3, .64, 1);
+  transition:
+    opacity 220ms ease,
+    transform 220ms cubic-bezier(0.34, 1.3, 0.64, 1);
 }
 
 .watched-icon-visible {
@@ -375,38 +409,38 @@
 
 .watched-icon-hidden-check {
   opacity: 0;
-  transform: scale(.7) rotate(-18deg);
+  transform: scale(0.7) rotate(-18deg);
 }
 
 .watched-icon-hidden-undo {
   opacity: 0;
-  transform: scale(.7) rotate(18deg);
+  transform: scale(0.7) rotate(18deg);
 }
 
 ::view-transition-group(*) {
   animation-duration: 280ms;
-  animation-timing-function: cubic-bezier(.2, .7, .3, 1);
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 ::view-transition-old(*) {
-  animation: 280ms cubic-bezier(.2, .7, .3, 1) both view-transition-old-card;
+  animation: 280ms cubic-bezier(0.2, 0.7, 0.3, 1) both view-transition-old-card;
 }
 
 ::view-transition-new(*) {
-  animation: 280ms cubic-bezier(.2, .7, .3, 1) both view-transition-new-card;
+  animation: 280ms cubic-bezier(0.2, 0.7, 0.3, 1) both view-transition-new-card;
 }
 
 @keyframes view-transition-old-card {
   to {
     opacity: 0;
-    transform: scale(.96);
+    transform: scale(0.96);
   }
 }
 
 @keyframes view-transition-new-card {
   from {
     opacity: 0;
-    transform: scale(.98);
+    transform: scale(0.98);
   }
 }
 
@@ -429,7 +463,9 @@
 
   .card-flash {
     animation: none;
-    box-shadow: var(--shadow-elegant), 0 0 0 2px var(--primary);
+    box-shadow:
+      var(--shadow-elegant),
+      0 0 0 2px var(--primary);
   }
 
   .watched-card-flash {

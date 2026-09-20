@@ -91,7 +91,15 @@ type Props = {
   onEnter?: () => void;
 };
 
-export function JikanSearch({ value, onChange, onPick, placeholder, id, autoFocus, onEnter }: Props) {
+export function JikanSearch({
+  value,
+  onChange,
+  onPick,
+  placeholder,
+  id,
+  autoFocus,
+  onEnter,
+}: Props) {
   const [focused, setFocused] = useState(false);
   const [suppress, setSuppress] = useState(false);
   const debounced = useDebounced(value.trim(), 500);
@@ -107,9 +115,7 @@ export function JikanSearch({ value, onChange, onPick, placeholder, id, autoFocu
 
   const results = enabled ? (data ?? []) : [];
   const showDropdown =
-    focused &&
-    enabled &&
-    (results.length > 0 || isError || (isSuccess && results.length === 0));
+    focused && enabled && (results.length > 0 || isError || (isSuccess && results.length === 0));
 
   const errorMessage = isError
     ? error?.message === "429"
@@ -152,8 +158,7 @@ export function JikanSearch({ value, onChange, onPick, placeholder, id, autoFocu
             <ul className="max-h-72 overflow-y-auto py-1">
               {results.map((r) => {
                 const year =
-                  r.year ??
-                  (r.aired?.from ? new Date(r.aired.from).getFullYear() : null);
+                  r.year ?? (r.aired?.from ? new Date(r.aired.from).getFullYear() : null);
                 const thumb = r.images?.jpg?.small_image_url;
                 return (
                   <li key={r.mal_id}>
@@ -184,9 +189,7 @@ export function JikanSearch({ value, onChange, onPick, placeholder, id, autoFocu
                       )}
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-medium">{r.title}</p>
-                        {year && (
-                          <p className="text-xs text-muted-foreground">{year}</p>
-                        )}
+                        {year && <p className="text-xs text-muted-foreground">{year}</p>}
                       </div>
                     </button>
                   </li>

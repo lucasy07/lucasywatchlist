@@ -21,7 +21,9 @@ export function MalScoreDialog({ open, onOpenChange, updated }: MalScoreDialogPr
       <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-card">
         <DialogHeader>
           <DialogTitle>Notas atualizadas</DialogTitle>
-          <DialogDescription>Alterações encontradas nas temporadas vinculadas ao MyAnimeList.</DialogDescription>
+          <DialogDescription>
+            Alterações encontradas nas temporadas vinculadas ao MyAnimeList.
+          </DialogDescription>
         </DialogHeader>
         <ul className="grid gap-2">
           {updated.map((updatedSeason) => (
@@ -33,8 +35,13 @@ export function MalScoreDialog({ open, onOpenChange, updated }: MalScoreDialogPr
                 <p className="line-clamp-2 text-sm font-medium">{updatedSeason.title}</p>
                 <p className="truncate text-[11px] text-muted-foreground">
                   em {updatedSeason.parentName} •{" "}
-                  {typeof updatedSeason.oldScore === "number" ? updatedSeason.oldScore.toFixed(2) : "—"} →{" "}
-                  {typeof updatedSeason.newScore === "number" ? updatedSeason.newScore.toFixed(2) : "—"}
+                  {typeof updatedSeason.oldScore === "number"
+                    ? updatedSeason.oldScore.toFixed(2)
+                    : "—"}{" "}
+                  →{" "}
+                  {typeof updatedSeason.newScore === "number"
+                    ? updatedSeason.newScore.toFixed(2)
+                    : "—"}
                   {updatedSeason.filledFields.includes("year") ? " • ano preenchido" : ""}
                   {updatedSeason.filledFields.includes("type") ? " • tipo preenchido" : ""}
                 </p>
