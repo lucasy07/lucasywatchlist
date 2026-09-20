@@ -109,6 +109,8 @@ import { JikanSearch, type JikanPick } from "@/components/JikanSearch";
 import { TierPicker, tierColor, tierBg } from "@/components/TierPicker";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { StatsDialog } from "@/components/StatsDialog";
+import { CheckResultDialog } from "@/components/CheckResultDialog";
+import { MalScoreDialog } from "@/components/MalScoreDialog";
 import { SortableSeasonList } from "@/components/SortableSeasonList";
 import { SortableCardSeasons } from "@/components/SortableCardSeasons";
 import { SeasonThumb } from "@/components/SeasonThumb";
@@ -136,6 +138,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SegmentedToggle } from "@/components/SegmentedToggle";
 import { withViewTransition } from "@/lib/view-transition";
+import type { FoundSeason, UpdatedSeason } from "@/lib/scan-types";
 
 
 const TIER_ROWS = (Object.keys(TIER_VALUE) as Tier[]).sort(
@@ -308,27 +311,6 @@ function Index() {
 
   // Check for new seasons
 
-  type FoundSeason = {
-    parentId: string;
-    parentName: string;
-    malId: number;
-    title: string;
-    malScore: number | null;
-    imageUrl: string | null;
-    type: string | null;
-    year: number | null;
-    episodes: number | null;
-    durationMin: number | null;
-  };
-  type UpdatedSeason = {
-    parentId: string;
-    parentName: string;
-    title: string;
-    malId: number;
-    oldScore: number | null;
-    newScore: number | null;
-    filledFields: string[];
-  };
   const [checking, setChecking] = useState(false);
   const [checkingId, setCheckingId] = useState<string | null>(null);
   const [checkProgress, setCheckProgress] = useState<{ current: number; total: number } | null>(null);
@@ -2849,112 +2831,20 @@ function Index() {
       </Dialog>
 
       {/* Check new seasons summary */}
-      <Dialog open={checkDialogOpen} onOpenChange={setCheckDialogOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-card">
-          <DialogHeader>
-            <DialogTitle>Novas temporadas</DialogTitle>
-            <DialogDescription>
-              {checkAborted
-                ? `Verificação cancelada em ${checkAborted.scanned} de ${checkAborted.total} animes. O resultado é parcial.`
-                : "Resultado da verificação a partir do MyAnimeList."}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-6">
-            <section className="grid gap-2">
-              <h3 className="font-display text-xs uppercase tracking-widest text-muted-foreground">
-                Já disponíveis (adicionar)
-              </h3>
-              {foundAvailable.length === 0 ? (
-                <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
-                  Nada novo pra adicionar.
-                </p>
-              ) : (
-                <ul className="grid gap-2">
-                  {foundAvailable.map((f) => (
-                    <li
-                      key={`${f.parentId}-${f.malId}`}
-                      className="flex items-center gap-2 overflow-hidden rounded-lg border border-border/60 bg-card-elevated p-2 min-w-0"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="line-clamp-2 text-sm font-medium">{f.title}</p>
-                        <p className="truncate text-[11px] text-muted-foreground">
-                          em {f.parentName}
-                          {f.type ? ` • ${f.type}` : ""}
-                          {f.year ? ` • ${f.year}` : ""}
-                        </p>
-                      </div>
-                      <Button size="sm" className="shrink-0" onClick={() => addFoundSeason(f)}>
-                        <Plus className="mr-1 h-3.5 w-3.5" /> Adicionar
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-            <section className="grid gap-2">
-              <h3 className="font-display text-xs uppercase tracking-widest text-muted-foreground">
-                Em breve (marcadas nos cards)
-              </h3>
-              {foundUpcoming.length === 0 ? (
-                <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
-                  Nenhuma continuação futura encontrada.
-                </p>
-              ) : (
-                <ul className="grid gap-2">
-                  {foundUpcoming.map((u) => (
-                    <li
-                      key={`${u.parentId}-${u.title}`}
-                      className="overflow-hidden rounded-lg border border-border/60 bg-card-elevated p-2 min-w-0"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="line-clamp-2 text-sm font-medium">{u.title}</p>
-                        <p className="truncate text-[11px] text-muted-foreground">
-                          em {u.parentName} • {formatDateBR(u.releaseDate)} •{" "}
-                          {formatReleaseLabel(u.releaseDate)}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setCheckDialogOpen(false)}>Fechar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <CheckResultDialog
+        open={checkDialogOpen}
+        onOpenChange={setCheckDialogOpen}
+        aborted={checkAborted}
+        available={foundAvailable}
+        upcoming={foundUpcoming}
+        onAdd={addFoundSeason}
+      />
 
-      <Dialog open={malScoreDialogOpen} onOpenChange={setMalScoreDialogOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-card">
-          <DialogHeader>
-            <DialogTitle>Notas atualizadas</DialogTitle>
-            <DialogDescription>Alterações encontradas nas temporadas vinculadas ao MyAnimeList.</DialogDescription>
-          </DialogHeader>
-          <ul className="grid gap-2">
-            {malScoreUpdated.map((updatedSeason) => (
-              <li
-                key={`${updatedSeason.parentId}-${updatedSeason.malId}`}
-                className="overflow-hidden rounded-lg border border-border/60 bg-card-elevated p-2 min-w-0"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="line-clamp-2 text-sm font-medium">{updatedSeason.title}</p>
-                  <p className="truncate text-[11px] text-muted-foreground">
-                    em {updatedSeason.parentName} •{" "}
-                    {typeof updatedSeason.oldScore === "number" ? updatedSeason.oldScore.toFixed(2) : "—"} →{" "}
-                    {typeof updatedSeason.newScore === "number" ? updatedSeason.newScore.toFixed(2) : "—"}
-                    {updatedSeason.filledFields.includes("year") ? " • ano preenchido" : ""}
-                    {updatedSeason.filledFields.includes("type") ? " • tipo preenchido" : ""}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-          <DialogFooter>
-            <Button onClick={() => setMalScoreDialogOpen(false)}>Fechar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <MalScoreDialog
+        open={malScoreDialogOpen}
+        onOpenChange={setMalScoreDialogOpen}
+        updated={malScoreUpdated}
+      />
 
       <AlertDialog
         open={confirmDelete !== null}
