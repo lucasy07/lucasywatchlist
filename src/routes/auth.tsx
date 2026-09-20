@@ -30,7 +30,11 @@ function translateAuthError(raw: string): string {
   if (m.includes("invalid login credentials") || m.includes("invalid credentials")) {
     return "E-mail ou senha incorretos.";
   }
-  if (m.includes("already registered") || m.includes("already been registered") || m.includes("user already")) {
+  if (
+    m.includes("already registered") ||
+    m.includes("already been registered") ||
+    m.includes("user already")
+  ) {
     return "Esse e-mail já tem conta. Tente entrar.";
   }
   if (m.includes("email not confirmed") || m.includes("not confirmed")) {
@@ -51,7 +55,12 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState<{ username?: string; email?: string; password?: string; confirmPassword?: string }>({});
+  const [errors, setErrors] = useState<{
+    username?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [resetSentEmail, setResetSentEmail] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -76,7 +85,6 @@ function AuthPage() {
     setShowPassword(false);
     setResetSentEmail(null);
   }
-
 
   function validate() {
     const next: typeof errors = {};
@@ -299,8 +307,8 @@ function AuthPage() {
                 aria-live="polite"
               >
                 Enviamos um e-mail de confirmação para{" "}
-                <span className="font-semibold text-foreground">{pendingEmail}</span>. Confira sua caixa
-                de entrada e também a pasta de spam antes de entrar.
+                <span className="font-semibold text-foreground">{pendingEmail}</span>. Confira sua
+                caixa de entrada e também a pasta de spam antes de entrar.
               </div>
             )}
 
@@ -321,7 +329,10 @@ function AuthPage() {
                 role="alert"
                 className="mt-6 flex items-start gap-2 rounded-lg border border-destructive bg-card p-3 text-xs text-foreground"
               >
-                <AlertCircle aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-destructive" />
+                <AlertCircle
+                  aria-hidden="true"
+                  className="mt-0.5 size-4 shrink-0 text-destructive"
+                />
                 <span>
                   {serverError}{" "}
                   {mode !== "reset" && (
@@ -336,7 +347,6 @@ function AuthPage() {
                 </span>
               </div>
             )}
-
 
             <form onSubmit={handleSubmit} className="auth-form grid" noValidate>
               {mode === "signup" && (
@@ -403,49 +413,48 @@ function AuthPage() {
               )}
 
               {mode !== "reset" && (
-              <div className="grid gap-2">
-                <Label
-                  htmlFor="password"
-                  className="text-xs uppercase tracking-[0.14em] text-muted-foreground"
-                >
-                  Senha
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                      clearFieldError("password");
-                    }}
-                    aria-invalid={!!errors.password}
-                    aria-describedby={errors.password ? "password-error" : undefined}
-                    className="h-11 min-h-11 rounded-none border-0 border-b-[1.5px] border-border-interactive bg-transparent pl-0 pr-12 shadow-none transition-colors focus-visible:border-b-2 focus-visible:border-b-primary focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 aria-invalid:border-b-destructive focus-visible:aria-invalid:border-b-destructive"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    aria-pressed={showPassword}
-                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                    className="absolute right-0 top-0 flex size-11 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                <div className="grid gap-2">
+                  <Label
+                    htmlFor="password"
+                    className="text-xs uppercase tracking-[0.14em] text-muted-foreground"
                   >
-                    {showPassword ? (
-                      <EyeOff aria-hidden="true" className="size-4" />
-                    ) : (
-                      <Eye aria-hidden="true" className="size-4" />
-                    )}
-                  </button>
+                    Senha
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        clearFieldError("password");
+                      }}
+                      aria-invalid={!!errors.password}
+                      aria-describedby={errors.password ? "password-error" : undefined}
+                      className="h-11 min-h-11 rounded-none border-0 border-b-[1.5px] border-border-interactive bg-transparent pl-0 pr-12 shadow-none transition-colors focus-visible:border-b-2 focus-visible:border-b-primary focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 aria-invalid:border-b-destructive focus-visible:aria-invalid:border-b-destructive"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      aria-pressed={showPassword}
+                      aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                      className="absolute right-0 top-0 flex size-11 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {showPassword ? (
+                        <EyeOff aria-hidden="true" className="size-4" />
+                      ) : (
+                        <Eye aria-hidden="true" className="size-4" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.password && (
+                    <p id="password-error" role="alert" className="text-xs text-destructive">
+                      {errors.password}
+                    </p>
+                  )}
                 </div>
-                {errors.password && (
-                  <p id="password-error" role="alert" className="text-xs text-destructive">
-                    {errors.password}
-                  </p>
-                )}
-              </div>
               )}
-
 
               {mode === "signup" && (
                 <div className="grid gap-2">
@@ -469,7 +478,11 @@ function AuthPage() {
                     className="h-11 min-h-11 rounded-none border-0 border-b-[1.5px] border-border-interactive bg-transparent px-0 shadow-none transition-colors focus-visible:border-b-2 focus-visible:border-b-primary focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 aria-invalid:border-b-destructive focus-visible:aria-invalid:border-b-destructive"
                   />
                   {errors.confirmPassword && (
-                    <p id="confirm-password-error" role="alert" className="text-xs text-destructive">
+                    <p
+                      id="confirm-password-error"
+                      role="alert"
+                      className="text-xs text-destructive"
+                    >
                       {errors.confirmPassword}
                     </p>
                   )}
@@ -529,11 +542,9 @@ function AuthPage() {
                 </>
               )}
             </div>
-
           </div>
         </main>
       </div>
     </div>
   );
 }
-

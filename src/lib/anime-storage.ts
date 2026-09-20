@@ -110,7 +110,10 @@ export function tierFromAverage(avg: number): Tier {
 export const AWARD_GENRE = "Award Winning";
 
 export function isAwardWinning(anime: Anime): boolean {
-  return Array.isArray(anime.genres) && anime.genres.some((g) => g.trim().toLowerCase() === AWARD_GENRE.toLowerCase());
+  return (
+    Array.isArray(anime.genres) &&
+    anime.genres.some((g) => g.trim().toLowerCase() === AWARD_GENRE.toLowerCase())
+  );
 }
 
 export type UpcomingSeason = {
@@ -142,7 +145,6 @@ export type Anime = {
   genres: string[] | null;
 };
 
-
 /** Legacy localStorage key — used only for one-time auto-import. */
 export const LEGACY_STORAGE_KEY = "anime-ranker:v1";
 
@@ -168,7 +170,12 @@ function rowToAnime(row: DbRow): Anime {
   const seasons = Array.isArray(row.seasons) ? (row.seasons as Season[]) : [];
   const upcoming = (row.upcoming ?? undefined) as UpcomingSeason | undefined;
   const tier =
-    row.tier === "S" || row.tier === "A" || row.tier === "B" || row.tier === "C" || row.tier === "D" || row.tier === "E"
+    row.tier === "S" ||
+    row.tier === "A" ||
+    row.tier === "B" ||
+    row.tier === "C" ||
+    row.tier === "D" ||
+    row.tier === "E"
       ? (row.tier as Tier)
       : null;
   return {
@@ -189,9 +196,7 @@ function rowToAnime(row: DbRow): Anime {
         ? (row.genres as string[])
         : null,
   };
-
 }
-
 
 function readLegacyLocal(): Anime[] {
   if (typeof window === "undefined") return [];
@@ -209,7 +214,9 @@ function readLegacyLocal(): Anime[] {
 export async function fetchAnimes(): Promise<Anime[]> {
   const { data, error } = await supabase
     .from("animes")
-    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier, tier_position, last_checked_at, genres")
+    .select(
+      "id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier, tier_position, last_checked_at, genres",
+    )
     .order("created_at", { ascending: true });
   if (error) throw error;
   return (data as DbRow[]).map(rowToAnime);
@@ -266,12 +273,13 @@ export async function createAnime(input: {
       last_checked_at: null,
       genres: input.genres ?? null,
     })
-    .select("id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier, tier_position, last_checked_at, genres")
+    .select(
+      "id, name, cover, seasons, upcoming, watched, mal_id, image_url, mal_score, tier, tier_position, last_checked_at, genres",
+    )
     .single();
   if (error) throw error;
   return rowToAnime(data as DbRow);
 }
-
 
 export async function updateTier(id: string, tier: Tier | null): Promise<void> {
   const { error } = await supabase
@@ -296,13 +304,8 @@ export async function updateTierPositions(
   );
 }
 
-
-
 export async function setWatched(id: string, watched: boolean): Promise<void> {
-  const { error } = await supabase
-    .from("animes")
-    .update({ watched })
-    .eq("id", id);
+  const { error } = await supabase.from("animes").update({ watched }).eq("id", id);
   if (error) throw error;
 }
 
@@ -324,9 +327,19 @@ export async function updateAnime(
 
 export async function updateAnimeMeta(
   id: string,
-  meta: { malId?: number | null; imageUrl?: string | null; malScore?: number | null; genres?: string[] | null },
+  meta: {
+    malId?: number | null;
+    imageUrl?: string | null;
+    malScore?: number | null;
+    genres?: string[] | null;
+  },
 ): Promise<void> {
-  const update: { mal_id?: number | null; image_url?: string | null; mal_score?: number | null; genres?: string[] | null } = {};
+  const update: {
+    mal_id?: number | null;
+    image_url?: string | null;
+    mal_score?: number | null;
+    genres?: string[] | null;
+  } = {};
   if (meta.malId !== undefined) update.mal_id = meta.malId;
   if (meta.imageUrl !== undefined) update.image_url = meta.imageUrl;
   if (meta.malScore !== undefined) update.mal_score = meta.malScore;
@@ -335,23 +348,13 @@ export async function updateAnimeMeta(
   if (error) throw error;
 }
 
-
 export async function updateSeasons(id: string, seasons: Season[]): Promise<void> {
-  const { error } = await supabase
-    .from("animes")
-    .update({ seasons })
-    .eq("id", id);
+  const { error } = await supabase.from("animes").update({ seasons }).eq("id", id);
   if (error) throw error;
 }
 
-export async function updateUpcoming(
-  id: string,
-  upcoming: UpcomingSeason | null,
-): Promise<void> {
-  const { error } = await supabase
-    .from("animes")
-    .update({ upcoming })
-    .eq("id", id);
+export async function updateUpcoming(id: string, upcoming: UpcomingSeason | null): Promise<void> {
+  const { error } = await supabase.from("animes").update({ upcoming }).eq("id", id);
   if (error) throw error;
 }
 
@@ -404,10 +407,7 @@ export function formatDateBR(dateStr?: string): string {
 }
 
 export async function updateLastCheckedAt(id: string, iso: string): Promise<void> {
-  const { error } = await supabase
-    .from("animes")
-    .update({ last_checked_at: iso })
-    .eq("id", id);
+  const { error } = await supabase.from("animes").update({ last_checked_at: iso }).eq("id", id);
   if (error) throw error;
 }
 
@@ -438,5 +438,5 @@ export function allGenres(animes: Anime[]): Array<{ name: string; count: number 
   }
   return [...counts.entries()]
     .map(([name, count]) => ({ name, count }))
-    .sort((x, y) => (y.count - x.count) || x.name.localeCompare(y.name));
+    .sort((x, y) => y.count - x.count || x.name.localeCompare(y.name));
 }

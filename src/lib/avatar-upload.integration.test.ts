@@ -10,8 +10,7 @@ import { AVATAR_BUCKET, avatarPath, removeAvatar, uploadAvatar } from "./avatar-
  * (LOVABLE_BROWSER_SUPABASE_SESSION_JSON). Sem ela o teste é ignorado.
  */
 const url = process.env["VITE_SUPABASE_URL"] ?? process.env["SUPABASE_URL"];
-const key =
-  process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_PUBLISHABLE_KEY"];
+const key = process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_PUBLISHABLE_KEY"];
 const sessionJson = process.env["LOVABLE_BROWSER_SUPABASE_SESSION_JSON"];
 
 const canRun = Boolean(url && key && sessionJson);

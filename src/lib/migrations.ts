@@ -64,7 +64,12 @@ export type MigrationParams = {
   signal: AbortSignal;
 };
 
-async function backfillImageUrl({ userId, animes, onPatch, signal }: MigrationParams): Promise<void> {
+async function backfillImageUrl({
+  userId,
+  animes,
+  onPatch,
+  signal,
+}: MigrationParams): Promise<void> {
   const tried = readImgTried(userId);
   const missing = animes.filter((a) => !a.imageUrl && !tried.has(a.name));
   if (missing.length === 0) return;
@@ -78,10 +83,12 @@ async function backfillImageUrl({ userId, animes, onPatch, signal }: MigrationPa
 
       let jikanOk = false;
       try {
-        const top = (await searchJikanAnime(anime.name, 1, {
-          signal,
-          priority: "background",
-        }))[0];
+        const top = (
+          await searchJikanAnime(anime.name, 1, {
+            signal,
+            priority: "background",
+          })
+        )[0];
         const img: string | undefined =
           top?.images?.jpg?.large_image_url ?? top?.images?.jpg?.image_url;
         if (img) {
@@ -209,9 +216,7 @@ async function backfillSeasonDetails({ animes, onPatch, signal }: MigrationParam
           genresPatch = [
             ...new Set(
               (Array.isArray(data.genres) ? data.genres : [])
-                .map((g: { name?: unknown }) =>
-                  typeof g?.name === "string" ? g.name.trim() : "",
-                )
+                .map((g: { name?: unknown }) => (typeof g?.name === "string" ? g.name.trim() : ""))
                 .filter((name: string) => name.length > 0),
             ),
           ];
@@ -275,7 +280,12 @@ async function backfillGenres({ animes, onPatch, signal }: MigrationParams): Pro
   }
 }
 
-async function migrateTierFromRatings({ userId, animes, onPatch, signal }: MigrationParams): Promise<void> {
+async function migrateTierFromRatings({
+  userId,
+  animes,
+  onPatch,
+  signal,
+}: MigrationParams): Promise<void> {
   if (readVersion(userId) >= TIER_MIGRATION_VERSION) return;
   const candidates = animes.filter(
     (a) =>

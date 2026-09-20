@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 
 export const AVATAR_BUCKET = "avatars";
 
@@ -12,7 +13,7 @@ export function avatarPath(userId: string) {
  * profiles.avatar_url. Retorna o valor persistido.
  */
 export async function uploadAvatar(
-  client: SupabaseClient<any, any, any>,
+  client: SupabaseClient<Database>,
   userId: string,
   blob: Blob,
   contentType = "image/webp",
@@ -36,7 +37,7 @@ export async function uploadAvatar(
 
 /** Remove o arquivo do storage e limpa profiles.avatar_url. */
 export async function removeAvatar(
-  client: SupabaseClient<any, any, any>,
+  client: SupabaseClient<Database>,
   userId: string,
 ): Promise<void> {
   await client.storage.from(AVATAR_BUCKET).remove([avatarPath(userId)]);

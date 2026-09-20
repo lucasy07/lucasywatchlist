@@ -27,13 +27,7 @@ type Props = {
   onDelete: (seasonId: string) => void;
 };
 
-function SortableRow({
-  season,
-  onDelete,
-}: {
-  season: Season;
-  onDelete: (id: string) => void;
-}) {
+function SortableRow({ season, onDelete }: { season: Season; onDelete: (id: string) => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: season.id,
   });
@@ -64,11 +58,7 @@ function SortableRow({
           {season.type && (
             <Badge
               variant="outline"
-              title={
-                isExcludedFromAverage(season)
-                  ? `${season.type} — fora da média`
-                  : season.type
-              }
+              title={isExcludedFromAverage(season) ? `${season.type} — fora da média` : season.type}
               className={`px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wider ${
                 isExcludedFromAverage(season)
                   ? "border-border/50 bg-muted/40 text-muted-foreground"

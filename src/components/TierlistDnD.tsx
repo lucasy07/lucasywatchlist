@@ -10,12 +10,7 @@ export function CoverArt({ anime }: { anime: Anime }) {
   return (
     <div className="relative overflow-hidden rounded-lg ring-1 ring-border/50 transition-transform duration-200 group-hover:scale-105 group-hover:ring-primary/50 motion-reduce:transform-none">
       {img ? (
-        <img
-          src={img}
-          alt={anime.name}
-          loading="lazy"
-          className="aspect-[2/3] w-20 object-cover"
-        />
+        <img src={img} alt={anime.name} loading="lazy" className="aspect-[2/3] w-20 object-cover" />
       ) : (
         <div className="flex aspect-[2/3] w-20 items-center justify-center bg-secondary text-muted-foreground">
           <ImageIcon className="h-5 w-5" />

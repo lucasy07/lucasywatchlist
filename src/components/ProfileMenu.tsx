@@ -131,7 +131,6 @@ export function ProfileMenu({ onOpenStats }: { onOpenStats: () => void }) {
     }
   }
 
-
   async function save() {
     const u = value.trim();
     if (!u) return setError("Informe um nome de usuário.");
@@ -162,14 +161,19 @@ export function ProfileMenu({ onOpenStats }: { onOpenStats: () => void }) {
     <>
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
-
           <button
             type="button"
             aria-label="Menu do perfil"
             className="focus-ring inline-flex h-11 items-center gap-2 rounded-full ring-1 ring-border/60 transition-colors hover:ring-primary/50 sm:h-9"
           >
             <Avatar className="h-11 w-11 shrink-0 sm:h-9 sm:w-9">
-              {avatarSrc && <AvatarImage src={avatarSrc} alt={profile?.username ?? "Perfil"} className="object-cover" />}
+              {avatarSrc && (
+                <AvatarImage
+                  src={avatarSrc}
+                  alt={profile?.username ?? "Perfil"}
+                  className="object-cover"
+                />
+              )}
               <AvatarFallback className="text-sm sm:text-xs">{initial}</AvatarFallback>
             </Avatar>
             {profile?.username && (

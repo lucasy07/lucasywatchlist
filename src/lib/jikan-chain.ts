@@ -3,11 +3,7 @@
 // as one anime grouped by its seasons.
 
 import { parseJikanDuration } from "@/lib/anime-storage";
-import {
-  getJikanAnime,
-  getJikanRelations,
-  type JikanAnimeDetails,
-} from "@/lib/jikan-client";
+import { getJikanAnime, getJikanRelations, type JikanAnimeDetails } from "@/lib/jikan-client";
 
 export type ChainSeason = {
   malId: number;
@@ -101,15 +97,13 @@ export async function buildChain(
     const id = detailIds[i];
     const d = await getDetails(id, signal);
     if (d && d.type && KEEP_TYPES.has(d.type)) {
-      const year =
-        d.year ?? (d.aired?.from ? new Date(d.aired.from).getFullYear() : null);
+      const year = d.year ?? (d.aired?.from ? new Date(d.aired.from).getFullYear() : null);
       seasons.push({
         malId: d.mal_id,
         title: d.title,
         year: Number.isFinite(year as number) ? (year as number) : null,
         malScore: d.score ?? null,
-        imageUrl:
-          d.images?.jpg?.large_image_url ?? d.images?.jpg?.image_url ?? null,
+        imageUrl: d.images?.jpg?.large_image_url ?? d.images?.jpg?.image_url ?? null,
         type: d.type,
         status: d.status ?? null,
         airedFrom: d.aired?.from ?? null,

@@ -12,12 +12,7 @@ import {
 import { useAuth } from "@/auth/AuthProvider";
 import { useAvatarSrc } from "@/hooks/use-avatar-src";
 import { tierColor, tierBg } from "@/components/TierPicker";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -58,7 +53,6 @@ type Stats = {
   avgEpisodeDuration: number | null;
 };
 
-
 export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
   const { user, profile } = useAuth();
   const avatarSrc = useAvatarSrc(profile?.avatar_url);
@@ -72,9 +66,7 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
     const genres = allGenres(animes);
     const watchedPercent = total === 0 ? 0 : Math.round((watchedCount / total) * 100);
 
-    const malScores = animes
-      .map((a) => mediaMAL(a.seasons))
-      .filter((s): s is number => s !== null);
+    const malScores = animes.map((a) => mediaMAL(a.seasons)).filter((s): s is number => s !== null);
     const avgMal =
       malScores.length === 0 ? null : malScores.reduce((s, x) => s + x, 0) / malScores.length;
 
@@ -137,7 +129,8 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
     const typeCounts = new Map<string, number>();
     for (const a of animes) {
       for (const s of a.seasons) {
-        const type = typeof s.type === "string" && s.type.trim() !== "" ? s.type.trim() : "Sem tipo";
+        const type =
+          typeof s.type === "string" && s.type.trim() !== "" ? s.type.trim() : "Sem tipo";
         typeCounts.set(type, (typeCounts.get(type) ?? 0) + 1);
       }
     }
@@ -163,7 +156,8 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
         const decadeB = parseInt(b.name, 10);
         return decadeA - decadeB;
       });
-    const maxDecadeCount = decadeList.length > 0 ? Math.max(...decadeList.map((d) => d.count), 1) : 1;
+    const maxDecadeCount =
+      decadeList.length > 0 ? Math.max(...decadeList.map((d) => d.count), 1) : 1;
     const decadeListWithMax = decadeList.map((d) => ({ ...d, max: maxDecadeCount }));
 
     // ---- Time block (watched animes only, all season types) ----
@@ -295,15 +289,15 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <div className="flex min-w-0 flex-1 items-center gap-3">
                 <Avatar className="h-16 w-16 shrink-0 rounded-full ring-1 ring-primary/40">
-                  {avatarSrc && <AvatarImage src={avatarSrc} alt={displayName} className="object-cover" />}
+                  {avatarSrc && (
+                    <AvatarImage src={avatarSrc} alt={displayName} className="object-cover" />
+                  )}
                   <AvatarFallback className="bg-primary/15 text-lg font-bold text-primary">
                     {nameInitial ?? <User className="h-5 w-5" />}
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-display text-2xl font-semibold">
-                    {displayName}
-                  </p>
+                  <p className="truncate font-display text-2xl font-semibold">{displayName}</p>
                   <p className="text-[11px] text-muted-foreground">
                     entrou em{" "}
                     {createdAt && !Number.isNaN(createdAt.getTime())
@@ -320,36 +314,35 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
               <div className="flex justify-between gap-4 border-t pt-3 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
                 <div className="text-center">
                   <p className="font-display font-bold tabular-nums">{stats.total}</p>
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Animes</p>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                    Animes
+                  </p>
                 </div>
                 <div className="text-center">
                   <p className="font-display font-bold tabular-nums">{stats.totalSeasons}</p>
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Temporadas</p>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                    Temporadas
+                  </p>
                 </div>
                 <div className="text-center">
                   <p className="font-display font-bold tabular-nums">{stats.genresCount}</p>
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Gêneros</p>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                    Gêneros
+                  </p>
                 </div>
                 <div className="text-center">
                   <p className="font-display font-bold tabular-nums">{stats.watchedCount}</p>
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Assistidos</p>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                    Assistidos
+                  </p>
                 </div>
               </div>
             </div>
 
             <div className="mt-4 flex items-center gap-3">
-              <span className="font-display text-2xl font-bold tabular-nums">
-                {level}
-              </span>
-              <div
-                className="flex-1"
-                title={levelTitle}
-                aria-label={levelTitle}
-              >
-                <Progress
-                  value={levelPercent}
-                  className="bg-foreground/7"
-                />
+              <span className="font-display text-2xl font-bold tabular-nums">{level}</span>
+              <div className="flex-1" title={levelTitle} aria-label={levelTitle}>
+                <Progress value={levelPercent} className="bg-foreground/7" />
               </div>
               <span className="text-[11px] tabular-nums text-muted-foreground">
                 {stats.timeMinutes === 0
@@ -399,7 +392,10 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                       </p>
                       {stats.timeTopAnimes.map((a) => (
                         <div key={a.name} className="flex min-w-0 items-center gap-3">
-                          <span className="w-32 shrink-0 truncate text-xs text-muted-foreground lg:w-44" title={a.name}>
+                          <span
+                            className="w-32 shrink-0 truncate text-xs text-muted-foreground lg:w-44"
+                            title={a.name}
+                          >
                             {a.name}
                           </span>
                           <div className="min-w-0 flex-1">
@@ -426,7 +422,9 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                     </p>
                     {stats.timeByTier.map((t) => (
                       <div key={t.tier} className="flex min-w-0 items-center gap-3">
-                        <span className={`w-6 shrink-0 font-display text-xs font-bold ${tierColor(t.tier)}`}>
+                        <span
+                          className={`w-6 shrink-0 font-display text-xs font-bold ${tierColor(t.tier)}`}
+                        >
                           {t.tier}
                         </span>
                         <div className="min-w-0 flex-1">
@@ -451,7 +449,10 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                       </p>
                       {stats.timeByGenre.map((g) => (
                         <div key={g.name} className="flex min-w-0 items-center gap-3">
-                          <span className="w-24 shrink-0 truncate text-xs text-muted-foreground lg:w-28" title={g.name}>
+                          <span
+                            className="w-24 shrink-0 truncate text-xs text-muted-foreground lg:w-28"
+                            title={g.name}
+                          >
                             {g.name}
                           </span>
                           <div className="min-w-0 flex-1">
@@ -479,17 +480,21 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
             )}
           </div>
 
-
-
           {/* Records grid */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Collection group */}
             <div className="min-w-0 rounded-xl border border-border/60 bg-background/30 p-4">
-              <p className="mb-3 text-[9px] uppercase tracking-widest text-muted-foreground">Coleção</p>
+              <p className="mb-3 text-[9px] uppercase tracking-widest text-muted-foreground">
+                Coleção
+              </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="min-w-0">
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Assistidos</p>
-                  <p className="font-display font-bold tabular-nums">{stats.total === 0 ? "—" : stats.watchedCount}</p>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                    Assistidos
+                  </p>
+                  <p className="font-display font-bold tabular-nums">
+                    {stats.total === 0 ? "—" : stats.watchedCount}
+                  </p>
                   {stats.total > 0 && (
                     <p className="truncate text-[11px] text-muted-foreground">
                       {Math.round((stats.watchedCount / stats.total) * 100)}% da lista
@@ -497,8 +502,12 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Na fila</p>
-                  <p className="font-display font-bold tabular-nums">{stats.total === 0 ? "—" : stats.queuedCount}</p>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                    Na fila
+                  </p>
+                  <p className="font-display font-bold tabular-nums">
+                    {stats.total === 0 ? "—" : stats.queuedCount}
+                  </p>
                   {stats.total > 0 && (
                     <p className="truncate text-[11px] text-muted-foreground">
                       {Math.round((stats.queuedCount / stats.total) * 100)}% da lista
@@ -506,8 +515,12 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Temporadas</p>
-                  <p className="font-display font-bold tabular-nums">{stats.totalSeasons === 0 ? "—" : stats.totalSeasons}</p>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                    Temporadas
+                  </p>
+                  <p className="font-display font-bold tabular-nums">
+                    {stats.totalSeasons === 0 ? "—" : stats.totalSeasons}
+                  </p>
                   {stats.seasonsPerAnime !== null && (
                     <p className="truncate text-[11px] text-muted-foreground">
                       {stats.seasonsPerAnime.toFixed(1)} por anime
@@ -515,8 +528,12 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Média MAL</p>
-                  <p className={`font-display font-bold tabular-nums ${stats.avgMal === null ? "" : "text-primary"}`}>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                    Média MAL
+                  </p>
+                  <p
+                    className={`font-display font-bold tabular-nums ${stats.avgMal === null ? "" : "text-primary"}`}
+                  >
                     {stats.avgMal === null ? "—" : stats.avgMal.toFixed(2)}
                   </p>
                   {stats.scoredCount > 0 && (
@@ -530,33 +547,51 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
 
             {/* Highlights group */}
             <div className="min-w-0 rounded-xl border border-border/60 bg-background/30 p-4">
-              <p className="mb-3 text-[9px] uppercase tracking-widest text-muted-foreground">Destaques</p>
+              <p className="mb-3 text-[9px] uppercase tracking-widest text-muted-foreground">
+                Destaques
+              </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="min-w-0">
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Melhor nota</p>
-                  <p className={`font-display font-bold tabular-nums ${stats.bestScore === null ? "" : "text-primary"}`}>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                    Melhor nota
+                  </p>
+                  <p
+                    className={`font-display font-bold tabular-nums ${stats.bestScore === null ? "" : "text-primary"}`}
+                  >
                     {stats.bestScore === null ? "—" : stats.bestScore.toFixed(2)}
                   </p>
                   {stats.bestAnime ? (
-                    <p className="truncate text-[11px] text-muted-foreground" title={stats.bestAnime.name}>
+                    <p
+                      className="truncate text-[11px] text-muted-foreground"
+                      title={stats.bestAnime.name}
+                    >
                       {stats.bestAnime.name}
                     </p>
                   ) : null}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Mais temporadas</p>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                    Mais temporadas
+                  </p>
                   <p className="font-display font-bold tabular-nums">
                     {stats.mostSeasons === null ? "—" : stats.mostSeasons}
                   </p>
                   {stats.mostSeasonsAnime ? (
-                    <p className="truncate text-[11px] text-muted-foreground" title={stats.mostSeasonsAnime.name}>
+                    <p
+                      className="truncate text-[11px] text-muted-foreground"
+                      title={stats.mostSeasonsAnime.name}
+                    >
                       {stats.mostSeasonsAnime.name}
                     </p>
                   ) : null}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Tier dominante</p>
-                  <p className={`font-display font-bold tabular-nums ${stats.dominantTier ? tierColor(stats.dominantTier as import("@/lib/anime-storage").Tier) : ""}`}>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                    Tier dominante
+                  </p>
+                  <p
+                    className={`font-display font-bold tabular-nums ${stats.dominantTier ? tierColor(stats.dominantTier as import("@/lib/anime-storage").Tier) : ""}`}
+                  >
                     {stats.dominantTier ?? "—"}
                   </p>
                   {stats.dominantTier !== null && (
@@ -566,7 +601,9 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Gênero mais comum</p>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                    Gênero mais comum
+                  </p>
                   <p className="font-display font-bold tabular-nums text-sm">
                     {stats.topGenre ? stats.topGenre.name : "—"}
                   </p>
@@ -637,7 +674,10 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                     const pct = (g.count / g.max) * 100;
                     return (
                       <div key={g.name} className="flex items-center gap-3">
-                        <span className="w-24 shrink-0 truncate text-xs text-muted-foreground lg:w-28" title={g.name}>
+                        <span
+                          className="w-24 shrink-0 truncate text-xs text-muted-foreground lg:w-28"
+                          title={g.name}
+                        >
                           {g.name}
                         </span>
                         <div className="flex-1">
@@ -673,7 +713,9 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                       className="inline-flex items-center gap-1.5 rounded-md bg-foreground/5 px-2.5 py-1.5 text-xs text-muted-foreground"
                     >
                       <span className="truncate">{t.name}</span>
-                      <span className="font-display font-semibold tabular-nums text-foreground">{t.count}</span>
+                      <span className="font-display font-semibold tabular-nums text-foreground">
+                        {t.count}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -691,7 +733,9 @@ export function StatsDialog({ animes, open, onOpenChange }: StatsDialogProps) {
                     const pct = (d.count / d.max) * 100;
                     return (
                       <div key={d.name} className="flex items-center gap-3">
-                        <span className="w-16 shrink-0 text-xs text-muted-foreground lg:w-20">{d.name}</span>
+                        <span className="w-16 shrink-0 text-xs text-muted-foreground lg:w-20">
+                          {d.name}
+                        </span>
                         <div className="flex-1">
                           <div className="h-2.5 w-full overflow-hidden rounded-full bg-foreground/5">
                             <div
