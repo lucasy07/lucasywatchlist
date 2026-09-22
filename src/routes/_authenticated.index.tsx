@@ -18,8 +18,6 @@ import {
   LayoutGrid,
   List as ListIcon,
   CalendarClock,
-  Check,
-  RotateCcw,
   Pencil,
   Image as ImageIcon,
   RefreshCw,
@@ -83,11 +81,9 @@ import {
   importLegacyIfNeeded,
   uid,
   mediaMAL,
-  rankColor,
   formatReleaseLabel,
   formatDateBR,
   formatLastChecked,
-  isExcludedFromAverage,
   allGenres,
   parseJikanDuration,
   AWARD_GENRE,
@@ -109,6 +105,8 @@ import { ProfileMenu } from "@/components/ProfileMenu";
 import { StatsDialog } from "@/components/StatsDialog";
 import { CheckResultDialog } from "@/components/CheckResultDialog";
 import { MalScoreDialog } from "@/components/MalScoreDialog";
+import { AnimeDetailDialog } from "@/components/AnimeDetailDialog";
+import { WatchedIcon } from "@/components/WatchedIcon";
 import { SortableSeasonList } from "@/components/SortableSeasonList";
 import { SortableCardSeasons } from "@/components/SortableCardSeasons";
 import { SeasonThumb } from "@/components/SeasonThumb";
@@ -137,6 +135,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SegmentedToggle } from "@/components/SegmentedToggle";
 import { withViewTransition } from "@/lib/view-transition";
 import type { FoundSeason, UpdatedSeason } from "@/lib/scan-types";
+import { formatScore, scoreColor } from "@/lib/score-format";
 
 const TIER_ROWS = (Object.keys(TIER_VALUE) as Tier[]).sort((a, b) => TIER_VALUE[b] - TIER_VALUE[a]);
 // Espelham o stagger e a duração definidos nas animações de src/styles.css.
@@ -197,27 +196,6 @@ function TiltCardInner({
     >
       {children}
     </div>
-  );
-}
-
-function formatScore(n: number | null): string {
-  return n !== null && n !== undefined ? n.toFixed(2) : "—";
-}
-
-function scoreColor(n: number | null): string {
-  return n === null || n === undefined ? "text-muted-foreground" : rankColor(n);
-}
-
-function WatchedIcon({ watched, className = "h-4 w-4" }: { watched: boolean; className?: string }) {
-  return (
-    <span className={`relative inline-block shrink-0 ${className}`} aria-hidden="true">
-      <Check
-        className={`watched-icon absolute inset-0 h-full w-full ${watched ? "watched-icon-hidden-check" : "watched-icon-visible"}`}
-      />
-      <RotateCcw
-        className={`watched-icon absolute inset-0 h-full w-full ${watched ? "watched-icon-visible" : "watched-icon-hidden-undo"}`}
-      />
-    </span>
   );
 }
 
@@ -2951,193 +2929,30 @@ function Index() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Anime detail dialog */}
-      <Dialog
+      <AnimeDetailDialog
         open={detailOpen}
         onOpenChange={(open) => {
           setDetailOpen(open);
           if (!open) setDetailAnimeId("");
         }}
-      >
-        <DialogContent className="max-h-[90vh] max-w-[calc(100vw-2rem)] sm:max-w-2xl overflow-y-auto overflow-x-hidden border-border bg-card">
-          <DialogHeader>
-            <DialogTitle>Detalhes do anime</DialogTitle>
-          </DialogHeader>
-          {detailAnime ? (
-            <div className="grid gap-4">
-              <div className="flex gap-4">
-                {detailAnime.cover || detailAnime.imageUrl ? (
-                  <img
-                    src={detailAnime.cover ?? detailAnime.imageUrl ?? undefined}
-                    alt={detailAnime.name}
-                    className="aspect-[2/3] w-28 shrink-0 rounded-lg object-cover ring-1 ring-border/50"
-                  />
-                ) : (
-                  <div className="flex aspect-[2/3] w-28 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
-                    <ImageIcon className="h-8 w-8" />
-                  </div>
-                )}
-                <div className="flex min-w-0 flex-1 flex-col gap-2">
-                  <h3 className="font-display text-base font-semibold leading-tight tracking-tight break-words sm:text-lg">
-                    {detailAnime.name}
-                  </h3>
-                  <Badge variant="outline" className="w-fit gap-1 border-primary/30 px-2 py-0.5">
-                    <span className={`font-display font-bold ${tierColor(detailAnime.tier)}`}>
-                      {detailAnime.tier ?? "—"}
-                    </span>
-                  </Badge>
-                  <div className="mt-1 flex flex-wrap gap-4">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                        MAL
-                      </span>
-                      <span
-                        className={`font-display text-xl font-bold tabular-nums ${scoreColor(mediaMAL(detailAnime.seasons))}`}
-                      >
-                        {formatScore(mediaMAL(detailAnime.seasons))}
-                        {mediaMAL(detailAnime.seasons) !== null && (
-                          <span className="ml-0.5 text-[10px] text-muted-foreground">/10</span>
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="grid gap-2">
-                <h4 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  Gêneros
-                </h4>
-                {detailAnime.genres === null || detailAnime.genres === undefined ? (
-                  <p className="text-sm text-muted-foreground">Sem gêneros</p>
-                ) : detailAnime.genres.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Nenhum gênero no MAL</p>
-                ) : (
-                  <div className="flex flex-wrap gap-1.5">
-                    {isAwardWinning(detailAnime) && (
-                      <button
-                        key={AWARD_GENRE}
-                        type="button"
-                        aria-label="Filtrar por Award Winning"
-                        title="Award Winning (MAL)"
-                        onClick={() => {
-                          setDetailOpen(false);
-                          setDetailAnimeId("");
-                          selectGenreFilter(AWARD_GENRE);
-                          setShowFilters(true);
-                        }}
-                        className="focus-ring inline-flex items-center gap-1 rounded-md bg-award px-2 py-1 text-[11px] font-medium text-award-foreground transition-colors hover:brightness-110"
-                      >
-                        <Award className="h-3 w-3" />
-                        Award Winning
-                      </button>
-                    )}
-                    {detailAnime.genres
-                      .filter((g) => g.trim().toLowerCase() !== AWARD_GENRE.toLowerCase())
-                      .map((g) => (
-                        <button
-                          key={g}
-                          type="button"
-                          aria-label={`Filtrar por ${g}`}
-                          onClick={() => {
-                            setDetailOpen(false);
-                            setDetailAnimeId("");
-                            selectGenreFilter(g);
-                            setShowFilters(true);
-                          }}
-                          className="focus-ring rounded-md bg-foreground/5 px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-primary/15 hover:text-primary"
-                        >
-                          {g}
-                        </button>
-                      ))}
-                  </div>
-                )}
-              </div>
-              <div className="grid gap-2">
-                <h4 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  Temporadas
-                </h4>
-                {detailAnime.seasons.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Nenhuma temporada</p>
-                ) : (
-                  <div className="grid grid-cols-[repeat(auto-fill,minmax(84px,1fr))] gap-3">
-                    {detailAnime.seasons.map((s) => {
-                      const excluded = isExcludedFromAverage(s);
-                      return (
-                        <div
-                          key={s.id}
-                          className={`flex flex-col gap-1 ${excluded ? "opacity-60" : ""}`}
-                        >
-                          <SeasonThumb
-                            season={s}
-                            className="aspect-[2/3] w-full rounded"
-                            alt={s.name}
-                          />
-                          <p
-                            className="line-clamp-2 text-xs font-medium leading-tight"
-                            title={s.name}
-                          >
-                            {s.name}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground">
-                            {[
-                              s.type,
-                              s.year,
-                              typeof s.malScore === "number" && `MAL ${s.malScore.toFixed(2)}`,
-                            ]
-                              .filter(Boolean)
-                              .join(" · ")}
-                            {excluded && <span className="block">fora da média</span>}
-                          </p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">Carregando...</p>
-          )}
-          <DialogFooter>
-            {scoreMode !== "gosto" && (
-              <div className="flex flex-1 flex-wrap items-center gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => detailAnimeId && checkNewSeasonsForAnime(detailAnimeId)}
-                  disabled={
-                    checking || checkingId !== null || updatingMalScores || !detailAnime?.malId
-                  }
-                >
-                  <RefreshCw
-                    className={`mr-1 h-4 w-4 ${detailAnimeId && checkingId === detailAnimeId ? "animate-spin" : ""}`}
-                  />
-                  Verificar novas temporadas
-                </Button>
-                <span className="text-[11px] text-muted-foreground">
-                  {formatLastChecked(detailAnime?.lastCheckedAt)}
-                </span>
-              </div>
-            )}
-            {detailAnime && (
-              <Button
-                variant="outline"
-                onClick={() => handleWatchedToggle(detailAnime.id, !detailAnime.watched)}
-              >
-                <WatchedIcon watched={detailAnime.watched} />
-                {detailAnime.watched ? "Desmarcar" : "Assistido"}
-              </Button>
-            )}
-            <Button
-              onClick={() => {
-                setDetailOpen(false);
-                if (detailAnimeId) openEdit(detailAnimeId);
-              }}
-            >
-              <Pencil className="mr-1 h-4 w-4" /> Editar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        anime={detailAnime ?? null}
+        scoreMode={scoreMode}
+        checking={checking}
+        checkingId={checkingId}
+        updatingMalScores={updatingMalScores}
+        onCheckSeasons={checkNewSeasonsForAnime}
+        onToggleWatched={handleWatchedToggle}
+        onEdit={(animeId) => {
+          setDetailOpen(false);
+          openEdit(animeId);
+        }}
+        onSelectGenre={(genre) => {
+          setDetailOpen(false);
+          setDetailAnimeId("");
+          selectGenreFilter(genre);
+          setShowFilters(true);
+        }}
+      />
 
       {/* Stats dialog */}
       <StatsDialog animes={animes} open={statsOpen} onOpenChange={setStatsOpen} />
