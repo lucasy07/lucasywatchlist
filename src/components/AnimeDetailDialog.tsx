@@ -200,10 +200,7 @@ export function AnimeDetailDialog({
             </div>
           )}
           {anime && (
-            <Button
-              variant="outline"
-              onClick={() => onToggleWatched(anime.id, !anime.watched)}
-            >
+            <Button variant="outline" onClick={() => onToggleWatched(anime.id, !anime.watched)}>
               <WatchedIcon watched={anime.watched} />
               {anime.watched ? "Desmarcar" : "Assistido"}
             </Button>
