@@ -39,13 +39,6 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -87,7 +80,6 @@ import {
   formatDateBR,
   formatLastChecked,
   allGenres,
-  parseJikanDuration,
   AWARD_GENRE,
   isAwardWinning,
 } from "@/lib/anime-storage";
@@ -108,6 +100,7 @@ import { StatsDialog } from "@/components/StatsDialog";
 import { CheckResultDialog } from "@/components/CheckResultDialog";
 import { MalScoreDialog } from "@/components/MalScoreDialog";
 import { AnimeDetailDialog } from "@/components/AnimeDetailDialog";
+import { AddSeasonDialog } from "@/components/AddSeasonDialog";
 import { WatchedIcon } from "@/components/WatchedIcon";
 import { SortableSeasonList } from "@/components/SortableSeasonList";
 import { SortableCardSeasons } from "@/components/SortableCardSeasons";
@@ -261,17 +254,7 @@ function Index() {
 
   // Add Season dialog
   const [seasonDialogOpen, setSeasonDialogOpen] = useState(false);
-  const [seasonAnimeId, setSeasonAnimeId] = useState<string>("");
-  const [seasonSearch, setSeasonSearch] = useState("");
-  const [seasonPick, setSeasonPick] = useState<JikanPick | null>(null);
-  const [seasonDetailsLoading, setSeasonDetailsLoading] = useState(false);
-  const [seasonDetails, setSeasonDetails] = useState<{
-    malId: number;
-    type: string | null;
-    year: number | null;
-    episodes: number | null;
-    durationMin: number | null;
-  } | null>(null);
+  const [seasonInitialAnimeId, setSeasonInitialAnimeId] = useState<string>("");
 
   // FAB menu
   const [fabOpen, setFabOpen] = useState(false);
@@ -843,11 +826,7 @@ function Index() {
       toast.error("Adicione um anime primeiro");
       return;
     }
-    setSeasonAnimeId(animeId ?? animes[0].id);
-    setSeasonSearch("");
-    setSeasonPick(null);
-    setSeasonDetails(null);
-    setSeasonDetailsLoading(false);
+    setSeasonInitialAnimeId(animeId ?? animes[0].id);
     setSeasonDialogOpen(true);
   }
 
@@ -860,67 +839,17 @@ function Index() {
     }
   }
 
-  async function pickSeasonEntry(pick: JikanPick) {
-    setSeasonPick(pick);
-    setSeasonDetails(null);
-    setSeasonDetailsLoading(true);
-    try {
-      const data = await getJikanAnime(pick.malId, { priority: "interactive" });
-      const t: string | null = data?.type ?? null;
-      const y: number | null =
-        data?.year ?? (data?.aired?.from ? new Date(data.aired.from).getFullYear() : null);
-      setSeasonDetails({
-        malId: pick.malId,
-        type: t,
-        year: Number.isFinite(y as number) ? (y as number) : null,
-        episodes: data?.episodes ?? null,
-        durationMin: parseJikanDuration(data?.duration),
-      });
-    } catch {
-      setSeasonDetails({
-        malId: pick.malId,
-        type: null,
-        year: null,
-        episodes: null,
-        durationMin: null,
-      });
-    } finally {
-      setSeasonDetailsLoading(false);
-    }
-  }
-
-  async function addSeason() {
-    if (!seasonAnimeId) {
-      toast.error("Selecione um anime");
-      return;
-    }
-    if (!seasonPick || seasonDetailsLoading) {
-      toast.error("Escolha uma entrada");
-      return;
-    }
-    const target = animes.find((a) => a.id === seasonAnimeId);
+  async function handleAddSeason(animeId: string, newSeason: Season) {
+    const target = animes.find((anime) => anime.id === animeId);
     if (!target) return;
-    if (target.seasons.some((s) => s.malId === seasonPick.malId)) {
-      toast.error("Essa entrada já está no anime");
-      return;
-    }
-    const newSeason: Season = {
-      id: uid(),
-      name: seasonPick.title,
-      malId: seasonPick.malId,
-      malScore: seasonPick.score ?? null,
-      year: seasonDetails?.year ?? null,
-      type: seasonDetails?.type ?? null,
-      episodes: seasonDetails?.episodes ?? null,
-      durationMin: seasonDetails?.durationMin ?? null,
-      imageUrl: seasonPick.imageUrl ?? null,
-    };
     const newSeasons = [...target.seasons, newSeason];
     const prev = animes;
-    setAnimes((p) => p.map((a) => (a.id === seasonAnimeId ? { ...a, seasons: newSeasons } : a)));
+    setAnimes((current) =>
+      current.map((anime) => (anime.id === animeId ? { ...anime, seasons: newSeasons } : anime)),
+    );
     setSeasonDialogOpen(false);
     try {
-      await updateSeasons(seasonAnimeId, newSeasons);
+      await updateSeasons(animeId, newSeasons);
       toast.success("Temporada adicionada");
     } catch (err) {
       console.error(err);
@@ -2721,63 +2650,13 @@ function Index() {
         </DialogContent>
       </Dialog>
 
-      {/* Add Season Dialog */}
-      <Dialog open={seasonDialogOpen} onOpenChange={setSeasonDialogOpen}>
-        <DialogContent className="border-border bg-card">
-          <DialogHeader>
-            <DialogTitle>Nova Temporada</DialogTitle>
-            <DialogDescription>Nomeie a nova temporada.</DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label>Anime</Label>
-              <Select value={seasonAnimeId} onValueChange={setSeasonAnimeId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  {animes.map((a) => (
-                    <SelectItem key={a.id} value={a.id}>
-                      {a.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="season-search">Temporada</Label>
-              <JikanSearch
-                id="season-search"
-                value={seasonSearch}
-                onChange={(v) => {
-                  setSeasonSearch(v);
-                  if (seasonPick && seasonPick.title !== v) {
-                    setSeasonPick(null);
-                    setSeasonDetails(null);
-                    setSeasonDetailsLoading(false);
-                  }
-                }}
-                onPick={(pick) => {
-                  setSeasonSearch(pick.title);
-                  void pickSeasonEntry(pick);
-                }}
-                placeholder="Buscar temporada, OVA, filme..."
-              />
-              {seasonDetailsLoading && (
-                <p className="text-xs text-muted-foreground">Buscando detalhes...</p>
-              )}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setSeasonDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={addSeason} disabled={!seasonPick || seasonDetailsLoading}>
-              Adicionar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AddSeasonDialog
+        open={seasonDialogOpen}
+        onOpenChange={setSeasonDialogOpen}
+        animes={animes}
+        initialAnimeId={seasonInitialAnimeId}
+        onAdd={handleAddSeason}
+      />
 
       {/* Edit Anime Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
