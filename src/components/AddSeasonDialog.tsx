@@ -18,12 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  type Anime,
-  type Season,
-  parseJikanDuration,
-  uid,
-} from "@/lib/anime-storage";
+import { type Anime, type Season, parseJikanDuration, uid } from "@/lib/anime-storage";
 import { getJikanAnime } from "@/lib/jikan-client";
 
 type SeasonDetails = {
