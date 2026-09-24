@@ -245,7 +245,7 @@ export async function importLegacyIfNeeded(userId: string): Promise<number> {
   return rows.length;
 }
 
-export async function createAnime(input: {
+export type CreateAnimeInput = {
   name: string;
   cover?: string;
   malId?: number | null;
@@ -253,7 +253,9 @@ export async function createAnime(input: {
   malScore?: number | null;
   seasons?: Season[];
   genres?: string[] | null;
-}): Promise<Anime> {
+};
+
+export async function createAnime(input: CreateAnimeInput): Promise<Anime> {
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user?.id;
   if (!userId) throw new Error("Not authenticated");
