@@ -24,7 +24,6 @@ import {
   RefreshCw,
   Gauge,
   Filter,
-  AlertCircle,
   Award,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -51,12 +50,11 @@ import {
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { Progress } from "@/components/ui/progress";
 
 import {
   type Anime,
+  type CreateAnimeInput,
   type Season,
   type Tier,
   type UpcomingSeason,
@@ -93,13 +91,13 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { useAuth } from "@/auth/AuthProvider";
-import { JikanSearch, type JikanPick } from "@/components/JikanSearch";
 import { TierPicker, tierColor, tierBg } from "@/components/TierPicker";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { StatsDialog } from "@/components/StatsDialog";
 import { CheckResultDialog } from "@/components/CheckResultDialog";
 import { MalScoreDialog } from "@/components/MalScoreDialog";
 import { AnimeDetailDialog } from "@/components/AnimeDetailDialog";
+import { AddAnimeDialog } from "@/components/AddAnimeDialog";
 import { AddSeasonDialog } from "@/components/AddSeasonDialog";
 import { WatchedIcon } from "@/components/WatchedIcon";
 import { SortableSeasonList } from "@/components/SortableSeasonList";
@@ -122,7 +120,7 @@ import {
 } from "@dnd-kit/core";
 import { CoverArt, DraggableCover, TierDropRow } from "@/components/TierlistDnD";
 
-import { buildChain, type ChainSeason } from "@/lib/jikan-chain";
+import { buildChain } from "@/lib/jikan-chain";
 import { getJikanAnime } from "@/lib/jikan-client";
 import { runMigrations } from "@/lib/migrations";
 import { EmptyState } from "@/components/EmptyState";
@@ -240,17 +238,6 @@ function Index() {
 
   // Add Anime dialog
   const [animeDialogOpen, setAnimeDialogOpen] = useState(false);
-  const [newAnimeName, setNewAnimeName] = useState("");
-
-  const [newAnimeMal, setNewAnimeMal] = useState<JikanPick | null>(null);
-  const [chainSeasons, setChainSeasons] = useState<ChainSeason[] | null>(null);
-  const [selectedChainIds, setSelectedChainIds] = useState<Set<number>>(() => new Set());
-  const [chainLoading, setChainLoading] = useState(false);
-  const [chainProgress, setChainProgress] = useState<{ current: number; total: number } | null>(
-    null,
-  );
-  const [chainError, setChainError] = useState(false);
-  const chainAbortRef = useRef<AbortController | null>(null);
 
   // Add Season dialog
   const [seasonDialogOpen, setSeasonDialogOpen] = useState(false);
@@ -685,136 +672,15 @@ function Index() {
     void toggleWatched(id, next);
   }
 
-  function resetAddAnime() {
-    chainAbortRef.current?.abort();
-    chainAbortRef.current = null;
-    setNewAnimeName("");
-    setNewAnimeMal(null);
-    setChainSeasons(null);
-    setChainLoading(false);
-    setChainProgress(null);
-    setChainError(false);
-    setSelectedChainIds(new Set());
-  }
-
-  async function startChainFetch(pick: JikanPick) {
-    chainAbortRef.current?.abort();
-    const ctrl = new AbortController();
-    chainAbortRef.current = ctrl;
-    setChainLoading(true);
-    setChainSeasons(null);
-    setSelectedChainIds(new Set());
-    setChainProgress({ current: 0, total: 0 });
-    setChainError(false);
+  async function handleCreateAnime(input: CreateAnimeInput, toastLabel: string) {
     try {
-      const seasons = await buildChain(pick.malId, (p) => setChainProgress(p), ctrl.signal);
-      if (ctrl.signal.aborted) return;
-      // Ensure the picked anime itself is included (in case it was filtered or
-      // the API returned nothing): fall back to the pick details.
-      const finalSeasons =
-        seasons.length > 0
-          ? seasons
-          : [
-              {
-                malId: pick.malId,
-                title: pick.title,
-                year: null,
-                malScore: pick.score,
-                imageUrl: pick.imageUrl,
-                type: null,
-                status: null,
-                airedFrom: null,
-                genres: [],
-                episodes: null,
-                durationMin: null,
-              },
-            ];
-      setChainSeasons(finalSeasons);
-      setSelectedChainIds(new Set(finalSeasons.map((s) => s.malId)));
-    } catch (err) {
-      if ((err as { name?: string })?.name === "AbortError") return;
-      console.error(err);
-      toast.error("Falha ao buscar temporadas no MAL");
-      setChainSeasons(null);
-      setChainError(true);
-    } finally {
-      if (!ctrl.signal.aborted) setChainLoading(false);
-    }
-  }
-
-  async function addAnime() {
-    const name = newAnimeName.trim();
-    if (!name) {
-      toast.error("Informe o nome do anime");
-      return;
-    }
-    if (chainLoading) return;
-    const pick = newAnimeMal && newAnimeMal.title === name ? newAnimeMal : null;
-    try {
-      // MAL pick → save as one anime with full season chain
-      if (pick && chainSeasons && chainSeasons.length > 0) {
-        const selected = chainSeasons.filter((s) => selectedChainIds.has(s.malId));
-        if (selected.length === 0) {
-          toast.error("Selecione ao menos uma temporada");
-          return;
-        }
-        const existingIds = new Set<number>();
-        for (const a of animes) {
-          if (a.malId) existingIds.add(a.malId);
-          for (const s of a.seasons) if (s.malId) existingIds.add(s.malId);
-        }
-        if (selected.some((s) => existingIds.has(s.malId))) {
-          toast.error("Esse anime já está na sua lista");
-          return;
-        }
-        const first = selected[0];
-        const seasons: Season[] = selected.map((s) => ({
-          id: uid(),
-          name: s.title,
-          malId: s.malId,
-          year: s.year,
-          malScore: s.malScore,
-          type: s.type,
-          episodes: s.episodes,
-          durationMin: s.durationMin,
-          imageUrl: s.imageUrl ?? null,
-        }));
-        const created = await createAnime({
-          name: first.title,
-          cover: first.imageUrl ?? undefined,
-          malId: first.malId,
-          imageUrl: first.imageUrl,
-          malScore: first.malScore,
-          genres: first.genres,
-          seasons,
-        });
-        setAnimes((prev) => [...prev, created]);
-        resetAddAnime();
-        setAnimeDialogOpen(false);
-        if (scoreMode !== "gosto" && animeMatchesFilters(created)) {
-          setTimeout(() => revealAnime(created.id), 0);
-        }
-        toast.success(
-          `"${first.title}" adicionado com ${seasons.length} temporada${seasons.length === 1 ? "" : "s"}`,
-          addedAnimeToastOptions(created),
-        );
-        return;
-      }
-      // Manual creation (no MAL chain)
-      const created = await createAnime({
-        name,
-        cover: pick?.imageUrl ?? undefined,
-        malId: pick?.malId ?? null,
-        imageUrl: pick?.imageUrl ?? null,
-        malScore: pick?.score ?? null,
-      });
+      const created = await createAnime(input);
       setAnimes((prev) => [...prev, created]);
-      resetAddAnime();
       setAnimeDialogOpen(false);
       if (scoreMode !== "gosto" && animeMatchesFilters(created)) {
         setTimeout(() => revealAnime(created.id), 0);
       }
-      toast.success(`"${name}" adicionado`, addedAnimeToastOptions(created));
+      toast.success(toastLabel, addedAnimeToastOptions(created));
     } catch (err) {
       console.error(err);
       toast.error("Falha ao adicionar anime");
@@ -2495,160 +2361,12 @@ function Index() {
         </button>
       </div>
 
-      {/* Add Anime Dialog */}
-      <Dialog
+      <AddAnimeDialog
         open={animeDialogOpen}
-        onOpenChange={(open) => {
-          setAnimeDialogOpen(open);
-          if (!open) resetAddAnime();
-        }}
-      >
-        <DialogContent className="border-border bg-card">
-          <DialogHeader>
-            <DialogTitle>Novo Anime</DialogTitle>
-            <DialogDescription>Adicione um anime ao seu ranking.</DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="anime-name">Nome</Label>
-              <JikanSearch
-                id="anime-name"
-                autoFocus
-                value={newAnimeName}
-                onChange={(v) => {
-                  setNewAnimeName(v);
-                  if (newAnimeMal && newAnimeMal.title !== v) {
-                    setNewAnimeMal(null);
-                    setChainSeasons(null);
-                    setChainProgress(null);
-                    setChainError(false);
-                    chainAbortRef.current?.abort();
-                    setChainLoading(false);
-                  }
-                }}
-                onPick={(pick) => {
-                  setNewAnimeMal(pick);
-                  startChainFetch(pick);
-                }}
-                onEnter={addAnime}
-                placeholder="Ex: Frieren"
-              />
-            </div>
-
-            {chainLoading && (
-              <div className="grid gap-2">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>Buscando temporadas...</span>
-                  {chainProgress && chainProgress.total > 0 && (
-                    <span>
-                      {chainProgress.current} de {chainProgress.total}
-                    </span>
-                  )}
-                </div>
-                {chainProgress && chainProgress.total > 0 ? (
-                  <Progress
-                    value={(chainProgress.current / chainProgress.total) * 100}
-                    className="h-2"
-                  />
-                ) : (
-                  <div className="relative h-2 w-full overflow-hidden rounded-full bg-primary/20">
-                    <div className="h-full w-1/3 animate-pulse rounded-full bg-primary/70" />
-                  </div>
-                )}
-              </div>
-            )}
-            {!chainLoading && chainError && (
-              <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3">
-                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
-                <div className="grid gap-1.5">
-                  <p className="text-xs text-destructive">
-                    Não foi possível buscar as temporadas no MAL.
-                  </p>
-                  {newAnimeMal && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => startChainFetch(newAnimeMal)}
-                      className="h-7 w-fit gap-1.5 text-xs"
-                    >
-                      <RefreshCw className="h-3.5 w-3.5" />
-                      Tentar novamente
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
-            {!chainLoading && !chainError && chainSeasons && chainSeasons.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground">
-                  {selectedChainIds.size} de {chainSeasons.length} selecionada
-                  {chainSeasons.length === 1 ? "" : "s"}
-                </p>
-                <ul className="max-h-72 overflow-y-auto rounded-md border border-border p-2">
-                  {chainSeasons.map((s) => {
-                    const checked = selectedChainIds.has(s.malId);
-                    return (
-                      <li
-                        key={s.malId}
-                        className="flex items-start gap-2 rounded-md px-2 py-2 hover:bg-muted/40"
-                      >
-                        <Checkbox
-                          id={`chain-${s.malId}`}
-                          checked={checked}
-                          onCheckedChange={(v) => {
-                            setSelectedChainIds((prev) => {
-                              const next = new Set(prev);
-                              if (v) next.add(s.malId);
-                              else next.delete(s.malId);
-                              return next;
-                            });
-                          }}
-                          className="mt-1"
-                        />
-                        <label
-                          htmlFor={`chain-${s.malId}`}
-                          className="min-w-0 flex-1 cursor-pointer text-sm"
-                        >
-                          <span className="block">{s.title}</span>
-                          <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-                            {s.year != null && <span>{s.year}</span>}
-                            {s.type && (
-                              <Badge variant="outline" className="px-1.5 py-0 text-[10px]">
-                                {s.type}
-                              </Badge>
-                            )}
-                          </div>
-                        </label>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setAnimeDialogOpen(false);
-                resetAddAnime();
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={addAnime}
-              disabled={
-                chainLoading ||
-                (!!chainSeasons && chainSeasons.length > 0 && selectedChainIds.size === 0)
-              }
-            >
-              Adicionar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        onOpenChange={setAnimeDialogOpen}
+        animes={animes}
+        onCreate={handleCreateAnime}
+      />
 
       <AddSeasonDialog
         open={seasonDialogOpen}
