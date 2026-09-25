@@ -15,12 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import {
-  type Anime,
-  type CreateAnimeInput,
-  type Season,
-  uid,
-} from "@/lib/anime-storage";
+import { type Anime, type CreateAnimeInput, type Season, uid } from "@/lib/anime-storage";
 import { buildChain, type ChainSeason } from "@/lib/jikan-chain";
 
 type AddAnimeDialogProps = {
@@ -30,12 +25,7 @@ type AddAnimeDialogProps = {
   onCreate: (input: CreateAnimeInput, toastLabel: string) => Promise<void>;
 };
 
-export function AddAnimeDialog({
-  open,
-  onOpenChange,
-  animes,
-  onCreate,
-}: AddAnimeDialogProps) {
+export function AddAnimeDialog({ open, onOpenChange, animes, onCreate }: AddAnimeDialogProps) {
   const [newAnimeName, setNewAnimeName] = useState("");
   const [newAnimeMal, setNewAnimeMal] = useState<JikanPick | null>(null);
   const [chainSeasons, setChainSeasons] = useState<ChainSeason[] | null>(null);
