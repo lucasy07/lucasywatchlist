@@ -92,7 +92,7 @@ export function isExcludedFromAverage(season: Season): boolean {
   if (season.includeInAverage === false) return true;
 
   const t = typeof season.type === "string" ? season.type.toLowerCase() : "";
-  return t === "ova" || t === "special";
+  return t === "ova" || t === "special" || t === "tv special";
 }
 
 export type Tier = "S" | "A" | "B" | "C" | "D" | "E";

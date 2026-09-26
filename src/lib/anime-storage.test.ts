@@ -124,11 +124,13 @@ describe("isExcludedFromAverage", () => {
     [season({ type: "TV" }), false],
     [season({ type: "OVA" }), true],
     [season({ type: "Special" }), true],
+    [season({ type: "TV Special" }), true],
     [season({ type: "ova" }), true],
     [season({ type: "SPECIAL" }), true],
     [season({ type: undefined }), false],
     [season({ type: null }), false],
     [season({ type: "OVA", includeInAverage: true }), false],
+    [season({ type: "TV Special", includeInAverage: true }), false],
     [season({ type: "TV", includeInAverage: false }), true],
   ])("resolve exclusão e override", (input, expected) => {
     expect(isExcludedFromAverage(input)).toBe(expected);
