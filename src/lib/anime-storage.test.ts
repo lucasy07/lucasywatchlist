@@ -151,14 +151,11 @@ describe("tierFromAverage", () => {
     [5, "C"],
     [6.9, "C"],
     [4.9, "D"],
-    [0, "D"],
+    [3, "D"],
+    [2.9, "E"],
+    [0, "E"],
   ] as const)("converte %s para %s", (average, expected) => {
     expect(tierFromAverage(average)).toBe(expected);
-  });
-
-  it("não atribui E automaticamente", () => {
-    // Hoje E não tem faixa automática; este teste deve avisar se essa decisão mudar.
-    expect([0, 1, 2, 3, 4, 5, 7, 8, 9, 10].map(tierFromAverage)).not.toContain("E");
   });
 });
 

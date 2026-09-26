@@ -104,7 +104,8 @@ export function tierFromAverage(avg: number): Tier {
   if (avg >= 8) return "A";
   if (avg >= 7) return "B";
   if (avg >= 5) return "C";
-  return "D";
+  if (avg >= 3) return "D";
+  return "E";
 }
 
 export const AWARD_GENRE = "Award Winning";
