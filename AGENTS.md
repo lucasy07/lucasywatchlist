@@ -1,0 +1,1 @@
+Keep the add-anime dialog's search, chain, validation, and cancellation state inside `AddAnimeDialog`; the authenticated route owns persistence, reveal, and success/error feedback so dialog state does not leak into the page.

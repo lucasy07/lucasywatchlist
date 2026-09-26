@@ -9,8 +9,8 @@
 - [x] Integrar o diálogo à rota mantendo persistência, fechamento e rollback.
 - [x] Limpar somente imports órfãos da rota.
 - [x] Validar lint, tipos, testes e o fluxo do diálogo.
-- [ ] Exportar `CreateAnimeInput` sem alterar a criação existente.
-- [ ] Criar `AddAnimeDialog` com busca, cadeia, validação e cancelamento internos.
-- [ ] Integrar a criação na rota mantendo inserção, revelação, avisos e erro.
-- [ ] Limpar somente imports órfãos da rota.
-- [ ] Validar lint, tipos, testes e o fluxo do diálogo.
+- [x] Exportar `CreateAnimeInput` sem alterar a criação existente.
+- [x] Criar `AddAnimeDialog` com busca, cadeia, validação e cancelamento internos.
+- [x] Integrar a criação na rota mantendo inserção, revelação, avisos e erro.
+- [x] Limpar somente imports órfãos da rota.
+- [x] Validar lint, tipos, testes e o fluxo do diálogo.
