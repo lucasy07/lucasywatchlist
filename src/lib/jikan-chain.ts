@@ -19,7 +19,7 @@ export type ChainSeason = {
   durationMin: number | null;
 };
 
-const KEEP_TYPES = new Set(["TV", "ONA", "Movie", "OVA", "Special"]);
+const KEEP_TYPES = new Set(["TV", "ONA", "Movie", "OVA", "Special", "TV Special"]);
 const MAX_ENTRIES = 15;
 
 async function getRelations(malId: number, signal?: AbortSignal): Promise<number[]> {
